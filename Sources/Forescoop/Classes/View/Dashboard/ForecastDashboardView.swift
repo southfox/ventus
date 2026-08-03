@@ -410,7 +410,7 @@ public struct ForecastDashboardView: View {
                         VStack(alignment: .leading, spacing: 28) {
                             ForecastWindDetails(forecast: forecast, selectedHour: selectedHour, windSpeedUnit: $viewModel.windSpeedUnit, modelForecasts: displayedModelForecasts, modelNamesByID: modelNamesByID, isModelComparisonEnabled: showsDashboardModelComparison)
                             ForecastWeatherDetails(forecast: forecast, selectedHour: selectedHour, waveHeightUnit: $viewModel.waveHeightUnit, precipitationUnit: $viewModel.precipitationUnit, freezingLevelUnit: $viewModel.freezingLevelUnit, pressureUnit: $viewModel.pressureUnit, modelForecasts: displayedModelForecasts, modelNamesByID: modelNamesByID, isModelComparisonEnabled: showsDashboardModelComparison)
-                            ForecastIntelligenceSummary(forecast: forecast, hour: selectedHour)
+                            ForecastIntelligenceSummary(forecast: forecast, hour: selectedHour, temperatureUnit: viewModel.temperatureUnit, windSpeedUnit: viewModel.windSpeedUnit, precipitationUnit: viewModel.precipitationUnit)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
@@ -432,7 +432,7 @@ public struct ForecastDashboardView: View {
                         ForecastOverview(forecast: forecast, selectedHour: selectedHour, temperatureUnit: $viewModel.temperatureUnit, coordinateLocationName: coordinateLocationName, modelForecasts: displayedModelForecasts, modelNamesByID: modelNamesByID, isModelComparisonEnabled: showsDashboardModelComparison, showsLocationHeader: showsLocationHeader, showsModelSummary: showsModelSummary, onSelectLocation: { activeSheet = .spotPicker }, onSelectModel: { activeSheet = .modelPicker }, onShowMap: { activeSheet = .forecastMap })
                         ForecastWindDetails(forecast: forecast, selectedHour: selectedHour, windSpeedUnit: $viewModel.windSpeedUnit, modelForecasts: displayedModelForecasts, modelNamesByID: modelNamesByID, isModelComparisonEnabled: showsDashboardModelComparison)
                         ForecastWeatherDetails(forecast: forecast, selectedHour: selectedHour, waveHeightUnit: $viewModel.waveHeightUnit, precipitationUnit: $viewModel.precipitationUnit, freezingLevelUnit: $viewModel.freezingLevelUnit, pressureUnit: $viewModel.pressureUnit, modelForecasts: displayedModelForecasts, modelNamesByID: modelNamesByID, isModelComparisonEnabled: showsDashboardModelComparison)
-                        ForecastIntelligenceSummary(forecast: forecast, hour: selectedHour)
+                        ForecastIntelligenceSummary(forecast: forecast, hour: selectedHour, temperatureUnit: viewModel.temperatureUnit, windSpeedUnit: viewModel.windSpeedUnit, precipitationUnit: viewModel.precipitationUnit)
                     }
                 }
 

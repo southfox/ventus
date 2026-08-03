@@ -13,8 +13,20 @@ public struct ForecastIntelligenceSummary: View {
     @State private var summary: String
     @State private var isGenerating = false
 
-    public init(forecast: SpotForecast, hour: String?) {
-        let snapshot = ForecastIntelligenceSnapshot(forecast: forecast, hour: hour)
+    public init(
+        forecast: SpotForecast,
+        hour: String?,
+        temperatureUnit: TemperatureUnit = DeviceForecastPreferences.temperatureUnit,
+        windSpeedUnit: WindSpeedUnit = DeviceForecastPreferences.windSpeedUnit,
+        precipitationUnit: PrecipitationUnit = DeviceForecastPreferences.precipitationUnit
+    ) {
+        let snapshot = ForecastIntelligenceSnapshot(
+            forecast: forecast,
+            hour: hour,
+            temperatureUnit: temperatureUnit,
+            windSpeedUnit: windSpeedUnit,
+            precipitationUnit: precipitationUnit
+        )
         self.snapshot = snapshot
         _summary = State(initialValue: snapshot.deterministicSummary)
     }
@@ -85,36 +97,66 @@ public struct ForecastIntelligenceSummary: View {
 private struct ForecastIntelligenceSnapshot: Hashable, Sendable {
     let location: String
     let hour: String
-    let temperature: Int
-    let wind: Int
-    let gust: Int?
-    let rain: Double
+    let temperature: String
+    let wind: String
+    let gust: String?
+    let hasSignificantGust: Bool
+    let rain: String
+    let hasRain: Bool
     let humidity: Int?
     let cloudCover: Int?
 
-    init(forecast: SpotForecast, hour: String?) {
+    init(
+        forecast: SpotForecast,
+        hour: String?,
+        temperatureUnit: TemperatureUnit,
+        windSpeedUnit: WindSpeedUnit,
+        precipitationUnit: PrecipitationUnit
+    ) {
         let hour = hour ?? forecast.currentForecastHour ?? "0"
         let source = forecast.forecast
         location = forecast.locationDisplayName()
         self.hour = hour
-        temperature = Int((source?.temperatureReal(hh: hour) ?? source?.temperature(hh: hour) ?? 0).rounded())
-        wind = Int((source?.windSpeed(hh: hour) ?? 0).rounded())
-        gust = source?.windGustsKnots(hh: hour).map { Int($0.rounded()) }
-        rain = source?.precipitation1(hh: hour) ?? source?.precipitation(hh: hour) ?? 0
+        let temperatureCelsius = source?.temperatureReal(hh: hour) ?? source?.temperature(hh: hour) ?? 0
+        temperature = Self.temperature(temperatureCelsius, unit: temperatureUnit)
+        let windKnots = source?.windSpeed(hh: hour) ?? 0
+        let gustKnots = source?.windGustsKnots(hh: hour)
+        wind = Self.wind(windKnots, unit: windSpeedUnit)
+        gust = gustKnots.map { Self.wind($0, unit: windSpeedUnit) }
+        hasSignificantGust = gustKnots.map { $0 >= windKnots + 8 } ?? false
+        let millimeters = source?.precipitation1(hh: hour) ?? source?.precipitation(hh: hour) ?? 0
+        rain = Self.precipitation(millimeters, unit: precipitationUnit)
+        hasRain = millimeters > 0
         humidity = source?.relativeHumidity(hh: hour)
         cloudCover = source?.cloudCoverTotal(hh: hour)
     }
 
     var prompt: String {
-        "Location: \(location). Forecast hour: \(hour). Temperature: \(temperature) °C. Wind: \(wind) kt. Gusts: \(gust.map(String.init) ?? "unavailable") kt. Rain: \(rain.formatted(.number.precision(.fractionLength(0...1)))) mm. Humidity: \(humidity.map(String.init) ?? "unavailable")%. Cloud cover: \(cloudCover.map(String.init) ?? "unavailable")%."
+        "Location: \(location). Forecast hour: \(hour). Temperature: \(temperature). Wind: \(wind). Gusts: \(gust ?? "unavailable"). Rain: \(rain). Humidity: \(humidity.map(String.init) ?? "unavailable")%. Cloud cover: \(cloudCover.map(String.init) ?? "unavailable")%."
     }
 
     var deterministicSummary: String {
-        var phrases = ["\(location): \(temperature)°C with \(wind) kt wind"]
-        if let gust, gust >= wind + 8 { phrases.append("gusting to \(gust) kt") }
-        if rain > 0 { phrases.append("\(rain.formatted(.number.precision(.fractionLength(0...1)))) mm of rain") }
+        var phrases = ["\(location): \(temperature) with \(wind) wind"]
+        if let gust, hasSignificantGust { phrases.append("gusting to \(gust)") }
+        if hasRain { phrases.append("\(rain) of rain") }
         if let cloudCover, cloudCover >= 75 { phrases.append("mostly cloudy") }
         return phrases.joined(separator: ", ") + "."
+    }
+
+    private static func temperature(_ celsius: Double, unit: TemperatureUnit) -> String {
+        let value = Temperature(celsius: celsius).value(in: unit)
+        return "\(value.formatted(.number.precision(.fractionLength(0))))\(unit.label)"
+    }
+
+    private static func wind(_ knots: Double, unit: WindSpeedUnit) -> String {
+        let value = Knots(knots).value(in: unit) ?? knots
+        return "\(value.formatted(.number.precision(.fractionLength(0)))) \(unit.label)"
+    }
+
+    private static func precipitation(_ millimeters: Double, unit: PrecipitationUnit) -> String {
+        let value = Precipitation(millimeters: millimeters).value(in: unit)
+        let decimals = unit == .inches ? 2 : 1
+        return "\(value.formatted(.number.precision(.fractionLength(decimals)))) \(unit.label)"
     }
 }
 
