@@ -62,7 +62,10 @@ public extension SpotForecast {
             "lat": base.latitude,
             "lon": base.longitude,
             "alt": base.altitude,
+            "tz": base.tz ?? "",
             "gmt_hour_offset": base.gmt_hour_offset,
+            "sunrise": base.sunrise ?? "",
+            "sunset": base.sunset ?? "",
             "models": base.models,
             "forecast": ["forescoop-mix": model]
         ]

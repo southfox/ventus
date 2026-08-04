@@ -8,6 +8,39 @@
 #if !os(watchOS)
 import SwiftUI
 
+/// The spot's local daylight bounds, shown prominently in the dashboard.
+public struct ForecastDaylightSummary: View {
+    @Environment(\.ventusTheme) private var theme
+    public let forecast: SpotForecast
+
+    public init(forecast: SpotForecast) {
+        self.forecast = forecast
+    }
+
+    public var body: some View {
+        if let sunrise = forecast.sunrise,
+           let sunset = forecast.sunset {
+            HStack(spacing: 16) {
+                Label("Sunrise \(sunrise)", systemImage: "sunrise.fill")
+                Spacer(minLength: 12)
+                Label("Sunset \(sunset)", systemImage: "sunset.fill")
+            }
+            .font(.subheadline.weight(.medium))
+            .foregroundStyle(theme.accentColor)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 9)
+            .background {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(theme.usesMaterial ? AnyShapeStyle(.thinMaterial) : AnyShapeStyle(theme.accentColor.opacity(0.10)))
+            }
+            .ventusGlassEffect(theme: theme, in: RoundedRectangle(cornerRadius: 10))
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Sunrise at \(sunrise). Sunset at \(sunset).")
+            .accessibilityIdentifier("forecast.daylight")
+        }
+    }
+}
+
 public struct ForecastWeatherDetails: View {
     @Environment(\.ventusTheme) private var theme
     public let forecast: SpotForecast
@@ -45,7 +78,6 @@ public struct ForecastWeatherDetails: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            daylightRow
             cloudCover(
                 total: weather?.cloudCoverTotal(hh: hour),
                 high: weather?.cloudCoverHigh(hh: hour),
@@ -70,23 +102,6 @@ public struct ForecastWeatherDetails: View {
 
     private var hour: String? { selectedHour ?? forecast.currentForecastHour }
     private var weather: Forecast? { forecast.forecast }
-
-    @ViewBuilder private var daylightRow: some View {
-        if let sunrise = forecast.sunrise,
-           let sunset = forecast.sunset {
-            HStack(spacing: 16) {
-                Label("Sunrise \(sunrise)", systemImage: "sunrise.fill")
-                    .foregroundStyle(theme.accentColor)
-                Spacer(minLength: 12)
-                Label("Sunset \(sunset)", systemImage: "sunset.fill")
-                    .foregroundStyle(theme.accentColor)
-            }
-            .font(.subheadline)
-            .accessibilityElement(children: .combine)
-            .accessibilityLabel("Sunrise at \(sunrise). Sunset at \(sunset).")
-            .accessibilityIdentifier("forecast.daylight")
-        }
-    }
 
     private var precipitationRow: some View {
         ForecastUnitSelector(

@@ -18,6 +18,8 @@ struct ForecastGridHourHeader: View {
     let day: (String) -> String
     let time: (String) -> String
     let weatherSymbols: (String) -> [String]
+    let daylightSymbol: (String) -> String?
+    let daylightOverlay: (String) -> Color
     let selectedHour: String?
     let onSelectHour: (String) -> Void
 
@@ -31,6 +33,8 @@ struct ForecastGridHourHeader: View {
                     day: day,
                     time: time,
                     weatherSymbols: weatherSymbols,
+                    daylightSymbol: daylightSymbol,
+                    daylightOverlay: daylightOverlay,
                     isSelected: selectedHour == hour,
                     onSelect: onSelectHour
                 )
@@ -49,6 +53,8 @@ struct ForecastGridHourCell: View {
     let day: (String) -> String
     let time: (String) -> String
     let weatherSymbols: (String) -> [String]
+    let daylightSymbol: (String) -> String?
+    let daylightOverlay: (String) -> Color
     let isSelected: Bool
     let onSelect: (String) -> Void
 
@@ -60,6 +66,10 @@ struct ForecastGridHourCell: View {
                 Text(day(hour)).font(.caption2)
                 Text(time(hour)).font(.caption.bold())
                 HStack(spacing: 2) {
+                    if let daylightSymbol = daylightSymbol(hour) {
+                        Image(systemName: daylightSymbol)
+                            .foregroundStyle(.orange)
+                    }
                     ForEach(weatherSymbols(hour).prefix(3), id: \.self) { symbol in
                         Image(systemName: symbol)
                     }
@@ -76,6 +86,12 @@ struct ForecastGridHourCell: View {
                     isSelected ? theme.accentColor.opacity(0.18) : Color.secondary.opacity(0.12)
                 }
             }
+            // The glass treatment must sit below the daylight layer; otherwise
+            // it washes out the night and twilight state on iPhone.
+            .ventusGlassEffect(theme: theme, in: RoundedRectangle(cornerRadius: 3))
+            .overlay {
+                Rectangle().fill(daylightOverlay(hour))
+            }
             .overlay {
                 if isSelected {
                     ForecastGridHeaderSelectionBorder(cornerRadius: 3)
@@ -85,8 +101,7 @@ struct ForecastGridHourCell: View {
         }
         .buttonStyle(.plain)
         .foregroundStyle(theme.accentColor)
-        .ventusGlassEffect(theme: theme, in: RoundedRectangle(cornerRadius: 3))
-        .accessibilityLabel("\(day(hour)), \(time(hour)), \(weatherSymbols(hour).count) weather symbol\(weatherSymbols(hour).count == 1 ? "" : "s")")
+        .accessibilityLabel("\(day(hour)), \(time(hour))\(daylightSymbol(hour).map { ", \($0 == "sunrise.fill" ? "sunrise" : "sunset")" } ?? ""), \(weatherSymbols(hour).count) weather symbol\(weatherSymbols(hour).count == 1 ? "" : "s")")
         .accessibilityHint(isSelected ? "Selected forecast hour" : "Select forecast hour")
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
@@ -151,6 +166,8 @@ struct ForecastGridDataSelectionBorder: Shape {
             day: { _ in "Sat 1" },
             time: { hour in "\(hour)h" },
             weatherSymbols: { _ in ["cloud.sun.fill", "wind"] },
+            daylightSymbol: { hour in hour == "1" ? "sunrise.fill" : nil },
+            daylightOverlay: { _ in .clear },
             selectedHour: "1",
             onSelectHour: { _ in }
         )

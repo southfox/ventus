@@ -168,6 +168,47 @@ public extension SpotInfo {
         }
         return date >= sunrise && date <= sunset
     }
+
+    /// A presentation-friendly daylight classification for forecast columns.
+    /// The hour around each transition is deliberately neutral so sunrise and
+    /// sunset do not read as either broad daylight or full night.
+    func daylightPhase(at date: Date) -> ForecastDaylightPhase {
+        guard let sunrise = daylightDate(from: sunrise, on: date),
+              let sunset = daylightDate(from: sunset, on: date) else {
+            return .daylight
+        }
+        if daylightTransition(at: date) != nil {
+            return .twilight
+        }
+        return date >= sunrise && date <= sunset ? .daylight : .night
+    }
+
+    /// Identifies the local solar transition represented by a forecast hour.
+    /// A one-hour window lets hourly and three-hourly forecast grids show the
+    /// closest available column for the spot's supplied transition time.
+    func daylightTransition(at date: Date) -> ForecastDaylightTransition? {
+        guard let sunrise = daylightDate(from: sunrise, on: date),
+              let sunset = daylightDate(from: sunset, on: date) else {
+            return nil
+        }
+        let transitionWindow: TimeInterval = 60 * 60
+        if abs(date.timeIntervalSince(sunrise)) <= transitionWindow { return .sunrise }
+        if abs(date.timeIntervalSince(sunset)) <= transitionWindow { return .sunset }
+        return nil
+    }
+
+    /// Returns the solar transition contained by a forecast-column interval.
+    /// This avoids presenting the same event in both neighbouring columns.
+    func daylightTransition(from start: Date, until end: Date) -> ForecastDaylightTransition? {
+        guard start < end,
+              let sunrise = daylightDate(from: sunrise, on: start),
+              let sunset = daylightDate(from: sunset, on: start) else {
+            return nil
+        }
+        if start <= sunrise && sunrise < end { return .sunrise }
+        if start <= sunset && sunset < end { return .sunset }
+        return nil
+    }
     
     var countryIdentifier: Int {
         id_country
@@ -212,4 +253,15 @@ public extension SpotInfo {
         components.second = 0
         return calendar.date(from: components)
     }
+}
+
+public enum ForecastDaylightPhase: Sendable {
+    case night
+    case twilight
+    case daylight
+}
+
+public enum ForecastDaylightTransition: Sendable {
+    case sunrise
+    case sunset
 }

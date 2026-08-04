@@ -397,6 +397,7 @@ public struct ForecastDashboardView: View {
                     forecast: forecast,
                     selectedHour: selectedHourBinding
                 )
+                ForecastDaylightSummary(forecast: forecast)
 
 #if os(tvOS)
                 TVForecastWidgetCard(forecast: forecast, hour: selectedHour)

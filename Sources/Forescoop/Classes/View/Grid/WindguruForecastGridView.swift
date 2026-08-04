@@ -262,6 +262,8 @@ public struct WindguruForecastGridView: View {
             day: day(for:),
             time: time(for:),
             weatherSymbols: forecast.weatherSymbolNames(hour:),
+            daylightSymbol: daylightSymbol(for:),
+            daylightOverlay: daylightColumnOverlay(for:),
             selectedHour: viewModel.selectedHour,
             onSelectHour: onSelectHour
         )
@@ -492,6 +494,8 @@ public struct WindguruForecastGridView: View {
                     day: day(for:),
                     time: time(for:),
                     weatherSymbols: forecast.weatherSymbolNames(hour:),
+                    daylightSymbol: daylightSymbol(for:),
+                    daylightOverlay: daylightColumnOverlay(for:),
                     isSelected: viewModel.selectedHour == hour,
                     onSelect: onSelectHour
                 )
@@ -638,6 +642,32 @@ public struct WindguruForecastGridView: View {
         formatter.locale = .autoupdatingCurrent
         formatter.setLocalizedDateFormatFromTemplate("j")
         return formatter.string(from: date) + "h"
+    }
+
+    private func daylightColumnOverlay(for hour: String) -> Color {
+        guard let date = forecast.forecastDate(hour: hour) else { return .clear }
+        switch forecast.daylightPhase(at: date) {
+        case .night:
+            return .black.opacity(theme.usesMaterial ? 0.42 : 0.50)
+        case .twilight:
+            return .gray.opacity(theme.usesMaterial ? 0.32 : 0.40)
+        case .daylight:
+            return .clear
+        }
+    }
+
+    private func daylightSymbol(for hour: String) -> String? {
+        guard let index = hours.firstIndex(of: hour),
+              let start = forecast.forecastDate(hour: hour) else { return nil }
+        let end = hours.indices.contains(index + 1)
+            ? forecast.forecastDate(hour: hours[index + 1]) ?? start.addingTimeInterval(3_600)
+            : start.addingTimeInterval(3_600)
+
+        switch forecast.daylightTransition(from: start, until: end) {
+        case .sunrise: return "sunrise.fill"
+        case .sunset: return "sunset.fill"
+        case nil: return nil
+        }
     }
 
     private func windSpeed(_ hour: String, source: SpotForecast? = nil) -> GridCell {
