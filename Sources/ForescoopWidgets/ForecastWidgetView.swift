@@ -117,29 +117,60 @@ public struct ForecastWidgetView: View {
     /// The iPad-only extra-large canvas has room for both the near-term
     /// outlook and the multi-day forecast at a comfortably readable size.
     private var extraLargeWidgetContent: some View {
-        HStack(alignment: .top, spacing: 24) {
-            VStack(alignment: .leading, spacing: 16) {
-                weatherHeader
-                Divider()
-                hourlyForecast(limit: 10)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-
-            VStack(alignment: .leading, spacing: 12) {
-                Text("10-Day Forecast")
-                    .font(.headline)
-                // Five compact rows across two columns use the iPad canvas
-                // for a full ten-day outlook rather than leaving it sparse.
-                dailyForecast(limit: 10, columns: 2)
-                Divider()
-                HStack(spacing: 14) {
-                    widgetMetric(entry.wind, symbol: "wind")
-                    widgetMetric(entry.gust, symbol: "wind.circle")
-                    widgetMetric(entry.rain, symbol: "drop.fill")
-                    widgetMetric(entry.humidity, symbol: "humidity")
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .top, spacing: 24) {
+                VStack(alignment: .leading, spacing: 16) {
+                    weatherHeader
+                    Divider()
+                    hourlyForecast(limit: 10)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("10-Day Forecast")
+                        .font(.headline)
+                    // Five compact rows across two columns use the iPad canvas
+                    // for a full ten-day outlook rather than leaving it sparse.
+                    dailyForecast(limit: 10, columns: 2)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+
+            Spacer(minLength: 0)
+            Divider()
+            Text("Conditions")
+                .font(.headline)
+            expandedConditions
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+    }
+
+    private var expandedConditions: some View {
+        LazyVGrid(
+            columns: Array(repeating: GridItem(.flexible(), alignment: .leading), count: 4),
+            alignment: .leading,
+            spacing: 12
+        ) {
+            expandedMetric("Wind", value: entry.wind, symbol: "wind")
+            expandedMetric("Gusts", value: entry.gust, symbol: "wind.circle")
+            expandedMetric("Direction", value: entry.windDirection, symbol: "location.north.line")
+            expandedMetric("Rain", value: entry.rain, symbol: "drop.fill")
+            expandedMetric("Humidity", value: entry.humidity, symbol: "humidity")
+            expandedMetric("Clouds", value: entry.cloudCover, symbol: "cloud.fill")
+            expandedMetric("Pressure", value: entry.pressure, symbol: "gauge.medium")
+        }
+    }
+
+    private func expandedMetric(_ title: String, value: String, symbol: String) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Label(title, systemImage: symbol)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+            Text(value)
+                .font(.subheadline.weight(.semibold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
         }
     }
 
