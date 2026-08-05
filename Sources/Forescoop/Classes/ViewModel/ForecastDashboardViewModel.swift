@@ -31,12 +31,12 @@ public final class ForecastDashboardViewModel: ObservableObject {
     @Published var modelNamesByID = [String: String]()
     @Published var displayedModelForecasts = [SpotForecast]()
     @Published var savedMapLocations = SavedMapLocationStore.load()
-    @Published var temperatureUnit: TemperatureUnit
-    @Published var windSpeedUnit: WindSpeedUnit
-    @Published var waveHeightUnit: WaveHeightUnit
-    @Published var pressureUnit: PressureUnit
-    @Published var precipitationUnit: PrecipitationUnit
-    @Published var freezingLevelUnit: FreezingLevelUnit
+    @Published var temperatureUnit: TemperatureUnit { didSet { persistWidgetUnits() } }
+    @Published var windSpeedUnit: WindSpeedUnit { didSet { persistWidgetUnits() } }
+    @Published var waveHeightUnit: WaveHeightUnit { didSet { persistWidgetUnits() } }
+    @Published var pressureUnit: PressureUnit { didSet { persistWidgetUnits() } }
+    @Published var precipitationUnit: PrecipitationUnit { didSet { persistWidgetUnits() } }
+    @Published var freezingLevelUnit: FreezingLevelUnit { didSet { persistWidgetUnits() } }
 
     private let profileLoader: @MainActor (String, String) async throws -> User?
     private let preferencesProvider: any ForecastPreferencesProviding
@@ -116,6 +116,19 @@ public final class ForecastDashboardViewModel: ObservableObject {
         pressureUnit = preferences.pressureUnit
         precipitationUnit = preferences.precipitationUnit
         freezingLevelUnit = preferences.freezingLevelUnit
+    }
+
+    private func persistWidgetUnits() {
+        VentusForecastUnitStore.save(
+            ForecastUnitPreferences(
+                temperatureUnit: temperatureUnit,
+                windSpeedUnit: windSpeedUnit,
+                waveHeightUnit: waveHeightUnit,
+                pressureUnit: pressureUnit,
+                precipitationUnit: precipitationUnit,
+                freezingLevelUnit: freezingLevelUnit
+            )
+        )
     }
 
     public func clearUserProfile() {

@@ -7,6 +7,9 @@
 //
 
 import Foundation
+#if canImport(WidgetKit)
+import WidgetKit
+#endif
 
 public enum WindSpeedUnit: String, CaseIterable, Identifiable, Sendable {
     case knots
@@ -203,6 +206,47 @@ public enum DeviceForecastPreferences {
 
     public static var freezingLevelUnit: FreezingLevelUnit {
         values.freezingLevelUnit
+    }
+}
+
+/// Persists the units currently selected in the app so WidgetKit extensions
+/// render the same measurements as the dashboard.
+public enum VentusForecastUnitStore {
+    private static let appGroupIdentifier = "group.org.forescoop.shared"
+    private static let temperatureKey = "forecastUnit.temperature"
+    private static let windSpeedKey = "forecastUnit.windSpeed"
+    private static let waveHeightKey = "forecastUnit.waveHeight"
+    private static let pressureKey = "forecastUnit.pressure"
+    private static let precipitationKey = "forecastUnit.precipitation"
+    private static let freezingLevelKey = "forecastUnit.freezingLevel"
+
+    private static func defaults() -> UserDefaults {
+        UserDefaults(suiteName: appGroupIdentifier) ?? .standard
+    }
+
+    public static func load(fallback: ForecastUnitPreferences = DeviceForecastPreferenceProvider().forecastUnitPreferences) -> ForecastUnitPreferences {
+        let defaults = defaults()
+        return ForecastUnitPreferences(
+            temperatureUnit: defaults.string(forKey: temperatureKey).flatMap(TemperatureUnit.init(rawValue:)) ?? fallback.temperatureUnit,
+            windSpeedUnit: defaults.string(forKey: windSpeedKey).flatMap(WindSpeedUnit.init(rawValue:)) ?? fallback.windSpeedUnit,
+            waveHeightUnit: defaults.string(forKey: waveHeightKey).flatMap(WaveHeightUnit.init(rawValue:)) ?? fallback.waveHeightUnit,
+            pressureUnit: defaults.string(forKey: pressureKey).flatMap(PressureUnit.init(rawValue:)) ?? fallback.pressureUnit,
+            precipitationUnit: defaults.string(forKey: precipitationKey).flatMap(PrecipitationUnit.init(rawValue:)) ?? fallback.precipitationUnit,
+            freezingLevelUnit: defaults.string(forKey: freezingLevelKey).flatMap(FreezingLevelUnit.init(rawValue:)) ?? fallback.freezingLevelUnit
+        )
+    }
+
+    public static func save(_ preferences: ForecastUnitPreferences) {
+        let defaults = defaults()
+        defaults.set(preferences.temperatureUnit.rawValue, forKey: temperatureKey)
+        defaults.set(preferences.windSpeedUnit.rawValue, forKey: windSpeedKey)
+        defaults.set(preferences.waveHeightUnit.rawValue, forKey: waveHeightKey)
+        defaults.set(preferences.pressureUnit.rawValue, forKey: pressureKey)
+        defaults.set(preferences.precipitationUnit.rawValue, forKey: precipitationKey)
+        defaults.set(preferences.freezingLevelUnit.rawValue, forKey: freezingLevelKey)
+#if canImport(WidgetKit)
+        WidgetCenter.shared.reloadAllTimelines()
+#endif
     }
 }
 

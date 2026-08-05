@@ -7,14 +7,38 @@ extension ForecastWidgetEntry {
         locationName: "Cerro Catedral",
         temperature: "6°C",
         wind: "22 kt",
+        gust: "31 kt",
+        windDirection: "WNW",
         rain: "1.8 mm",
-        symbolName: "cloud.rain.fill"
+        humidity: "82%",
+        cloudCover: "94%",
+        pressure: "1002 hPa",
+        symbolName: "cloud.rain.fill",
+        condition: "Rain showers",
+        high: "8°",
+        low: "3°",
+        hourly: ForecastWidgetHour.placeholder,
+        daily: ForecastWidgetDay.placeholder
     )
 }
 
-#Preview("Forecast widget") {
-    ForecastWidgetView(entry: .stormPreview)
-        .frame(width: 320, height: 150)
+#Preview("Small widget") {
+    ForecastWidgetView(entry: .stormPreview, theme: .ocean, previewFamily: .systemSmall)
+        .frame(width: 158, height: 158)
+        .padding()
+        .background(.blue.gradient)
+}
+
+#Preview("Medium widget") {
+    ForecastWidgetView(entry: .stormPreview, theme: .ocean, previewFamily: .systemMedium)
+        .frame(width: 338, height: 158)
+        .padding()
+        .background(.blue.gradient)
+}
+
+#Preview("Large widget") {
+    ForecastWidgetView(entry: .stormPreview, theme: .ocean, previewFamily: .systemLarge)
+        .frame(width: 338, height: 354)
         .padding()
         .background(.blue.gradient)
 }

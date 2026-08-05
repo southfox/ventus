@@ -7,6 +7,9 @@
 //
 
 import SwiftUI
+#if canImport(WidgetKit)
+import WidgetKit
+#endif
 
 /// Device-wide visual treatments. Font design changes preserve each view's
 /// existing size, weight, and dynamic-type behavior.
@@ -169,6 +172,9 @@ public enum VentusThemeStore {
 
     public static func save(_ theme: VentusTheme) {
         defaults().set(theme.rawValue, forKey: key)
+#if canImport(WidgetKit)
+        WidgetCenter.shared.reloadAllTimelines()
+#endif
     }
 }
 
