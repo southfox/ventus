@@ -141,13 +141,18 @@ struct VentusThemeModifier: ViewModifier {
             .tint(theme.accentColor)
             .foregroundStyle(theme.primaryTextColor)
 
-        let surfacedContent = themedContent.background {
-            if theme.usesMaterial {
-                Rectangle().fill(.ultraThinMaterial).ignoresSafeArea()
-            } else {
-                theme.backgroundColor.ignoresSafeArea()
+        // Keep the dashboard content free to use a readable maximum width,
+        // but give its theme surface the whole scene. This is particularly
+        // important on iPad after rotating into a wide layout.
+        let surfacedContent = themedContent
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background {
+                if theme.usesMaterial {
+                    Rectangle().fill(.ultraThinMaterial).ignoresSafeArea()
+                } else {
+                    theme.backgroundColor.ignoresSafeArea()
+                }
             }
-        }
 
         if let fontDesign = theme.fontDesign {
             surfacedContent.fontDesign(fontDesign)

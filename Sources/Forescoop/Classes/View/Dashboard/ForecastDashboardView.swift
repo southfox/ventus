@@ -191,24 +191,6 @@ public struct ForecastDashboardView: View {
                             forecastContent(for: forecast)
                         }
                     }
-                    .background {
-                        if content == .graph {
-                            // A graph needs a quiet surface. More importantly,
-                            // keeping animated weather renderers out of this
-                            // destination lets its SwiftUI preview update
-                            // independently and quickly.
-                            Group {
-                                if theme.usesMaterial {
-                                    Rectangle().fill(.ultraThinMaterial)
-                                } else {
-                                    theme.backgroundColor
-                                }
-                            }
-                            .ignoresSafeArea()
-                        } else {
-                            weatherBackground(for: forecast)
-                        }
-                    }
                 } else if isLoading {
                     ProgressView("Loading forecast…")
                 } else if let errorMessage {
@@ -218,6 +200,30 @@ public struct ForecastDashboardView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            // Apply the renderer after this container has its final scene
+            // dimensions. Applying it to the content above would leave an
+            // animated background at the narrower portrait/content width
+            // after an iPad rotates to landscape.
+            .background {
+                if let forecast {
+                    if content == .graph {
+                        // A graph needs a quiet surface. More importantly,
+                        // keeping animated weather renderers out of this
+                        // destination lets its SwiftUI preview update
+                        // independently and quickly.
+                        Group {
+                            if theme.usesMaterial {
+                                Rectangle().fill(.ultraThinMaterial)
+                            } else {
+                                theme.backgroundColor
+                            }
+                        }
+                        .ignoresSafeArea()
+                    } else {
+                        weatherBackground(for: forecast)
+                    }
+                }
+            }
             .navigationTitle("Ventus")
 #if os(iOS)
             .navigationBarTitleDisplayMode(.large)
