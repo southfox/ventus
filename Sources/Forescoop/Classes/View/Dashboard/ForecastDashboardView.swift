@@ -71,7 +71,9 @@ public struct ForecastDashboardView: View {
             viewModel.usePreviewForecast(previewForecast, spotID: initialSpotID, modelForecasts: previewModelForecasts)
         }
         _viewModel = StateObject(wrappedValue: viewModel)
-        _showsDashboardModelComparison = State(initialValue: previewModelForecasts.count > 1)
+        // Comparison is an explicit user choice, including in previews that
+        // load several model sources.
+        _showsDashboardModelComparison = State(initialValue: false)
         _account = StateObject(wrappedValue: WindguruAccount())
         spotSearch = { try await forecastService.searchSpots(byLocation: $0) }
         favoriteSpotsLoader = { try await forecastService.favoriteSpots(withUsername: $0, password: $1) }
@@ -505,7 +507,7 @@ public struct ForecastDashboardView: View {
             onModelComparisonChanged: { isEnabled in
                 showsDashboardModelComparison = isEnabled
             },
-            showsModelComparisonInitially: usesPreviewForecast && displayedModelForecasts.count > 1
+            showsModelComparisonInitially: false
         )
         .task(id: availableModelIDs) {
             await viewModel.loadModelNames(for: availableModelIDs)

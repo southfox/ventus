@@ -906,7 +906,7 @@ private struct WindguruForecastGridPreview: View {
                 onSelectLocation: {},
                 onToggleModel: { _ in },
                 onSelectHour: { _ in },
-                showsModelComparisonInitially: true
+                showsModelComparisonInitially: false
             )
         }
         } else {
