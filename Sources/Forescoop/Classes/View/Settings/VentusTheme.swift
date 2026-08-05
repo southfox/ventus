@@ -77,6 +77,74 @@ public enum VentusTheme: String, CaseIterable, Identifiable, Sendable {
         }
     }
 
+    /// The original palette is the light appearance. Dark appearance uses a
+    /// deliberately related, low-luminance surface so custom themes do not
+    /// put dark text on an unexpectedly light animated background.
+    public func backgroundColor(for colorScheme: ColorScheme) -> Color {
+        guard colorScheme == .dark else { return backgroundColor }
+
+        switch self {
+        case .system, .liquidGlass:
+            return .clear
+        case .ocean:
+            return Color(red: 0.025, green: 0.10, blue: 0.17)
+        case .forest:
+            return Color(red: 0.035, green: 0.12, blue: 0.065)
+        case .sunset:
+            return Color(red: 0.17, green: 0.055, blue: 0.045)
+        case .arctic:
+            return Color(red: 0.025, green: 0.105, blue: 0.16)
+        case .lavender:
+            return Color(red: 0.105, green: 0.06, blue: 0.19)
+        case .desert:
+            return Color(red: 0.15, green: 0.075, blue: 0.025)
+        }
+    }
+
+    /// Preserves each theme's carefully chosen light-mode text color while
+    /// ensuring sufficient contrast on its dark companion surface.
+    public func primaryTextColor(for colorScheme: ColorScheme) -> Color {
+        guard colorScheme == .dark else { return primaryTextColor }
+
+        switch self {
+        case .system, .liquidGlass:
+            return .primary
+        case .ocean, .arctic:
+            return Color(red: 0.84, green: 0.94, blue: 1.0)
+        case .forest:
+            return Color(red: 0.86, green: 0.97, blue: 0.86)
+        case .sunset:
+            return Color(red: 1.0, green: 0.89, blue: 0.82)
+        case .lavender:
+            return Color(red: 0.93, green: 0.87, blue: 1.0)
+        case .desert:
+            return Color(red: 1.0, green: 0.91, blue: 0.78)
+        }
+    }
+
+    /// Higher-luminance companions keep interactive controls, selection
+    /// outlines, and chart/grid labels visible on dark theme surfaces.
+    public func accentColor(for colorScheme: ColorScheme) -> Color {
+        guard colorScheme == .dark else { return accentColor }
+
+        switch self {
+        case .system, .liquidGlass:
+            return .accentColor
+        case .ocean:
+            return Color(red: 0.30, green: 0.72, blue: 1.0)
+        case .forest:
+            return Color(red: 0.38, green: 0.83, blue: 0.53)
+        case .sunset:
+            return Color(red: 1.0, green: 0.51, blue: 0.42)
+        case .arctic:
+            return Color(red: 0.34, green: 0.78, blue: 0.96)
+        case .lavender:
+            return Color(red: 0.72, green: 0.60, blue: 1.0)
+        case .desert:
+            return Color(red: 0.96, green: 0.62, blue: 0.30)
+        }
+    }
+
     public var fontDesign: Font.Design? {
         switch self {
         case .system, .liquidGlass: nil
@@ -133,13 +201,14 @@ public extension View {
 /// Applies a palette and a non-sizing font design to a complete app scene.
 struct VentusThemeModifier: ViewModifier {
     let theme: VentusTheme
+    @Environment(\.colorScheme) private var colorScheme
 
     @ViewBuilder
     func body(content: Content) -> some View {
         let themedContent = content
             .environment(\.ventusTheme, theme)
-            .tint(theme.accentColor)
-            .foregroundStyle(theme.primaryTextColor)
+            .tint(theme.accentColor(for: colorScheme))
+            .foregroundStyle(theme.primaryTextColor(for: colorScheme))
 
         // Keep the dashboard content free to use a readable maximum width,
         // but give its theme surface the whole scene. This is particularly
@@ -150,7 +219,7 @@ struct VentusThemeModifier: ViewModifier {
                 if theme.usesMaterial {
                     Rectangle().fill(.ultraThinMaterial).ignoresSafeArea()
                 } else {
-                    theme.backgroundColor.ignoresSafeArea()
+                    theme.backgroundColor(for: colorScheme).ignoresSafeArea()
                 }
             }
 
@@ -203,4 +272,16 @@ public enum VentusThemeStore {
     }
     .padding()
     .modifier(VentusThemeModifier(theme: .liquidGlass))
+}
+
+#Preview("Ocean theme · Dark") {
+    VStack(alignment: .leading, spacing: 12) {
+        Text("Ventus")
+            .font(.title.bold())
+        Label("Forecast Dashboard", systemImage: "wind")
+        Text("Dark surfaces retain the theme palette and readable contrast.")
+    }
+    .padding()
+    .modifier(VentusThemeModifier(theme: .ocean))
+    .preferredColorScheme(.dark)
 }

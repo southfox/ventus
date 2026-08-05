@@ -6,6 +6,7 @@ import WidgetKit
 public struct ForecastWidgetView: View {
     public let entry: ForecastWidgetEntry
     @Environment(\.widgetFamily) private var family
+    @Environment(\.colorScheme) private var colorScheme
     private let theme: VentusTheme
     private let previewFamily: WidgetFamily?
 
@@ -52,8 +53,8 @@ public struct ForecastWidgetView: View {
             mediumWidgetContent
 #endif
         }
-        .foregroundStyle(theme.primaryTextColor)
-        .tint(theme.accentColor)
+        .foregroundStyle(theme.primaryTextColor(for: colorScheme))
+        .tint(theme.accentColor(for: colorScheme))
         .containerBackground(for: .widget) { widgetBackground }
         .modifier(ForecastWidgetFontDesign(design: theme.fontDesign))
         .accessibilityElement(children: .ignore)
@@ -68,7 +69,7 @@ public struct ForecastWidgetView: View {
         if theme.usesMaterial {
             Rectangle().fill(.ultraThinMaterial)
         } else {
-            theme.backgroundColor
+            theme.backgroundColor(for: colorScheme)
         }
     }
 
@@ -257,10 +258,10 @@ public struct ForecastWidgetView: View {
                 .foregroundStyle(.secondary)
                 .frame(width: 25, alignment: .trailing)
             Capsule()
-                .fill(theme.accentColor.opacity(0.18))
+                .fill(theme.accentColor(for: colorScheme).opacity(0.18))
                 .overlay(alignment: .leading) {
                     Capsule()
-                        .fill(theme.accentColor)
+                        .fill(theme.accentColor(for: colorScheme))
                         .frame(width: temperatureBarWidth(for: day, in: range, compact: compact))
                 }
                 .frame(height: 5)
@@ -308,7 +309,7 @@ private struct ForecastWidgetFontDesign: ViewModifier {
     }
 }
 
-#if DEBUG
+#if DEBUG && !os(watchOS)
 #Preview("Small widget") {
     ForecastWidgetView(entry: .stormPreview, theme: .ocean, previewFamily: .systemSmall)
         .frame(width: 158, height: 158)

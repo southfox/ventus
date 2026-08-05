@@ -42,7 +42,7 @@ public struct ForescoopForecastWidget: Widget {
 
 #if DEBUG
 #Preview("Widget configuration") {
-    ForecastWidgetView(entry: .stormPreview)
+    ForecastWidgetView(entry: .placeholder)
         .frame(width: 320, height: 150)
         .padding()
         .background(.blue.gradient)

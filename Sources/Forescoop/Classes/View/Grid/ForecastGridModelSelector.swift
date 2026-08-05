@@ -12,6 +12,7 @@ import SwiftUI
 /// Inline toggle list for the models represented in the forecast grid.
 struct ForecastGridModelSelector: View {
     @Environment(\.ventusTheme) private var theme
+    @Environment(\.colorScheme) private var colorScheme
     let modelSummaryTitle: String
     let modelIDs: [String]
     let selectedModelIDs: [String]
@@ -48,7 +49,7 @@ struct ForecastGridModelSelector: View {
                         if theme.usesMaterial {
                             RoundedRectangle(cornerRadius: 10).fill(.thinMaterial)
                         } else {
-                            Color.primary.opacity(0.06)
+                            Color.primary.opacity(colorScheme == .dark ? 0.14 : 0.06)
                         }
                     }
                     .clipShape(RoundedRectangle(cornerRadius: 10))

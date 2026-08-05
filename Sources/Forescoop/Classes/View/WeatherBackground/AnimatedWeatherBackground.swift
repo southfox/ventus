@@ -21,6 +21,7 @@ public struct AnimatedWeatherBackground: WeatherBackground {
     let forecastDate: Date
 
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.ventusTheme) private var theme
     @State private var isAnimating = false
 
     /// Creates the animation from a forecast at the selected (or current) hour.
@@ -76,7 +77,7 @@ public struct AnimatedWeatherBackground: WeatherBackground {
     public var body: some View {
         GeometryReader { proxy in
             ZStack {
-                Color(colorScheme == .dark ? .black : .white)
+                animationBaseColor
 
                 LinearGradient(
                     colors: backgroundColors,
@@ -220,12 +221,22 @@ public struct AnimatedWeatherBackground: WeatherBackground {
     }
 
     private var backgroundColors: [Color] {
-        let intensity = colorScheme == .dark ? 1.65 : 1.0
+        let intensity = colorScheme == .dark ? 1.15 : 1.0
         if isNight { return [.indigo.opacity(0.55 * intensity), .blue.opacity(0.18 * intensity), .clear] }
         if isSunny { return [.yellow.opacity(0.25 * intensity), .cyan.opacity(0.17 * intensity), .clear] }
         if isRainy || isSnowy { return [.blue.opacity(0.20 * intensity), .gray.opacity(0.14 * intensity), .clear] }
         if isWindy { return [.teal.opacity(0.20 * intensity), .blue.opacity(0.12 * intensity), .clear] }
         return [.gray.opacity(0.15 * intensity), .blue.opacity(0.08 * intensity), .clear]
+    }
+
+    @ViewBuilder
+    private var animationBaseColor: some View {
+        if colorScheme == .dark, theme != .system, theme != .liquidGlass {
+            theme.backgroundColor(for: colorScheme)
+        } else {
+            // Keep the established system/light renderer treatment unchanged.
+            Color(colorScheme == .dark ? .black : .white)
+        }
     }
 
     private func cloudOffset(for index: Int, width: CGFloat) -> CGFloat {

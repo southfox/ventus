@@ -47,6 +47,7 @@ struct ForecastGridHourHeader: View {
 /// with its data column for one continuous selection outline.
 struct ForecastGridHourCell: View {
     @Environment(\.ventusTheme) private var theme
+    @Environment(\.colorScheme) private var colorScheme
     let hour: String
     let columnWidth: CGFloat
     let height: CGFloat
@@ -83,7 +84,7 @@ struct ForecastGridHourCell: View {
                 if theme.usesMaterial && !isSelected {
                     Rectangle().fill(.thinMaterial)
                 } else {
-                    isSelected ? theme.accentColor.opacity(0.18) : Color.secondary.opacity(0.12)
+                    isSelected ? accentColor.opacity(0.22) : Color.secondary.opacity(colorScheme == .dark ? 0.20 : 0.12)
                 }
             }
             // The glass treatment must sit below the daylight layer; otherwise
@@ -95,16 +96,18 @@ struct ForecastGridHourCell: View {
             .overlay {
                 if isSelected {
                     ForecastGridHeaderSelectionBorder(cornerRadius: 3)
-                        .stroke(theme.accentColor, lineWidth: 2)
+                        .stroke(accentColor, lineWidth: 2)
                 }
             }
         }
         .buttonStyle(.plain)
-        .foregroundStyle(theme.accentColor)
+        .foregroundStyle(accentColor)
         .accessibilityLabel("\(day(hour)), \(time(hour))\(daylightSymbol(hour).map { ", \($0 == "sunrise.fill" ? "sunrise" : "sunset")" } ?? ""), \(weatherSymbols(hour).count) weather symbol\(weatherSymbols(hour).count == 1 ? "" : "s")")
         .accessibilityHint(isSelected ? "Selected forecast hour" : "Select forecast hour")
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
+
+    private var accentColor: Color { theme.accentColor(for: colorScheme) }
 }
 
 /// The top half of the continuous selection outline that joins the sticky

@@ -37,6 +37,7 @@ public struct ForecastDashboardView: View {
 #if !os(macOS)
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 #endif
+    @Environment(\.colorScheme) private var colorScheme
     @State private var selectedSpotID: String
     @StateObject private var account: WindguruAccount
     @StateObject private var viewModel: ForecastDashboardViewModel
@@ -215,7 +216,7 @@ public struct ForecastDashboardView: View {
                             if theme.usesMaterial {
                                 Rectangle().fill(.ultraThinMaterial)
                             } else {
-                                theme.backgroundColor
+                                theme.backgroundColor(for: colorScheme)
                             }
                         }
                         .ignoresSafeArea()
@@ -467,7 +468,7 @@ public struct ForecastDashboardView: View {
             if theme.usesMaterial {
                 Rectangle().fill(.ultraThinMaterial)
             } else {
-                theme.backgroundColor
+                theme.backgroundColor(for: colorScheme)
             }
             WeatherBackgroundRenderer(
                 style: weatherBackgroundStyle,

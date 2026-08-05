@@ -12,6 +12,7 @@ import SwiftUI
 /// The compact watchOS forecast dashboard.
 public struct WatchForecastView: View {
     nonisolated(unsafe) private let forecastService: ForecastWindguruProtocol
+    @Environment(\.scenePhase) private var scenePhase
     @AppStorage("watchSelectedWindguruSpotID") private var selectedSpotID = "64141"
     @AppStorage("watchTemperatureUnit") private var temperatureUnitRaw = DeviceForecastPreferences.temperatureUnit.rawValue
     @AppStorage("watchWindSpeedUnit") private var windSpeedUnitRaw = DeviceForecastPreferences.windSpeedUnit.rawValue
@@ -25,6 +26,7 @@ public struct WatchForecastView: View {
     @State private var selectedHour: String?
     @State private var selectedModelID: String?
     @State private var navigationPath = NavigationPath()
+    @State private var theme = VentusThemeStore.load()
 
     public init(forecastService: ForecastWindguruProtocol = ForecastWindguruService()) {
         self.forecastService = forecastService
@@ -64,8 +66,14 @@ public struct WatchForecastView: View {
                 }
             }
         }
+        .modifier(VentusThemeModifier(theme: theme))
         .task { await loadForecast() }
         .onChange(of: selectedSpotID) { _, _ in Task { await loadForecast() } }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                theme = VentusThemeStore.load()
+            }
+        }
     }
 
     private func dashboard(for forecast: SpotForecast) -> some View {

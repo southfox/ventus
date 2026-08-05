@@ -12,6 +12,7 @@ import SwiftUI
 /// Location and map actions shared by dashboard and grid forecast headers.
 struct ForecastLocationHeader: View {
     @Environment(\.ventusTheme) private var theme
+    @Environment(\.colorScheme) private var colorScheme
     let locationName: String
     let onSelectLocation: () -> Void
     let onShowMap: () -> Void
@@ -33,7 +34,7 @@ struct ForecastLocationHeader: View {
 #endif
         }
         .font(.title.bold())
-        .foregroundStyle(theme.accentColor)
+        .foregroundStyle(theme.accentColor(for: colorScheme))
     }
 }
 

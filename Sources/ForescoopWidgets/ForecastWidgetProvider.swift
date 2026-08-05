@@ -135,7 +135,7 @@ public struct ForecastWidgetProvider: TimelineProvider {
 
 #if DEBUG
 #Preview("Provider result") {
-    ForecastWidgetView(entry: .stormPreview)
+    ForecastWidgetView(entry: .placeholder)
         .frame(width: 320, height: 150)
         .padding()
         .background(.blue.gradient)

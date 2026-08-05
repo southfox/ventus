@@ -9,6 +9,7 @@ import FoundationModels
 /// is available. The deterministic summary keeps this useful on every device.
 public struct ForecastIntelligenceSummary: View {
     @Environment(\.ventusTheme) private var theme
+    @Environment(\.colorScheme) private var colorScheme
     private let snapshot: ForecastIntelligenceSnapshot
     @State private var summary: String
     @State private var isGenerating = false
@@ -51,7 +52,7 @@ public struct ForecastIntelligenceSummary: View {
                 RoundedRectangle(cornerRadius: 14).fill(.regularMaterial)
             } else {
                 RoundedRectangle(cornerRadius: 14)
-                    .fill(theme.backgroundColor.opacity(theme == .system ? 0.2 : 0.82))
+                    .fill(theme.backgroundColor(for: colorScheme).opacity(theme == .system ? 0.2 : 0.82))
             }
         }
         .overlay {

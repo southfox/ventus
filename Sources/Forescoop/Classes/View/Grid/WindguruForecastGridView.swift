@@ -33,6 +33,7 @@ public struct WindguruForecastGridView: View {
     @State private var showsCloudLayers = false
     @Environment(\.displayScale) private var displayScale
     @Environment(\.ventusTheme) private var theme
+    @Environment(\.colorScheme) private var colorScheme
     @State private var horizontalGridOffset: CGFloat = 0
     private var columnWidth: CGFloat = 56
 
@@ -111,7 +112,7 @@ public struct WindguruForecastGridView: View {
                     ) {
                         advanceModelComparisonMode()
                     }
-                    .tint(isModelComparisonEnabled ? .accentColor : .secondary)
+                    .tint(isModelComparisonEnabled ? gridAccentColor : .secondary)
                 }
             }
         }
@@ -356,7 +357,7 @@ public struct WindguruForecastGridView: View {
                             Image(systemName: isExpanded ? "rectangle.compress.vertical" : "rectangle.expand.vertical")
                         }
                         .buttonStyle(.plain)
-                        .foregroundStyle(theme.accentColor)
+                        .foregroundStyle(gridAccentColor)
                     }
                     label
                 }
@@ -414,7 +415,7 @@ public struct WindguruForecastGridView: View {
                             Image(systemName: isComparisonExpanded ? "rectangle.compress.vertical" : "rectangle.expand.vertical")
                         }
                         .buttonStyle(.plain)
-                        .foregroundStyle(theme.accentColor)
+                        .foregroundStyle(gridAccentColor)
                     }
 
                     Button {
@@ -428,7 +429,7 @@ public struct WindguruForecastGridView: View {
                             Text("high / mid / low")
                                 .frame(maxWidth: .infinity, alignment: .center)
                         }
-                        .foregroundStyle(theme.accentColor)
+                        .foregroundStyle(gridAccentColor)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .buttonStyle(.plain)
@@ -505,7 +506,7 @@ public struct WindguruForecastGridView: View {
         .overlay {
             if viewModel.selectedHour == hour {
                 ForecastGridDataSelectionBorder(cornerRadius: 3)
-                    .stroke(theme.accentColor, lineWidth: 2)
+                    .stroke(gridAccentColor, lineWidth: 2)
             }
         }
     }
@@ -560,7 +561,7 @@ public struct WindguruForecastGridView: View {
                 rowLabel(title, icon: "cloud.fill", isInteractive: true)
             } else {
                 Text(title)
-                    .foregroundStyle(theme.accentColor)
+                    .foregroundStyle(gridAccentColor)
             }
         }
         .buttonStyle(.plain)
@@ -587,7 +588,7 @@ public struct WindguruForecastGridView: View {
                 }
             }
         }
-        .foregroundStyle(isInteractive ? theme.accentColor : Color.primary)
+        .foregroundStyle(isInteractive ? gridAccentColor : Color.primary)
     }
 
     /// A fixed symbol slot keeps every row title aligned despite SF Symbols
@@ -606,11 +607,12 @@ public struct WindguruForecastGridView: View {
     /// Sunset uses a monospaced design, so the fixed title column adopts a
     /// compact caption to preserve the table's existing width.
     private var gridRowTitleFont: Font { theme == .sunset ? .caption2 : .caption }
+    private var gridAccentColor: Color { theme.accentColor(for: colorScheme) }
     @ViewBuilder private var gridLabelBackground: some View {
         if theme.usesMaterial {
             Rectangle().fill(.thinMaterial)
         } else {
-            Color.primary.opacity(0.06)
+            Color.primary.opacity(colorScheme == .dark ? 0.14 : 0.06)
         }
     }
     /// The fixed header must be opaque; otherwise vertically scrolling labels
@@ -618,6 +620,8 @@ public struct WindguruForecastGridView: View {
     @ViewBuilder private var pinnedGridHeaderBackground: some View {
         if theme.usesMaterial {
             Rectangle().fill(.regularMaterial)
+        } else if theme != .system {
+            theme.backgroundColor(for: colorScheme)
         } else {
 #if os(iOS) || os(visionOS)
             Color(uiColor: .systemBackground)
@@ -826,12 +830,26 @@ public struct WindguruForecastGridView: View {
             .last(where: { value >= $0.threshold }) ?? palette.min(by: { $0.threshold < $1.threshold }) else {
             return nil
         }
-        return Color(
-            red: Double(selected.color.red / 255),
-            green: Double(selected.color.green / 255),
-            blue: Double(selected.color.blue / 255),
-            opacity: Double(selected.color.alpha)
-        )
+        let red = Double(selected.color.red / 255)
+        let green = Double(selected.color.green / 255)
+        let blue = Double(selected.color.blue / 255)
+        let sourceOpacity = Double(selected.color.alpha)
+
+        // Windguru profiles commonly use a white fill for neutral values
+        // (clouds, pressure and humidity). On a dark app surface that makes
+        // macOS's primary white cell text disappear. Preserve profile output
+        // in light mode, but blend bright fills into the dark grid surface.
+        let opacity: Double
+        if colorScheme == .dark {
+            let luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue
+            opacity = luminance > 0.72
+                ? min(sourceOpacity, 0.30)
+                : min(sourceOpacity, 0.78)
+        } else {
+            opacity = sourceOpacity
+        }
+
+        return Color(red: red, green: green, blue: blue, opacity: opacity)
     }
 
     private struct GridCell {

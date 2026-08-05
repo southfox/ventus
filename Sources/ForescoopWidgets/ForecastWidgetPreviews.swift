@@ -1,4 +1,4 @@
-#if DEBUG && canImport(WidgetKit) && !os(tvOS)
+#if DEBUG && canImport(WidgetKit) && !os(tvOS) && !os(watchOS)
 import SwiftUI
 
 extension ForecastWidgetEntry {
