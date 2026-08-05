@@ -42,4 +42,11 @@ extension ForecastWidgetEntry {
         .padding()
         .background(.blue.gradient)
 }
+
+#Preview("iPad extra-large widget") {
+    ForecastWidgetView(entry: .stormPreview, theme: .ocean, previewFamily: .systemExtraLarge)
+        .frame(width: 720, height: 338)
+        .padding()
+        .background(.blue.gradient)
+}
 #endif

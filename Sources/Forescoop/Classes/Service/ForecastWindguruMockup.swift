@@ -69,7 +69,9 @@ public class ForecastWindguruMockup: ForecastWindguruProtocol {
         windAdjustment: Double,
         temperatureAdjustment: Double
     ) -> [String: Any] {
-        let hours = Array(0...72)
+        // Keep ten complete model days for the iPad extra-large widget rather
+        // than truncating the bundled preview forecast at 72 hours.
+        let hours = Array(0...239)
         func values(_ transform: (Int) -> Any) -> [String: Any] {
             Dictionary(uniqueKeysWithValues: hours.map { (String($0), transform($0)) })
         }

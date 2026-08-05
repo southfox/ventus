@@ -20,7 +20,18 @@ public struct ForescoopForecastWidget: Widget {
 #if os(watchOS)
         [.accessoryCircular, .accessoryRectangular, .accessoryInline]
 #elseif os(iOS)
-        [.systemSmall, .systemMedium, .systemLarge, .accessoryCircular, .accessoryRectangular, .accessoryInline]
+        [
+            .systemSmall,
+            .systemMedium,
+            .systemLarge,
+            // This family is offered only by iPadOS; declaring it here makes
+            // it appear in the larger iPad widget gallery without affecting
+            // iPhone's available sizes.
+            .systemExtraLarge,
+            .accessoryCircular,
+            .accessoryRectangular,
+            .accessoryInline
+        ]
 #elseif os(visionOS)
         [.systemSmall, .systemMedium, .systemLarge, .systemExtraLargePortrait]
 #else

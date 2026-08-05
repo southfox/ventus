@@ -59,7 +59,9 @@ public struct ForecastWidgetProvider: TimelineProvider {
             .compactMap { hour -> (hour: String, offset: Int)? in Int(hour).map { (hour, $0) } }
             .filter { $0.offset >= currentOffset }
             .sorted { $0.offset < $1.offset }
-            .prefix(6)
+            // The extra-large iPad widget shows a longer outlook; compact
+            // families select the first six entries in their own layout.
+            .prefix(10)
             .map { item in
                 let date = forecast.forecastDate(hour: item.hour) ?? .now
                 let label = item.hour == currentHour ? "Now" : date.formatted(.dateTime.hour(.defaultDigits(amPM: .abbreviated)))
@@ -77,7 +79,8 @@ public struct ForecastWidgetProvider: TimelineProvider {
         let grouped = Dictionary(grouping: forecast.availableForecastHours) { hour in
             calendar.startOfDay(for: forecast.forecastDate(hour: hour) ?? .now)
         }
-        let dates = grouped.keys.sorted().prefix(4)
+        // The iPad extra-large widget presents a complete ten-day outlook.
+        let dates = grouped.keys.sorted().prefix(10)
         return dates.compactMap { date in
             guard let hours = grouped[date] else { return nil }
             let temperatures = hours.compactMap { hour in

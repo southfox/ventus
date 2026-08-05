@@ -65,13 +65,22 @@ public struct ForecastWidgetDay: Identifiable, Sendable {
     public let lowValue: Double
     public let highValue: Double
 
-    public var id: String { label }
+    // A longer outlook can span into the following week, where abbreviated
+    // weekday labels repeat. Include the values so SwiftUI rows remain unique.
+    public var id: String { "\(label)-\(lowValue)-\(highValue)" }
 
     public static let placeholder = [
         ForecastWidgetDay(label: "Today", symbolName: "cloud.sun.fill", low: "6°", high: "14°", lowValue: 6, highValue: 14),
         ForecastWidgetDay(label: "Thu", symbolName: "cloud.rain.fill", low: "5°", high: "11°", lowValue: 5, highValue: 11),
         ForecastWidgetDay(label: "Fri", symbolName: "cloud.fill", low: "4°", high: "10°", lowValue: 4, highValue: 10),
-        ForecastWidgetDay(label: "Sat", symbolName: "sun.max.fill", low: "6°", high: "16°", lowValue: 6, highValue: 16)
+        ForecastWidgetDay(label: "Sat", symbolName: "sun.max.fill", low: "6°", high: "16°", lowValue: 6, highValue: 16),
+        ForecastWidgetDay(label: "Sun", symbolName: "cloud.sun.fill", low: "7°", high: "15°", lowValue: 7, highValue: 15),
+        ForecastWidgetDay(label: "Mon", symbolName: "cloud.rain.fill", low: "6°", high: "12°", lowValue: 6, highValue: 12),
+        ForecastWidgetDay(label: "Tue", symbolName: "cloud.fill", low: "5°", high: "11°", lowValue: 5, highValue: 11),
+        ForecastWidgetDay(label: "Wed", symbolName: "sun.max.fill", low: "8°", high: "17°", lowValue: 8, highValue: 17),
+        ForecastWidgetDay(label: "Thu", symbolName: "cloud.sun.fill", low: "9°", high: "18°", lowValue: 9, highValue: 18),
+        ForecastWidgetDay(label: "Fri", symbolName: "cloud.rain.fill", low: "7°", high: "13°", lowValue: 7, highValue: 13),
+        ForecastWidgetDay(label: "Sat", symbolName: "cloud.fill", low: "6°", high: "12°", lowValue: 6, highValue: 12)
     ]
 }
 
