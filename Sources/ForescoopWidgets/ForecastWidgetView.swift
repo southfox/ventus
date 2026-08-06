@@ -49,6 +49,17 @@ public struct ForecastWidgetView: View {
             default:
                 mediumWidgetContent
             }
+#elseif os(macOS)
+            switch displayedFamily {
+            case .systemSmall:
+                smallWidgetContent
+            case .systemMedium:
+                mediumWidgetContent
+            case .systemLarge:
+                largeWidgetContent
+            default:
+                mediumWidgetContent
+            }
 #else
             mediumWidgetContent
 #endif

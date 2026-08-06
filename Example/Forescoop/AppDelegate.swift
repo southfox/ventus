@@ -24,6 +24,46 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.center()
         window.makeKeyAndOrderFront(nil)
         self.window = window
+        addWidgetMenu()
+    }
+
+    private func addWidgetMenu() {
+        let widgetsMenu = NSMenu(title: "Widgets")
+        let addWidgetItem = NSMenuItem(
+            title: "Add Ventus Widget…",
+            action: #selector(addVentusWidget(_:)),
+            keyEquivalent: ""
+        )
+        addWidgetItem.target = self
+        addWidgetItem.setAccessibilityIdentifier("widgets.addForecastWidget")
+        widgetsMenu.addItem(addWidgetItem)
+
+        let widgetsMenuItem = NSMenuItem(title: "Widgets", action: nil, keyEquivalent: "")
+        widgetsMenuItem.submenu = widgetsMenu
+        NSApp.mainMenu?.addItem(widgetsMenuItem)
+    }
+
+    @objc private func addVentusWidget(_ sender: Any?) {
+        // macOS owns widget placement. This is the same action used by its
+        // Widget Gallery; if it is unavailable, offer the manual path below.
+        let didOpenGallery = NSApp.sendAction(
+            Selector(("showWidgetGallery:")),
+            to: nil,
+            from: sender
+        )
+
+        guard !didOpenGallery else { return }
+
+        let alert = NSAlert()
+        alert.messageText = "Add Ventus Widget"
+        alert.informativeText = "Open Notification Center, click Edit Widgets, then search for “Ventus”. Choose a size and add it to Notification Center or the desktop."
+        alert.addButton(withTitle: "Done")
+
+        if let window {
+            alert.beginSheetModal(for: window)
+        } else {
+            alert.runModal()
+        }
     }
 }
 
