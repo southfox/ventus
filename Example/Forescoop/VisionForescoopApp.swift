@@ -12,11 +12,22 @@ import Forescoop
 
 @main
 struct VisionForescoopApp: App {
+    @Environment(\.scenePhase) private var scenePhase
+
     var body: some Scene {
         WindowGroup {
             VisionForecastView()
         }
         .defaultSize(width: 1_280, height: 900)
+        .backgroundTask(.appRefresh(ForecastAlertBackgroundRefresh.taskIdentifier)) {
+            await ForecastAlertSweep.run()
+            ForecastAlertBackgroundRefresh.schedule()
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .background {
+                ForecastAlertBackgroundRefresh.schedule()
+            }
+        }
     }
 }
 #endif

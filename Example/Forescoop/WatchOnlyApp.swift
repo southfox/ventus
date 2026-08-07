@@ -8,13 +8,28 @@
 
 #if os(watchOS)
 import SwiftUI
+import WatchKit
 import Forescoop
 
 @main
 struct ForescoopWatchOnlyApp: App {
+    @WKApplicationDelegateAdaptor(WatchExtensionDelegate.self) private var appDelegate
+
     var body: some Scene {
         WindowGroup {
             WatchForecastView()
+        }
+    }
+}
+
+class WatchExtensionDelegate: NSObject, WKApplicationDelegate {
+    func applicationDidFinishLaunching() {
+        ForecastAlertWatchBackgroundRefresh.schedule()
+    }
+
+    func handle(_ backgroundTasks: Set<WKRefreshBackgroundTask>) {
+        Task {
+            await ForecastAlertWatchBackgroundRefresh.handle(backgroundTasks)
         }
     }
 }

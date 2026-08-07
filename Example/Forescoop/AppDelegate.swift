@@ -25,6 +25,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.makeKeyAndOrderFront(nil)
         self.window = window
         addWidgetMenu()
+        ForecastAlertMacBackgroundRefresh.start()
     }
 
     private func addWidgetMenu() {
@@ -79,10 +80,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
-#if os(iOS)
         ForecastAlertBackgroundRefresh.register()
         ForecastAlertBackgroundRefresh.schedule()
-#endif
         return true
     }
 
@@ -105,9 +104,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationDidEnterBackground(_ application: UIApplication) {
         // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-#if os(iOS)
         ForecastAlertBackgroundRefresh.schedule()
-#endif
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {

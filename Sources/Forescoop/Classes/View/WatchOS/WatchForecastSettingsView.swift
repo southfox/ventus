@@ -11,6 +11,7 @@ import SwiftUI
 
 /// Watch-sized settings for the units visible in its dashboard and grid.
 struct WatchForecastSettingsView: View {
+    nonisolated(unsafe) let forecastService: ForecastWindguruProtocol
     @Binding var temperatureUnitRaw: String
     @Binding var windSpeedUnitRaw: String
     @Binding var waveHeightUnitRaw: String
@@ -40,6 +41,11 @@ struct WatchForecastSettingsView: View {
             }
 
             Section {
+                NavigationLink {
+                    WatchForecastAlertsListView(forecastService: forecastService)
+                } label: {
+                    Label("Forecast Alerts", systemImage: "bell.badge")
+                }
                 NavigationLink {
                     WatchAboutView()
                 } label: {

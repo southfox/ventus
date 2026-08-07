@@ -22,7 +22,6 @@
 		A0010000000000000000000B /* Forescoop in Frameworks */ = {isa = PBXBuildFile; productRef = A0010000000000000000000C /* Forescoop */; };
 		AA0100000000000000000001 /* WatchOnlyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000012 /* WatchOnlyApp.swift */; };
 		AA0100000000000000000002 /* Forescoop in Frameworks */ = {isa = PBXBuildFile; productRef = AA0100000000000000000009 /* Forescoop */; };
-		E00100000000000000000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E00100000000000000000002 /* Assets.xcassets */; };
 		B00100000000000000000007 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		B00100000000000000000009 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		B0010000000000000000000A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
@@ -31,13 +30,14 @@
 		C0DE00000000000000000013 /* Forescoop in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE00000000000000000003 /* Forescoop */; };
 		C0DE00000000000000000014 /* Forescoop in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE00000000000000000004 /* Forescoop */; };
 		C0DE00000000000000000015 /* Forescoop in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE00000000000000000005 /* Forescoop */; };
-		F00100000000000000000001 /* VisionForescoopApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00100000000000000000003 /* VisionForescoopApp.swift */; };
 		D00100000000000000000001 /* ForescoopWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00100000000000000000002 /* ForescoopWidgetBundle.swift */; };
 		D00100000000000000000003 /* ForescoopWidgets in Frameworks */ = {isa = PBXBuildFile; productRef = D00100000000000000000004 /* ForescoopWidgets */; };
 		D00100000000000000000005 /* ForescoopWatchWidgets.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = D00100000000000000000006 /* ForescoopWatchWidgets.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		E00100000000000000000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E00100000000000000000002 /* Assets.xcassets */; };
 		E10100000000000000000001 /* ForescoopWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00100000000000000000002 /* ForescoopWidgetBundle.swift */; };
 		E10100000000000000000002 /* ForescoopWidgets in Frameworks */ = {isa = PBXBuildFile; productRef = E1010000000000000000000A /* ForescoopWidgets */; };
 		E10100000000000000000003 /* ForescoopIOSWidgets.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = E10100000000000000000004 /* ForescoopIOSWidgets.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F00100000000000000000001 /* VisionForescoopApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00100000000000000000003 /* VisionForescoopApp.swift */; };
 		F10100000000000000000001 /* ForescoopWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00100000000000000000002 /* ForescoopWidgetBundle.swift */; };
 		F10100000000000000000002 /* ForescoopWidgets in Frameworks */ = {isa = PBXBuildFile; productRef = F1010000000000000000000A /* ForescoopWidgets */; };
 		F10100000000000000000003 /* ForescoopMacWidgets.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = F10100000000000000000004 /* ForescoopMacWidgets.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -51,7 +51,64 @@
 			remoteGlobalIDString = 70BAA9A41F276B4F004CD577;
 			remoteInfo = ForescoopPure_Example;
 		};
+		98231BAA3025E34900D4E0F2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 607FACC81AFB9204008FA782 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E10100000000000000000005;
+			remoteInfo = ForescoopIOSWidgets;
+		};
+		98231BAB3025E34900D4E0F2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 607FACC81AFB9204008FA782 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F10100000000000000000005;
+			remoteInfo = ForescoopMacWidgets;
+		};
+		98231BAC3025E34900D4E0F2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 607FACC81AFB9204008FA782 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D0010000000000000000000D;
+			remoteInfo = ForescoopWatchWidgets;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		D0010000000000000000000B /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				D00100000000000000000005 /* ForescoopWatchWidgets.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E10100000000000000000008 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				E10100000000000000000003 /* ForescoopIOSWidgets.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F10100000000000000000008 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				F10100000000000000000003 /* ForescoopMacWidgets.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		607FACD41AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -72,14 +129,14 @@
 		A0010000000000000000000D /* iOSnowatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iOSnowatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0100000000000000000011 /* ForescoopWatchOnly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ForescoopWatchOnly.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0100000000000000000012 /* WatchOnlyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchOnlyApp.swift; sourceTree = "<group>"; };
-		E00100000000000000000002 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = ../ForescoopWatchOnly/Assets.xcassets; sourceTree = "<group>"; };
 		B0010000000000000000000D /* ForescoopVisionOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ForescoopVisionOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		F00100000000000000000003 /* VisionForescoopApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionForescoopApp.swift; sourceTree = "<group>"; };
 		D00100000000000000000002 /* ForescoopWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForescoopWidgetBundle.swift; sourceTree = "<group>"; };
+		D00100000000000000000006 /* ForescoopWatchWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ForescoopWatchWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		D00100000000000000000007 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D00100000000000000000008 /* ForescoopWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ForescoopWidgets.entitlements; sourceTree = "<group>"; };
-		D00100000000000000000006 /* ForescoopWatchWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ForescoopWatchWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		E00100000000000000000002 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = ../ForescoopWatchOnly/Assets.xcassets; sourceTree = "<group>"; };
 		E10100000000000000000004 /* ForescoopIOSWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ForescoopIOSWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		F00100000000000000000003 /* VisionForescoopApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionForescoopApp.swift; sourceTree = "<group>"; };
 		F10100000000000000000004 /* ForescoopMacWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ForescoopMacWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -132,6 +189,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B0010000000000000000000E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B0010000000000000000000B /* Forescoop in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D00100000000000000000009 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -153,14 +218,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				F10100000000000000000002 /* ForescoopWidgets in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		B0010000000000000000000E /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				B0010000000000000000000B /* Forescoop in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -202,23 +259,13 @@
 				F00100000000000000000003 /* VisionForescoopApp.swift */,
 				AA0100000000000000000012 /* WatchOnlyApp.swift */,
 				E00100000000000000000002 /* Assets.xcassets */,
-				D0010000000000000000000A /* ForescoopWidgets */,
+				D0010000000000000000000A /* ../ForescoopWidgets */,
 				607FACDC1AFB9204008FA782 /* Images.xcassets */,
 				607FACDE1AFB9204008FA782 /* LaunchScreen.xib */,
 				607FACD31AFB9204008FA782 /* Supporting Files */,
 			);
 			name = "Example for Forescoop";
 			path = Forescoop;
-			sourceTree = "<group>";
-		};
-		D0010000000000000000000A /* ForescoopWidgets */ = {
-			isa = PBXGroup;
-			children = (
-				D00100000000000000000002 /* ForescoopWidgetBundle.swift */,
-				D00100000000000000000007 /* Info.plist */,
-				D00100000000000000000008 /* ForescoopWidgets.entitlements */,
-			);
-			path = ../ForescoopWidgets;
 			sourceTree = "<group>";
 		};
 		607FACD31AFB9204008FA782 /* Supporting Files */ = {
@@ -263,6 +310,16 @@
 				987A6DD022D595D400662010 /* Info.plist */,
 			);
 			path = ForescoopTVOS;
+			sourceTree = "<group>";
+		};
+		D0010000000000000000000A /* ../ForescoopWidgets */ = {
+			isa = PBXGroup;
+			children = (
+				D00100000000000000000002 /* ForescoopWidgetBundle.swift */,
+				D00100000000000000000007 /* Info.plist */,
+				D00100000000000000000008 /* ForescoopWidgets.entitlements */,
+			);
+			path = ../ForescoopWidgets;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -395,57 +452,6 @@
 			productReference = AA0100000000000000000011 /* ForescoopWatchOnly.app */;
 			productType = "com.apple.product-type.application";
 		};
-		D0010000000000000000000D /* ForescoopWatchWidgets */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = D0010000000000000000000E /* Build configuration list for PBXNativeTarget "ForescoopWatchWidgets" */;
-			buildPhases = (
-				D0010000000000000000000F /* Sources */,
-				D00100000000000000000009 /* Frameworks */,
-			);
-			buildRules = ();
-			dependencies = ();
-			name = ForescoopWatchWidgets;
-			packageProductDependencies = (
-				D00100000000000000000004 /* ForescoopWidgets */,
-			);
-			productName = ForescoopWatchWidgets;
-			productReference = D00100000000000000000006 /* ForescoopWatchWidgets.appex */;
-			productType = "com.apple.product-type.app-extension";
-		};
-		E10100000000000000000005 /* ForescoopIOSWidgets */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = E1010000000000000000000D /* Build configuration list for PBXNativeTarget "ForescoopIOSWidgets" */;
-			buildPhases = (
-				E10100000000000000000007 /* Sources */,
-				E10100000000000000000006 /* Frameworks */,
-			);
-			buildRules = ();
-			dependencies = ();
-			name = ForescoopIOSWidgets;
-			packageProductDependencies = (
-				E1010000000000000000000A /* ForescoopWidgets */,
-			);
-			productName = ForescoopIOSWidgets;
-			productReference = E10100000000000000000004 /* ForescoopIOSWidgets.appex */;
-			productType = "com.apple.product-type.app-extension";
-		};
-		F10100000000000000000005 /* ForescoopMacWidgets */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = F1010000000000000000000D /* Build configuration list for PBXNativeTarget "ForescoopMacWidgets" */;
-			buildPhases = (
-				F10100000000000000000007 /* Sources */,
-				F10100000000000000000006 /* Frameworks */,
-			);
-			buildRules = ();
-			dependencies = ();
-			name = ForescoopMacWidgets;
-			packageProductDependencies = (
-				F1010000000000000000000A /* ForescoopWidgets */,
-			);
-			productName = ForescoopMacWidgets;
-			productReference = F10100000000000000000004 /* ForescoopMacWidgets.appex */;
-			productType = "com.apple.product-type.app-extension";
-		};
 		B0010000000000000000000F /* ForescoopVisionOS */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = B00100000000000000000010 /* Build configuration list for PBXNativeTarget "ForescoopVisionOS" */;
@@ -465,6 +471,63 @@
 			productName = ForescoopVisionOS;
 			productReference = B0010000000000000000000D /* ForescoopVisionOS.app */;
 			productType = "com.apple.product-type.application";
+		};
+		D0010000000000000000000D /* ForescoopWatchWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D0010000000000000000000E /* Build configuration list for PBXNativeTarget "ForescoopWatchWidgets" */;
+			buildPhases = (
+				D0010000000000000000000F /* Sources */,
+				D00100000000000000000009 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ForescoopWatchWidgets;
+			packageProductDependencies = (
+				D00100000000000000000004 /* ForescoopWidgets */,
+			);
+			productName = ForescoopWatchWidgets;
+			productReference = D00100000000000000000006 /* ForescoopWatchWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		E10100000000000000000005 /* ForescoopIOSWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E1010000000000000000000D /* Build configuration list for PBXNativeTarget "ForescoopIOSWidgets" */;
+			buildPhases = (
+				E10100000000000000000007 /* Sources */,
+				E10100000000000000000006 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ForescoopIOSWidgets;
+			packageProductDependencies = (
+				E1010000000000000000000A /* ForescoopWidgets */,
+			);
+			productName = ForescoopIOSWidgets;
+			productReference = E10100000000000000000004 /* ForescoopIOSWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		F10100000000000000000005 /* ForescoopMacWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F1010000000000000000000D /* Build configuration list for PBXNativeTarget "ForescoopMacWidgets" */;
+			buildPhases = (
+				F10100000000000000000007 /* Sources */,
+				F10100000000000000000006 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ForescoopMacWidgets;
+			packageProductDependencies = (
+				F1010000000000000000000A /* ForescoopWidgets */,
+			);
+			productName = ForescoopMacWidgets;
+			productReference = F10100000000000000000004 /* ForescoopMacWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -517,7 +580,7 @@
 			productRefGroup = 607FACD11AFB9204008FA782 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
-				targets = (
+			targets = (
 				70BAA9A41F276B4F004CD577 /* Forescoop_Example */,
 				A0010000000000000000000F /* iOSnowatch */,
 				B0010000000000000000000F /* ForescoopVisionOS */,
@@ -531,42 +594,6 @@
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		D0010000000000000000000B /* Embed App Extensions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				D00100000000000000000005 /* ForescoopWatchWidgets.appex in Embed App Extensions */,
-			);
-			name = "Embed App Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E10100000000000000000008 /* Embed App Extensions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				E10100000000000000000003 /* ForescoopIOSWidgets.appex in Embed App Extensions */,
-			);
-			name = "Embed App Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		F10100000000000000000008 /* Embed App Extensions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				F10100000000000000000003 /* ForescoopMacWidgets.appex in Embed App Extensions */,
-			);
-			name = "Embed App Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXResourcesBuildPhase section */
 		70BAA9B11F276B4F004CD577 /* Resources */ = {
@@ -611,20 +638,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		E00100000000000000000003 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				E00100000000000000000001 /* Assets.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		B00100000000000000000012 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				B00100000000000000000009 /* LaunchScreen.xib in Resources */,
 				B0010000000000000000000A /* Images.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E00100000000000000000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E00100000000000000000001 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -723,14 +750,17 @@
 		D0010000000000000000000C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D0010000000000000000000D /* ForescoopWatchWidgets */;
+			targetProxy = 98231BAC3025E34900D4E0F2 /* PBXContainerItemProxy */;
 		};
 		E10100000000000000000009 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = E10100000000000000000005 /* ForescoopIOSWidgets */;
+			targetProxy = 98231BAA3025E34900D4E0F2 /* PBXContainerItemProxy */;
 		};
 		F10100000000000000000009 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = F10100000000000000000005 /* ForescoopMacWidgets */;
+			targetProxy = 98231BAB3025E34900D4E0F2 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -875,6 +905,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Forescoop_Example.entitlements;
+				DEVELOPMENT_TEAM = 27XTSJS68A;
 				INFOPLIST_FILE = "Forescoop_Example-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -895,6 +926,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Forescoop_Example.entitlements;
+				DEVELOPMENT_TEAM = 27XTSJS68A;
 				INFOPLIST_FILE = "Forescoop_Example-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1143,8 +1175,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Automatic;
 				CODE_SIGN_ENTITLEMENTS = ForescoopWatchOnly.entitlements;
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 27XTSJS68A;
 				INFOPLIST_FILE = "ForescoopWatchOnly-Info.plist";
 				PRODUCT_BUNDLE_IDENTIFIER = org.forescoop.iOSnowatch.ForescoopWatchOnly;
@@ -1161,8 +1193,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Automatic;
 				CODE_SIGN_ENTITLEMENTS = ForescoopWatchOnly.entitlements;
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 27XTSJS68A;
 				INFOPLIST_FILE = "ForescoopWatchOnly-Info.plist";
 				PRODUCT_BUNDLE_IDENTIFIER = org.forescoop.iOSnowatch.ForescoopWatchOnly;

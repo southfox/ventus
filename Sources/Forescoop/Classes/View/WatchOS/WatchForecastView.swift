@@ -58,7 +58,7 @@ public struct WatchForecastView: View {
                         navigationPath = NavigationPath()
                     }
                 case .settings:
-                    WatchForecastSettingsView(temperatureUnitRaw: $temperatureUnitRaw, windSpeedUnitRaw: $windSpeedUnitRaw, waveHeightUnitRaw: $waveHeightUnitRaw, pressureUnitRaw: $pressureUnitRaw, precipitationUnitRaw: $precipitationUnitRaw, freezingLevelUnitRaw: $freezingLevelUnitRaw)
+                    WatchForecastSettingsView(forecastService: forecastService, temperatureUnitRaw: $temperatureUnitRaw, windSpeedUnitRaw: $windSpeedUnitRaw, waveHeightUnitRaw: $waveHeightUnitRaw, pressureUnitRaw: $pressureUnitRaw, precipitationUnitRaw: $precipitationUnitRaw, freezingLevelUnitRaw: $freezingLevelUnitRaw)
                 case .models:
                     if let forecast {
                         WatchForecastModelPicker(forecast: forecast, selectedModelID: selectedModelID, select: selectModel)
