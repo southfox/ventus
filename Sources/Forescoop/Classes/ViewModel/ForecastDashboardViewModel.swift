@@ -30,6 +30,7 @@ public final class ForecastDashboardViewModel: ObservableObject {
     @Published var selectedModelIDsBySpot = [String: [String]]()
     @Published var modelNamesByID = [String: String]()
     @Published var displayedModelForecasts = [SpotForecast]()
+    @Published var severeWeatherAlert: ForecastSevereWeatherAlert?
     @Published var savedMapLocations = SavedMapLocationStore.load()
     @Published var temperatureUnit: TemperatureUnit { didSet { persistWidgetUnits() } }
     @Published var windSpeedUnit: WindSpeedUnit { didSet { persistWidgetUnits() } }
@@ -149,6 +150,7 @@ public final class ForecastDashboardViewModel: ObservableObject {
         forecast = nil
         coordinateLocationName = nil
         errorMessage = nil
+        severeWeatherAlert = nil
     }
 
     func clearPersistedSessionData() {
@@ -290,6 +292,8 @@ public final class ForecastDashboardViewModel: ObservableObject {
                 selectedModelIDs = currentSpotModelIDs
             }
             selectedHour = closestHour(to: Date(), in: forecast)
+            severeWeatherAlert = ForecastSevereWeatherNotifier.evaluate(forecast)
+            ForecastSevereWeatherNotifier.evaluateCustomAlerts(forecast)
             return true
         } catch {
             errorMessage = forecastErrorMessage(for: error)
@@ -346,6 +350,8 @@ public final class ForecastDashboardViewModel: ObservableObject {
             selectedModelIDs = coordinateForecasts.compactMap(\.model)
             usableModelIDs = selectedModelIDs
             selectedHour = forecast.flatMap { closestHour(to: Date(), in: $0) }
+            severeWeatherAlert = forecast.flatMap(ForecastSevereWeatherNotifier.evaluate)
+            if let forecast { ForecastSevereWeatherNotifier.evaluateCustomAlerts(forecast) }
         } catch {
             errorMessage = forecastErrorMessage(for: error)
         }

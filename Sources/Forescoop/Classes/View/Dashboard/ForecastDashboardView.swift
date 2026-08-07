@@ -94,6 +94,7 @@ public struct ForecastDashboardView: View {
     private var modelNamesByID: [String: String] { get { viewModel.modelNamesByID } nonmutating set { viewModel.modelNamesByID = newValue } }
     private var displayedModelForecasts: [SpotForecast] { get { viewModel.displayedModelForecasts } nonmutating set { viewModel.displayedModelForecasts = newValue } }
     private var savedMapLocations: [SavedMapLocation] { get { viewModel.savedMapLocations } nonmutating set { viewModel.savedMapLocations = newValue } }
+    private var severeWeatherAlert: ForecastSevereWeatherAlert? { viewModel.severeWeatherAlert }
 
     private var selectedHourBinding: Binding<String?> {
         Binding(get: { viewModel.selectedHour }, set: { viewModel.selectedHour = $0 })
@@ -201,6 +202,18 @@ public struct ForecastDashboardView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .safeAreaInset(edge: .top) {
+                if let severeWeatherAlert {
+                    Label(severeWeatherAlert.title, systemImage: "exclamationmark.triangle.fill")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal)
+                        .padding(.vertical, 8)
+                        .background(.red.gradient)
+                        .accessibilityLabel(severeWeatherAlert.title + ". " + severeWeatherAlert.body)
+                }
+            }
             // Apply the renderer after this container has its final scene
             // dimensions. Applying it to the content above would leave an
             // animated background at the narrower portrait/content width
@@ -340,7 +353,9 @@ public struct ForecastDashboardView: View {
                 SettingsView(
                     weatherBackgroundStyle: $weatherBackgroundStyle,
                     forecastViewMode: $content,
-                    theme: $theme
+                    theme: $theme,
+                    forecastService: forecastService,
+                    account: account
                 )
             }
             .sheet(isPresented: sheetBinding(.help)) {

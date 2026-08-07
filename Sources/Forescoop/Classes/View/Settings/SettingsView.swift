@@ -14,7 +14,27 @@ public struct SettingsView: View {
     @Binding private var weatherBackgroundStyle: WeatherBackgroundStyle
     @Binding private var forecastViewMode: ForecastViewMode
     @Binding private var theme: VentusTheme
+    @State private var notificationsEnabled = ForecastSevereWeatherNotificationsStore.load()
+#if !os(watchOS)
+    private let forecastService: ForecastWindguruProtocol
+    private let account: WindguruAccount
+#endif
 
+#if !os(watchOS)
+    public init(
+        weatherBackgroundStyle: Binding<WeatherBackgroundStyle>,
+        forecastViewMode: Binding<ForecastViewMode>,
+        theme: Binding<VentusTheme>,
+        forecastService: ForecastWindguruProtocol,
+        account: WindguruAccount
+    ) {
+        _weatherBackgroundStyle = weatherBackgroundStyle
+        _forecastViewMode = forecastViewMode
+        _theme = theme
+        self.forecastService = forecastService
+        self.account = account
+    }
+#else
     public init(
         weatherBackgroundStyle: Binding<WeatherBackgroundStyle>,
         forecastViewMode: Binding<ForecastViewMode>,
@@ -24,24 +44,11 @@ public struct SettingsView: View {
         _forecastViewMode = forecastViewMode
         _theme = theme
     }
+#endif
 
     public var body: some View {
         NavigationStack {
             Form {
-                Section {
-                    Picker("Theme", selection: $theme) {
-                        ForEach(VentusTheme.allCases) { theme in
-                            Label(theme.title, systemImage: "paintpalette")
-                                .tag(theme)
-                        }
-                    }
-                    .pickerStyle(.inline)
-                } header: {
-                    Text("Appearance")
-                } footer: {
-                    Text("Themes change colors and font design without changing text sizes. System Default follows the current device appearance.")
-                }
-
                 Section {
                     Picker("Forecast view", selection: $forecastViewMode) {
                         ForEach(ForecastViewMode.allCases) { mode in
@@ -69,6 +76,36 @@ public struct SettingsView: View {
                 } footer: {
                     Text("The selected animation is used as the forecast background on this device.")
                 }
+
+                Section {
+                    Picker("Theme", selection: $theme) {
+                        ForEach(VentusTheme.allCases) { theme in
+                            Label(theme.title, systemImage: "paintpalette")
+                                .tag(theme)
+                        }
+                    }
+                    .pickerStyle(.inline)
+                } header: {
+                    Text("Appearance")
+                } footer: {
+                    Text("Themes change colors and font design without changing text sizes. System Default follows the current device appearance.")
+                }
+
+                Section {
+                    Toggle("Severe weather alerts", isOn: $notificationsEnabled)
+#if !os(watchOS)
+                    NavigationLink {
+                        ForecastAlertsListView(forecastService: forecastService, account: account)
+                    } label: {
+                        Label("Forecast Alerts", systemImage: "bell.badge")
+                    }
+#endif
+                } header: {
+                    Text("Notifications")
+                } footer: {
+                    Text("Get notified about heavy snow, extreme cold, or extreme heat forecast near your selected location, or set up your own push alerts for specific spots, models, and conditions.")
+                }
+
             }
             .navigationTitle("Settings")
             .toolbar {
@@ -86,6 +123,9 @@ public struct SettingsView: View {
         .onChange(of: theme) { _, theme in
             VentusThemeStore.save(theme)
         }
+        .onChange(of: notificationsEnabled) { _, isEnabled in
+            ForecastSevereWeatherNotificationsStore.save(isEnabled)
+        }
         .forecastAccessibilityContainer(
             "Settings",
             hint: "Choose appearance, forecast layout, and weather animation preferences.",
@@ -94,6 +134,17 @@ public struct SettingsView: View {
     }
 }
 
+#if !os(watchOS)
+#Preview {
+    SettingsView(
+        weatherBackgroundStyle: .constant(.lottieAdriana),
+        forecastViewMode: .constant(.dashboard),
+        theme: .constant(.system),
+        forecastService: ForecastWindguruMockup(),
+        account: WindguruAccount()
+    )
+}
+#else
 #Preview {
     SettingsView(
         weatherBackgroundStyle: .constant(.lottieAdriana),
@@ -101,3 +152,4 @@ public struct SettingsView: View {
         theme: .constant(.system)
     )
 }
+#endif

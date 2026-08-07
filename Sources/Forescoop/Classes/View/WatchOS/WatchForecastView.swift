@@ -81,6 +81,13 @@ public struct WatchForecastView: View {
         let weather = forecast.forecast
         return ScrollView {
             VStack(spacing: 10) {
+                if let severeWeatherAlert = ForecastSevereWeatherNotifier.evaluate(forecast) {
+                    Label(severeWeatherAlert.title, systemImage: "exclamationmark.triangle.fill")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.red)
+                        .multilineTextAlignment(.center)
+                }
+                let _ = ForecastSevereWeatherNotifier.evaluateCustomAlerts(forecast)
                 HStack(spacing: 8) {
                 NavigationLink(value: WatchDestination.locations) { Image(systemName: "mappin.circle.fill") }.accessibilityLabel("Choose location")
                 NavigationLink(value: WatchDestination.settings) { Image(systemName: "gearshape") }.accessibilityLabel("Settings")
@@ -159,6 +166,10 @@ public struct WatchForecastView: View {
             forecast = try await forecastService.forecast(bySpotId: selectedSpotID, model: nil)
             selectedHour = forecast?.currentForecastHour
             selectedModelID = forecast?.model
+            if let forecast {
+                _ = ForecastSevereWeatherNotifier.evaluate(forecast)
+                ForecastSevereWeatherNotifier.evaluateCustomAlerts(forecast)
+            }
         } catch {
             errorMessage = error.localizedDescription
         }
