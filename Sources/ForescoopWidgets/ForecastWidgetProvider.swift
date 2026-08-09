@@ -88,7 +88,7 @@ public struct ForecastWidgetProvider: TimelineProvider {
             }
             guard let low = temperatures.min(), let high = temperatures.max() else { return nil }
             let representativeHour = hours.sorted { (Int($0) ?? 0) < (Int($1) ?? 0) }[hours.count / 2]
-            let label = calendar.isDateInToday(date) ? String(localized: "Today") : date.formatted(.dateTime.weekday(.abbreviated))
+            let label = calendar.isDateInToday(date) ? Bundle.mainLocalizedString("Today") : date.formatted(.dateTime.weekday(.abbreviated))
             return ForecastWidgetDay(
                 label: label,
                 symbolName: forecast.weatherSymbolName(hour: representativeHour),

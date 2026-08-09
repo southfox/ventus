@@ -106,7 +106,7 @@ public struct ForecastHourSelector: View {
 
         let calendar = Calendar.current
         let day = calendar.isDateInToday(date)
-            ? String(localized: "Today")
+            ? Bundle.mainLocalizedString("Today")
             : date.formatted(.dateTime.weekday(.abbreviated).day())
         let formatter = DateFormatter()
         formatter.locale = .autoupdatingCurrent

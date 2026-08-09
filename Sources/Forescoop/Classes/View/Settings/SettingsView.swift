@@ -141,9 +141,10 @@ public struct SettingsView: View {
         .onChange(of: theme) { _, theme in
             VentusThemeStore.save(theme)
         }
-        .onChange(of: appLanguage) { _, appLanguage in
-            AppLanguageStore.save(appLanguage)
-        }
+        // appLanguage is persisted synchronously in the binding passed down
+        // from the presenting view (see ForecastDashboardView), not here —
+        // it must apply before the next render, not after, or the frame
+        // right after switching still shows the old language.
         .onChange(of: notificationsEnabled) { _, isEnabled in
             ForecastSevereWeatherNotificationsStore.save(isEnabled)
         }
