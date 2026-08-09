@@ -42,7 +42,7 @@ struct ForecastUnitSelector<Unit, Label: View>: View where Unit: CaseIterable & 
             }
             .buttonStyle(.plain)
         } else {
-#if os(watchOS)
+#if os(watchOS) || os(tvOS)
             Button {
                 guard let currentIndex = units.firstIndex(of: selection) else {
                     selection = units[units.startIndex]

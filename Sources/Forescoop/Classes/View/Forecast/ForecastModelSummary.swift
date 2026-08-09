@@ -36,7 +36,9 @@ struct ForecastModelSummary: View {
 
             Link(destination: modelInfoURL) {
                 Image(systemName: "info.circle")
+                    .foregroundStyle(.secondary)
             }
+            .buttonStyle(.plain)
             .accessibilityLabel("About Windguru forecast models")
             .accessibilityHint("Opens Windguru's model explanation")
         }

@@ -261,7 +261,11 @@ public struct ForecastDashboardView: View {
                             Button("Compare models", systemImage: "arrow.left.and.right") {
                                 showsDashboardModelComparison.toggle()
                             }
+#if os(tvOS)
+                            .opacity(showsDashboardModelComparison ? 1 : 0.6)
+#else
                             .tint(showsDashboardModelComparison ? .accentColor : .secondary)
+#endif
                         }
                     }
                 }

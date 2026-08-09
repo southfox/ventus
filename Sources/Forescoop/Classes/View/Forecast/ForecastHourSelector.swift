@@ -48,11 +48,20 @@ public struct ForecastHourSelector: View {
                 Label("Previous forecast hour", systemImage: "chevron.left")
                     .labelStyle(.iconOnly)
             }
+            .buttonStyle(.plain)
             .disabled(selectedIndex == nil || selectedIndex == 0)
 
 
             Spacer()
 
+#if os(tvOS)
+            // tvOS's focus-driven picker styles render as an unlabeled tick-mark
+            // scrubber, which hides the selected hour. Navigation is already
+            // handled by the previous/next buttons, so just display the value.
+            Text(selection.map(hourLabel(for:)) ?? "")
+                .fontWeight(selection == currentHour ? .bold : .regular)
+                .fixedSize(horizontal: false, vertical: true)
+#else
             Picker("Forecast date and hour", selection: $selectedHour) {
                 ForEach(hours, id: \.self) { hour in
                     Text(hourLabel(for: hour))
@@ -66,6 +75,7 @@ public struct ForecastHourSelector: View {
             .pickerStyle(.menu)
             .fontWeight(selection == currentHour ? .bold : .regular)
             .fixedSize(horizontal: false, vertical: true)
+#endif
 
             Spacer()
 
@@ -75,6 +85,7 @@ public struct ForecastHourSelector: View {
                 Label("Next forecast hour", systemImage: "chevron.right")
                     .labelStyle(.iconOnly)
             }
+            .buttonStyle(.plain)
             .disabled(selectedIndex == nil || selectedIndex == hours.count - 1)
         }
         .accessibilityElement(children: .contain)
