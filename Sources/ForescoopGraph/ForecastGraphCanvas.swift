@@ -39,7 +39,7 @@ public struct ForecastGraphCanvas: View {
             if !comparisonSeries.isEmpty {
                 HStack(spacing: 10) {
                     ForEach(Array(comparisonSeries.enumerated()), id: \.element.id) { index, series in
-                        ForecastGraphLegendItem(label: series.name, color: comparisonColor(for: index), style: .line)
+                        ForecastGraphLegendItem(label: Text(series.name), color: comparisonColor(for: index), style: .line)
                     }
                 }
                 .font(.caption2)
@@ -71,14 +71,14 @@ public struct ForecastGraphCanvas: View {
             alignment: .leading,
             spacing: 7
         ) {
-            ForecastGraphLegendItem(label: "Wind", color: .primary, style: .line)
-            ForecastGraphLegendItem(label: "Gusts · low → strong", style: .gustGradient)
-            ForecastGraphLegendItem(label: "Cloud cover", color: .gray.opacity(0.55), style: .area)
-            ForecastGraphLegendItem(label: "Humidity", color: .green, style: .line)
-            ForecastGraphLegendItem(label: "Pressure", color: .blue, style: .line)
-            ForecastGraphLegendItem(label: "Temperature", color: .yellow, style: .dot)
-            ForecastGraphLegendItem(label: "Rain", color: .cyan, style: .bar)
-            ForecastGraphLegendItem(label: "Wind direction", color: .primary, style: .arrow)
+            ForecastGraphLegendItem(label: Text("Wind"), color: .primary, style: .line)
+            ForecastGraphLegendItem(label: Text("Gusts · low → strong"), style: .gustGradient)
+            ForecastGraphLegendItem(label: Text("Cloud cover"), color: .gray.opacity(0.55), style: .area)
+            ForecastGraphLegendItem(label: Text("Humidity"), color: .green, style: .line)
+            ForecastGraphLegendItem(label: Text("Pressure"), color: .blue, style: .line)
+            ForecastGraphLegendItem(label: Text("Temperature"), color: .yellow, style: .dot)
+            ForecastGraphLegendItem(label: Text("Rain"), color: .cyan, style: .bar)
+            ForecastGraphLegendItem(label: Text("Wind direction"), color: .primary, style: .arrow)
         }
         .font(.caption2)
         .foregroundStyle(.secondary)

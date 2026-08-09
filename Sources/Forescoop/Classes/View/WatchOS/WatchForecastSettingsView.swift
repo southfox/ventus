@@ -18,9 +18,16 @@ struct WatchForecastSettingsView: View {
     @Binding var pressureUnitRaw: String
     @Binding var precipitationUnitRaw: String
     @Binding var freezingLevelUnitRaw: String
+    @Binding var appLanguage: AppLanguage
 
     var body: some View {
         Form {
+            Picker("Language", selection: $appLanguage) {
+                ForEach(AppLanguage.allCases) { language in
+                    Text(language.title).tag(language)
+                }
+            }
+
             Picker("Temperature", selection: $temperatureUnitRaw) {
                 ForEach(TemperatureUnit.allCases) { unit in Text(unit.label).tag(unit.rawValue) }
             }

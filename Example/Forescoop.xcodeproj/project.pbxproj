@@ -34,6 +34,11 @@
 		D00100000000000000000003 /* ForescoopWidgets in Frameworks */ = {isa = PBXBuildFile; productRef = D00100000000000000000004 /* ForescoopWidgets */; };
 		D00100000000000000000005 /* ForescoopWatchWidgets.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = D00100000000000000000006 /* ForescoopWatchWidgets.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E00100000000000000000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E00100000000000000000002 /* Assets.xcassets */; };
+		C0DE00000000000000000101 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000100 /* Localizable.xcstrings */; };
+		C0DE00000000000000000102 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000100 /* Localizable.xcstrings */; };
+		C0DE00000000000000000103 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000100 /* Localizable.xcstrings */; };
+		C0DE00000000000000000104 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000100 /* Localizable.xcstrings */; };
+		C0DE00000000000000000105 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000100 /* Localizable.xcstrings */; };
 		E10100000000000000000001 /* ForescoopWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00100000000000000000002 /* ForescoopWidgetBundle.swift */; };
 		E10100000000000000000002 /* ForescoopWidgets in Frameworks */ = {isa = PBXBuildFile; productRef = E1010000000000000000000A /* ForescoopWidgets */; };
 		E10100000000000000000003 /* ForescoopIOSWidgets.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = E10100000000000000000004 /* ForescoopIOSWidgets.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -135,6 +140,7 @@
 		D00100000000000000000007 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D00100000000000000000008 /* ForescoopWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ForescoopWidgets.entitlements; sourceTree = "<group>"; };
 		E00100000000000000000002 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = ../ForescoopWatchOnly/Assets.xcassets; sourceTree = "<group>"; };
+		C0DE00000000000000000100 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = Localizable.xcstrings; path = ../Sources/Forescoop/Resources/Localizable.xcstrings; sourceTree = "<group>"; };
 		E10100000000000000000004 /* ForescoopIOSWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ForescoopIOSWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		F00100000000000000000003 /* VisionForescoopApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionForescoopApp.swift; sourceTree = "<group>"; };
 		F10100000000000000000004 /* ForescoopMacWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ForescoopMacWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -232,6 +238,7 @@
 				98688A0522D5936400A09AD0 /* ForescoopMacOS */,
 				987A6DC622D595D200662010 /* ForescoopTVOS */,
 				607FACD11AFB9204008FA782 /* Products */,
+				C0DE00000000000000000100 /* Localizable.xcstrings */,
 			);
 			sourceTree = "<group>";
 		};
@@ -571,6 +578,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				es,
 				Base,
 			);
 			mainGroup = 607FACC71AFB9204008FA782;
@@ -602,6 +610,7 @@
 			files = (
 				70BAA9B31F276B4F004CD577 /* LaunchScreen.xib in Resources */,
 				70BAA9B41F276B4F004CD577 /* Images.xcassets in Resources */,
+				C0DE00000000000000000101 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -618,6 +627,7 @@
 			files = (
 				98688A0B22D5936700A09AD0 /* Assets.xcassets in Resources */,
 				98688A0E22D5936700A09AD0 /* Main.storyboard in Resources */,
+				C0DE00000000000000000102 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -626,6 +636,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				987A6DCF22D595D400662010 /* Assets.xcassets in Resources */,
+				C0DE00000000000000000103 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -644,6 +655,7 @@
 			files = (
 				B00100000000000000000009 /* LaunchScreen.xib in Resources */,
 				B0010000000000000000000A /* Images.xcassets in Resources */,
+				C0DE00000000000000000105 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -652,6 +664,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E00100000000000000000001 /* Assets.xcassets in Resources */,
+				C0DE00000000000000000104 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -97,11 +97,13 @@ struct ForecastAlertFormView: View {
 #if os(tvOS)
                     Picker("Up to day", selection: $draft.considerForecastUpToDay) {
                         ForEach(1...10, id: \.self) { day in
-                            Text("\(day) day\(day == 1 ? "" : "s") ahead").tag(day)
+                            (day == 1 ? Text("1 day ahead") : Text("\(day) days ahead")).tag(day)
                         }
                     }
 #else
-                    Stepper("Up to \(draft.considerForecastUpToDay) day\(draft.considerForecastUpToDay == 1 ? "" : "s") ahead", value: $draft.considerForecastUpToDay, in: 1...10)
+                    Stepper(value: $draft.considerForecastUpToDay, in: 1...10) {
+                        draft.considerForecastUpToDay == 1 ? Text("Up to 1 day ahead") : Text("Up to \(draft.considerForecastUpToDay) days ahead")
+                    }
 #endif
                 } header: {
                     Text("Consider forecasts up to day")

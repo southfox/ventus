@@ -533,7 +533,7 @@ public struct WindguruForecastGridView: View {
 
     @ViewBuilder
     private func unitLabel<Unit>(
-        _ title: String,
+        _ title: LocalizedStringKey,
         compactLabel: String,
         icon: String,
         selection: Binding<Unit>,
@@ -553,7 +553,7 @@ public struct WindguruForecastGridView: View {
         .buttonStyle(.plain)
     }
 
-    private func cloudCoverLabel(_ title: String, showsIcon: Bool = true) -> some View {
+    private func cloudCoverLabel(_ title: LocalizedStringKey, showsIcon: Bool = true) -> some View {
         Button {
             showsCloudLayers.toggle()
         } label: {
@@ -570,7 +570,7 @@ public struct WindguruForecastGridView: View {
     }
 
     private func rowLabel(
-        _ title: String,
+        _ title: LocalizedStringKey,
         compactTitle: String? = nil,
         icon: String,
         isInteractive: Bool = false

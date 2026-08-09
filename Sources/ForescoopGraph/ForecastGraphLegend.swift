@@ -11,14 +11,14 @@ import SwiftUI
 struct ForecastGraphLegendItem: View {
     enum Style { case line, area, dot, bar, arrow, gustGradient }
 
-    let label: String
+    let label: Text
     var color: Color = .clear
     let style: Style
 
     var body: some View {
         HStack(spacing: 5) {
             swatch.frame(width: 22, height: 12)
-            Text(label).lineLimit(1)
+            label.lineLimit(1)
         }
         .accessibilityElement(children: .combine)
     }

@@ -46,6 +46,7 @@ public struct ForecastDashboardView: View {
     @State private var content: ForecastViewMode
     @State private var weatherBackgroundStyle: WeatherBackgroundStyle
     @State private var theme: VentusTheme
+    @State private var appLanguage: AppLanguage = AppLanguageStore.load()
     @State private var showsDashboardModelComparison = false
     @State private var iPadMapPosition: MapCameraPosition = .automatic
     @State private var selectedMapLocationID: SavedMapLocation.ID?
@@ -358,6 +359,7 @@ public struct ForecastDashboardView: View {
                     weatherBackgroundStyle: $weatherBackgroundStyle,
                     forecastViewMode: $content,
                     theme: $theme,
+                    appLanguage: $appLanguage,
                     forecastService: forecastService,
                     account: account
                 )
@@ -385,6 +387,7 @@ public struct ForecastDashboardView: View {
 #endif
         }
         .modifier(VentusThemeModifier(theme: theme))
+        .appLanguage(appLanguage)
         .forecastAccessibilityContainer(
             "Ventus forecast dashboard",
             hint: "Choose a location, forecast hour, view mode, or settings.",

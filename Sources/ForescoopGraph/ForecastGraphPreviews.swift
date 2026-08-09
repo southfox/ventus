@@ -50,14 +50,14 @@ private struct ForecastGraphCanvasPreview: View {
 private struct ForecastGraphLegendPreview: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            ForecastGraphLegendItem(label: "Wind", color: .primary, style: .line)
-            ForecastGraphLegendItem(label: "Gusts · low → strong", style: .gustGradient)
-            ForecastGraphLegendItem(label: "Cloud cover", color: .gray.opacity(0.55), style: .area)
-            ForecastGraphLegendItem(label: "Humidity", color: .green, style: .line)
-            ForecastGraphLegendItem(label: "Pressure", color: .blue, style: .line)
-            ForecastGraphLegendItem(label: "Temperature", color: .yellow, style: .dot)
-            ForecastGraphLegendItem(label: "Rain", color: .cyan, style: .bar)
-            ForecastGraphLegendItem(label: "Wind direction", color: .primary, style: .arrow)
+            ForecastGraphLegendItem(label: Text("Wind"), color: .primary, style: .line)
+            ForecastGraphLegendItem(label: Text("Gusts · low → strong"), style: .gustGradient)
+            ForecastGraphLegendItem(label: Text("Cloud cover"), color: .gray.opacity(0.55), style: .area)
+            ForecastGraphLegendItem(label: Text("Humidity"), color: .green, style: .line)
+            ForecastGraphLegendItem(label: Text("Pressure"), color: .blue, style: .line)
+            ForecastGraphLegendItem(label: Text("Temperature"), color: .yellow, style: .dot)
+            ForecastGraphLegendItem(label: Text("Rain"), color: .cyan, style: .bar)
+            ForecastGraphLegendItem(label: Text("Wind direction"), color: .primary, style: .arrow)
         }
     }
 }

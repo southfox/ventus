@@ -14,6 +14,7 @@ public struct SettingsView: View {
     @Binding private var weatherBackgroundStyle: WeatherBackgroundStyle
     @Binding private var forecastViewMode: ForecastViewMode
     @Binding private var theme: VentusTheme
+    @Binding private var appLanguage: AppLanguage
     @State private var notificationsEnabled = ForecastSevereWeatherNotificationsStore.load()
 #if !os(watchOS)
     private let forecastService: ForecastWindguruProtocol
@@ -25,12 +26,14 @@ public struct SettingsView: View {
         weatherBackgroundStyle: Binding<WeatherBackgroundStyle>,
         forecastViewMode: Binding<ForecastViewMode>,
         theme: Binding<VentusTheme>,
+        appLanguage: Binding<AppLanguage>,
         forecastService: ForecastWindguruProtocol,
         account: WindguruAccount
     ) {
         _weatherBackgroundStyle = weatherBackgroundStyle
         _forecastViewMode = forecastViewMode
         _theme = theme
+        _appLanguage = appLanguage
         self.forecastService = forecastService
         self.account = account
     }
@@ -38,11 +41,13 @@ public struct SettingsView: View {
     public init(
         weatherBackgroundStyle: Binding<WeatherBackgroundStyle>,
         forecastViewMode: Binding<ForecastViewMode>,
-        theme: Binding<VentusTheme>
+        theme: Binding<VentusTheme>,
+        appLanguage: Binding<AppLanguage>
     ) {
         _weatherBackgroundStyle = weatherBackgroundStyle
         _forecastViewMode = forecastViewMode
         _theme = theme
+        _appLanguage = appLanguage
     }
 #endif
 
@@ -92,6 +97,19 @@ public struct SettingsView: View {
                 }
 
                 Section {
+                    Picker("Language", selection: $appLanguage) {
+                        ForEach(AppLanguage.allCases) { language in
+                            Text(language.title).tag(language)
+                        }
+                    }
+                    .pickerStyle(.inline)
+                } header: {
+                    Text("Language")
+                } footer: {
+                    Text("System follows the device's language. Choosing a language overrides it for Ventus only.")
+                }
+
+                Section {
                     Toggle("Severe weather alerts", isOn: $notificationsEnabled)
 #if !os(watchOS)
                     NavigationLink {
@@ -123,6 +141,9 @@ public struct SettingsView: View {
         .onChange(of: theme) { _, theme in
             VentusThemeStore.save(theme)
         }
+        .onChange(of: appLanguage) { _, appLanguage in
+            AppLanguageStore.save(appLanguage)
+        }
         .onChange(of: notificationsEnabled) { _, isEnabled in
             ForecastSevereWeatherNotificationsStore.save(isEnabled)
         }
@@ -140,6 +161,7 @@ public struct SettingsView: View {
         weatherBackgroundStyle: .constant(.lottieAdriana),
         forecastViewMode: .constant(.dashboard),
         theme: .constant(.system),
+        appLanguage: .constant(.system),
         forecastService: ForecastWindguruMockup(),
         account: WindguruAccount()
     )
@@ -149,7 +171,8 @@ public struct SettingsView: View {
     SettingsView(
         weatherBackgroundStyle: .constant(.lottieAdriana),
         forecastViewMode: .constant(.dashboard),
-        theme: .constant(.system)
+        theme: .constant(.system),
+        appLanguage: .constant(.system)
     )
 }
 #endif

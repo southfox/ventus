@@ -13,6 +13,7 @@ import PackageDescription
 
 let package = Package(
     name: "ForescoopPackage",
+    defaultLocalization: "en",
     platforms: [
         .iOS(.v26),
         .macOS(.v26),

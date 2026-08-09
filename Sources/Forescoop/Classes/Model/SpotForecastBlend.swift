@@ -49,7 +49,7 @@ public extension SpotForecast {
             }
         }
 
-        let mixName = "Forescoop Mix (\(forecasts.count) models)"
+        let mixName = String(localized: "Forescoop Mix (\(forecasts.count) models)")
         var model: [String: Any] = blendedWeather
         model["initdate"] = base.forecast?.initdate ?? ""
         model["initstamp"] = base.forecast?.initStamp ?? 0

@@ -173,7 +173,7 @@ public struct ForecastWidgetView: View {
         }
     }
 
-    private func expandedMetric(_ title: String, value: String, symbol: String) -> some View {
+    private func expandedMetric(_ title: LocalizedStringKey, value: String, symbol: String) -> some View {
         VStack(alignment: .leading, spacing: 3) {
             Label(title, systemImage: symbol)
                 .font(.caption2)

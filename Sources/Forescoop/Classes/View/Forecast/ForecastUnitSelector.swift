@@ -13,14 +13,14 @@ import SwiftUI
 /// Celsius/Fahrenheit and other binary unit sets toggle immediately. Sets with
 /// three or more choices retain a menu so every value remains discoverable.
 struct ForecastUnitSelector<Unit, Label: View>: View where Unit: CaseIterable & Identifiable & Hashable, Unit.AllCases: RandomAccessCollection, Unit.AllCases.Element == Unit {
-    private let title: String
+    private let title: LocalizedStringKey
     @Binding private var selection: Unit
     private let units: [Unit]
     private let unitTitle: (Unit) -> String
     private let label: () -> Label
 
     init(
-        _ title: String,
+        _ title: LocalizedStringKey,
         selection: Binding<Unit>,
         unitTitle: @escaping (Unit) -> String,
         @ViewBuilder label: @escaping () -> Label

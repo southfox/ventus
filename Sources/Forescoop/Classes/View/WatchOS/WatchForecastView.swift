@@ -27,6 +27,7 @@ public struct WatchForecastView: View {
     @State private var selectedModelID: String?
     @State private var navigationPath = NavigationPath()
     @State private var theme = VentusThemeStore.load()
+    @State private var appLanguage = AppLanguageStore.load()
 
     public init(forecastService: ForecastWindguruProtocol = ForecastWindguruService()) {
         self.forecastService = forecastService
@@ -58,7 +59,7 @@ public struct WatchForecastView: View {
                         navigationPath = NavigationPath()
                     }
                 case .settings:
-                    WatchForecastSettingsView(forecastService: forecastService, temperatureUnitRaw: $temperatureUnitRaw, windSpeedUnitRaw: $windSpeedUnitRaw, waveHeightUnitRaw: $waveHeightUnitRaw, pressureUnitRaw: $pressureUnitRaw, precipitationUnitRaw: $precipitationUnitRaw, freezingLevelUnitRaw: $freezingLevelUnitRaw)
+                    WatchForecastSettingsView(forecastService: forecastService, temperatureUnitRaw: $temperatureUnitRaw, windSpeedUnitRaw: $windSpeedUnitRaw, waveHeightUnitRaw: $waveHeightUnitRaw, pressureUnitRaw: $pressureUnitRaw, precipitationUnitRaw: $precipitationUnitRaw, freezingLevelUnitRaw: $freezingLevelUnitRaw, appLanguage: $appLanguage)
                 case .models:
                     if let forecast {
                         WatchForecastModelPicker(forecast: forecast, selectedModelID: selectedModelID, select: selectModel)
@@ -67,12 +68,16 @@ public struct WatchForecastView: View {
             }
         }
         .modifier(VentusThemeModifier(theme: theme))
+        .appLanguage(appLanguage)
         .task { await loadForecast() }
         .onChange(of: selectedSpotID) { _, _ in Task { await loadForecast() } }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
                 theme = VentusThemeStore.load()
             }
+        }
+        .onChange(of: appLanguage) { _, appLanguage in
+            AppLanguageStore.save(appLanguage)
         }
     }
 

@@ -50,7 +50,7 @@ struct TVForecastWidgetCard: View {
         return "\(value.formatted(.number.precision(.fractionLength(0...1)))) mm"
     }
 
-    private func metric(_ title: String, value: String, symbol: String) -> some View {
+    private func metric(_ title: LocalizedStringKey, value: String, symbol: String) -> some View {
         Label {
             VStack(alignment: .leading, spacing: 2) {
                 Text(value).font(.headline)
