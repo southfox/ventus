@@ -22,7 +22,7 @@ public enum WindSpeedUnit: String, CaseIterable, Identifiable, Sendable {
 
     public var label: String {
         switch self {
-        case .knots: "knots"
+        case .knots: Bundle.main.localizedString("knots", locale: AppLanguageStore.currentLocale)
         case .metersPerSecond: "m/s"
         case .kilometersPerHour: "km/h"
         case .milesPerHour: "mph"

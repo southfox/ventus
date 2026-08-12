@@ -59,15 +59,7 @@ public struct WatchForecastView: View {
                         navigationPath = NavigationPath()
                     }
                 case .settings:
-                    WatchForecastSettingsView(forecastService: forecastService, temperatureUnitRaw: $temperatureUnitRaw, windSpeedUnitRaw: $windSpeedUnitRaw, waveHeightUnitRaw: $waveHeightUnitRaw, pressureUnitRaw: $pressureUnitRaw, precipitationUnitRaw: $precipitationUnitRaw, freezingLevelUnitRaw: $freezingLevelUnitRaw, appLanguage: Binding(
-                        get: { appLanguage },
-                        set: { newValue in
-                            // Apply synchronously so the very next render
-                            // already reflects the new bundle override.
-                            AppLanguageStore.save(newValue)
-                            appLanguage = newValue
-                        }
-                    ))
+                    WatchForecastSettingsView(forecastService: forecastService, temperatureUnitRaw: $temperatureUnitRaw, windSpeedUnitRaw: $windSpeedUnitRaw, waveHeightUnitRaw: $waveHeightUnitRaw, pressureUnitRaw: $pressureUnitRaw, precipitationUnitRaw: $precipitationUnitRaw, freezingLevelUnitRaw: $freezingLevelUnitRaw, appLanguage: $appLanguage)
                 case .models:
                     if let forecast {
                         WatchForecastModelPicker(forecast: forecast, selectedModelID: selectedModelID, select: selectModel)
@@ -83,6 +75,10 @@ public struct WatchForecastView: View {
             if phase == .active {
                 theme = VentusThemeStore.load()
             }
+        }
+        .onChange(of: appLanguage) { _, appLanguage in
+            // Takes effect next launch — see the note in SettingsView.
+            AppLanguageStore.save(appLanguage)
         }
     }
 

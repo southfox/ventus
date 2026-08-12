@@ -11,6 +11,7 @@ import SwiftUI
 /// Device settings that are available regardless of Windguru account status.
 public struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.locale) private var locale
     @Binding private var weatherBackgroundStyle: WeatherBackgroundStyle
     @Binding private var forecastViewMode: ForecastViewMode
     @Binding private var theme: VentusTheme
@@ -99,14 +100,14 @@ public struct SettingsView: View {
                 Section {
                     Picker("Language", selection: $appLanguage) {
                         ForEach(AppLanguage.allCases) { language in
-                            Text(language.title).tag(language)
+                            Text(language.title(locale: locale)).tag(language)
                         }
                     }
                     .pickerStyle(.inline)
                 } header: {
                     Text("Language")
                 } footer: {
-                    Text("System follows the device's language. Choosing a language overrides it for Ventus only.")
+                    Text("System follows the device's language. Choosing a language overrides it for Ventus only, starting the next time you open Ventus.")
                 }
 
                 Section {
@@ -141,10 +142,13 @@ public struct SettingsView: View {
         .onChange(of: theme) { _, theme in
             VentusThemeStore.save(theme)
         }
-        // appLanguage is persisted synchronously in the binding passed down
-        // from the presenting view (see ForecastDashboardView), not here —
-        // it must apply before the next render, not after, or the frame
-        // right after switching still shows the old language.
+        .onChange(of: appLanguage) { _, appLanguage in
+            // Bundle.main's language resolution isn't reliably reactive
+            // mid-session (Text and String(localized:) can each cache or
+            // resolve differently once already rendered), so this takes
+            // effect the next time the app launches rather than live.
+            AppLanguageStore.save(appLanguage)
+        }
         .onChange(of: notificationsEnabled) { _, isEnabled in
             ForecastSevereWeatherNotificationsStore.save(isEnabled)
         }

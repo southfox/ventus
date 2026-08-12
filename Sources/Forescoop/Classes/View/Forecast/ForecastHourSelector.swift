@@ -9,6 +9,7 @@ import SwiftUI
 public struct ForecastHourSelector: View {
     public let forecast: SpotForecast
     @Binding public var selectedHour: String?
+    @Environment(\.locale) private var locale
 
     public init(
         forecast: SpotForecast,
@@ -106,7 +107,7 @@ public struct ForecastHourSelector: View {
 
         let calendar = Calendar.current
         let day = calendar.isDateInToday(date)
-            ? Bundle.mainLocalizedString("Today")
+            ? Bundle.main.localizedString("Today", locale: locale)
             : date.formatted(.dateTime.weekday(.abbreviated).day())
         let formatter = DateFormatter()
         formatter.locale = .autoupdatingCurrent

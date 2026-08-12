@@ -359,18 +359,7 @@ public struct ForecastDashboardView: View {
                     weatherBackgroundStyle: $weatherBackgroundStyle,
                     forecastViewMode: $content,
                     theme: $theme,
-                    appLanguage: Binding(
-                        get: { appLanguage },
-                        set: { newValue in
-                            // Apply the bundle override synchronously, before
-                            // SwiftUI renders the next frame with the new
-                            // `appLanguage` — otherwise that first render
-                            // still resolves strings through the old
-                            // (not-yet-overridden) bundle.
-                            AppLanguageStore.save(newValue)
-                            appLanguage = newValue
-                        }
-                    ),
+                    appLanguage: $appLanguage,
                     forecastService: forecastService,
                     account: account
                 )

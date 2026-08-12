@@ -19,13 +19,18 @@ struct WatchForecastSettingsView: View {
     @Binding var precipitationUnitRaw: String
     @Binding var freezingLevelUnitRaw: String
     @Binding var appLanguage: AppLanguage
+    @Environment(\.locale) private var locale
 
     var body: some View {
         Form {
-            Picker("Language", selection: $appLanguage) {
-                ForEach(AppLanguage.allCases) { language in
-                    Text(language.title).tag(language)
+            Section {
+                Picker("Language", selection: $appLanguage) {
+                    ForEach(AppLanguage.allCases) { language in
+                        Text(language.title(locale: locale)).tag(language)
+                    }
                 }
+            } footer: {
+                Text("Takes effect the next time you open Ventus.")
             }
 
             Picker("Temperature", selection: $temperatureUnitRaw) {

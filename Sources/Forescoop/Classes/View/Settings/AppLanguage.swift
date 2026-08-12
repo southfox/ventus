@@ -7,10 +7,6 @@
 //
 
 import SwiftUI
-import ObjectiveC
-#if canImport(WidgetKit)
-import WidgetKit
-#endif
 
 /// Overrides the app's display language independently of the device's
 /// system language. "System" follows whatever language the device is set
@@ -24,10 +20,12 @@ public enum AppLanguage: String, CaseIterable, Identifiable, Sendable {
 
     /// English and Spanish are deliberately shown in their own language
     /// (matching Apple's own language pickers), so only "System" is
-    /// translated.
-    public var title: String {
+    /// translated — using `locale` rather than the environment, since this
+    /// is read from call sites (like the picker row itself) that need it
+    /// explicitly.
+    public func title(locale: Locale) -> String {
         switch self {
-        case .system: Bundle.mainLocalizedString("System")
+        case .system: Bundle.main.localizedString("System", locale: locale)
         case .english: "English"
         case .spanish: "Español"
         }
@@ -42,29 +40,14 @@ public enum AppLanguage: String, CaseIterable, Identifiable, Sendable {
         case .spanish: Locale(identifier: "es")
         }
     }
-
-    /// `nil` for `.system`. `Text`/`String(localized:)` resolve their string
-    /// table via `Bundle.main`, which only exposes a plain language code.
-    var languageCode: String? {
-        switch self {
-        case .system: nil
-        case .english: "en"
-        case .spanish: "es"
-        }
-    }
 }
 
-/// Applies the selected language override's locale (date/number formatting)
-/// to a complete app scene.
+/// Applies the selected language override to a complete app scene.
 ///
-/// This does *not* by itself change which language `Text`/`String(localized:)`
-/// display — that's `Bundle.main`'s own localization resolution, switched
-/// live by `Bundle.applyLanguageOverride` (called from `AppLanguageStore`,
-/// synchronously, whenever the preference changes). Once that override is
-/// in place, the normal SwiftUI re-render triggered by the `appLanguage`
-/// state change is enough to make every `Text` re-resolve its string — no
-/// forced `.id()` reset is needed, which would otherwise dismiss any sheet
-/// (like Settings) presented above this view.
+/// `Text` and `String(localized:locale:)` both resolve their string table
+/// from this environment value once `Bundle.main` itself carries every
+/// language's strings (see `Sources/Forescoop/Resources/Localizable.xcstrings`,
+/// wired into each app target directly) — no bundle-swapping trick needed.
 public extension View {
     @ViewBuilder
     func appLanguage(_ language: AppLanguage) -> some View {
@@ -76,79 +59,48 @@ public extension View {
     }
 }
 
-/// Bridges `Bundle.main`'s string lookups to a specific language's
-/// `.lproj`, independent of the device's system language. This is the
-/// standard technique for live in-app language switching: SwiftUI's `Text`
-/// and Foundation's `String(localized:)` both resolve through
-/// `Bundle.localizedString(forKey:value:table:)`, which normally follows
-/// the device's preferred languages and is otherwise fixed for the life of
-/// the process.
-private final class LocalizedBundle: Bundle, @unchecked Sendable {
-    nonisolated(unsafe) static var override: Bundle?
+/// Per-app language preference.
+public enum AppLanguageStore {
+    private static let key = "appLanguage"
 
-    override func localizedString(forKey key: String, value: String?, table tableName: String?) -> String {
-        guard let override = LocalizedBundle.override else {
-            return super.localizedString(forKey: key, value: value, table: tableName)
-        }
-        return override.localizedString(forKey: key, value: value, table: tableName)
+    public static func load() -> AppLanguage {
+        UserDefaults.standard.string(forKey: key).flatMap(AppLanguage.init(rawValue:)) ?? .system
+    }
+
+    public static func save(_ language: AppLanguage) {
+        UserDefaults.standard.set(language.rawValue, forKey: key)
+    }
+
+    /// For code outside the SwiftUI view hierarchy (model types, widget
+    /// timeline providers) that can't read `@Environment(\.locale)`.
+    public static var currentLocale: Locale {
+        load().locale ?? .current
     }
 }
 
 public extension Bundle {
-    /// Pass a language code (e.g. `"es"`) to pin `Bundle.main` lookups to
-    /// that language's `.lproj`, or `nil` to restore the device's language.
-    static func applyLanguageOverride(_ languageCode: String?) {
-        if object_getClass(Bundle.main) != LocalizedBundle.self {
-            object_setClass(Bundle.main, LocalizedBundle.self)
+    /// Looks `key` up in `locale`'s specific `.strings` table, independent
+    /// of the device's system language or `String(localized:locale:)`
+    /// (whose `locale:` parameter only affects argument formatting, not
+    /// which language's translation gets picked — confirmed by tracing
+    /// actual lookups, not assumed).
+    ///
+    /// Reads the compiled `.strings` file directly as a dictionary rather
+    /// than going through `Bundle.localizedString`: pointing a `Bundle` at
+    /// an `.lproj` folder and calling `localizedString` on it does *not*
+    /// work — that API expects `self` to be an app-root bundle containing
+    /// `xx.lproj` subdirectories, not a bundle that *is* one, so it looks
+    /// for the nonexistent `es.lproj/es.lproj/Localizable.strings` and
+    /// silently falls back to returning `key` unchanged.
+    func localizedString(_ key: String, locale: Locale, formatArguments: [CVarArg] = []) -> String {
+        guard let languageCode = locale.language.languageCode?.identifier,
+              let lprojPath = path(forResource: languageCode, ofType: "lproj"),
+              let stringsPath = Bundle(path: lprojPath)?.path(forResource: "Localizable", ofType: "strings"),
+              let table = NSDictionary(contentsOfFile: stringsPath) as? [String: String],
+              let format = table[key] else {
+            return formatArguments.isEmpty ? key : String(format: key, arguments: formatArguments)
         }
-        guard let languageCode, let path = Bundle.main.path(forResource: languageCode, ofType: "lproj") else {
-            LocalizedBundle.override = nil
-            return
-        }
-        LocalizedBundle.override = Bundle(path: path)
-    }
-
-    /// Looks a key up directly through `Bundle.main`'s localization,
-    /// including any `applyLanguageOverride`. Unlike `Text` (which resolves
-    /// `LocalizedStringKey` literals through the same legacy lookup), the
-    /// newer `String(localized:)` API does not consistently honor a
-    /// bundle-class override, so dynamically-built strings should call this
-    /// instead. `format` arguments substitute into the looked-up value the
-    /// same way `String(format:)` does, e.g. for `"%lld models"`-style keys.
-    static func mainLocalizedString(_ key: String, _ formatArguments: CVarArg...) -> String {
-        let format = Bundle.main.localizedString(forKey: key, value: nil, table: nil)
-        guard !formatArguments.isEmpty else { return format }
-        return String(format: format, arguments: formatArguments)
-    }
-}
-
-/// Language storage shared by every Forescoop target installed on this
-/// device. The App Group is intentionally also used by the widget
-/// extensions so their content follows the same language override.
-public enum AppLanguageStore {
-    private static let key = "appLanguage"
-    private static let appGroupIdentifier = "group.org.forescoop.shared"
-    private static func defaults() -> UserDefaults {
-        UserDefaults(suiteName: appGroupIdentifier) ?? .standard
-    }
-
-    /// Reads the stored preference and (re-)applies its bundle override.
-    /// Safe to call from every process that shares this app group,
-    /// including widget extensions, so it doubles as the setup call each
-    /// process needs at launch.
-    @discardableResult
-    public static func load() -> AppLanguage {
-        let language = defaults().string(forKey: key).flatMap(AppLanguage.init(rawValue:)) ?? .system
-        Bundle.applyLanguageOverride(language.languageCode)
-        return language
-    }
-
-    public static func save(_ language: AppLanguage) {
-        defaults().set(language.rawValue, forKey: key)
-        Bundle.applyLanguageOverride(language.languageCode)
-#if canImport(WidgetKit)
-        WidgetCenter.shared.reloadAllTimelines()
-#endif
+        return formatArguments.isEmpty ? format : String(format: format, arguments: formatArguments)
     }
 }
 
@@ -156,7 +108,7 @@ public enum AppLanguageStore {
 #Preview("App language") {
     VStack(alignment: .leading, spacing: 12) {
         ForEach(AppLanguage.allCases) { language in
-            Text(language.title)
+            Text(language.title(locale: .current))
         }
     }
     .padding()
