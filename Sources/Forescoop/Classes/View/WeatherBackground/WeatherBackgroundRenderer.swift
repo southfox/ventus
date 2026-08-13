@@ -15,6 +15,7 @@ public protocol WeatherBackground: View {
 
 /// The available visual renderers for a forecast background.
 public enum WeatherBackgroundStyle: String, CaseIterable, Identifiable, Sendable {
+    case none
     case animated
     case metal
     case spriteKit
@@ -25,6 +26,7 @@ public enum WeatherBackgroundStyle: String, CaseIterable, Identifiable, Sendable
 
     public var title: String {
         switch self {
+        case .none: Bundle.main.localizedString("None", locale: AppLanguageStore.currentLocale)
         case .animated: "Native"
         case .metal: "Metal"
         case .spriteKit: "SpriteKit"
@@ -35,6 +37,7 @@ public enum WeatherBackgroundStyle: String, CaseIterable, Identifiable, Sendable
 
     public var systemImage: String {
         switch self {
+        case .none: "circle.slash"
         case .animated: "sparkles"
         case .metal: "cpu"
         case .spriteKit: "leaf.arrow.circlepath"
@@ -75,6 +78,8 @@ public struct WeatherBackgroundRenderer: View {
     public var body: some View {
         Group {
             switch style {
+            case .none:
+                Color.clear
             case .animated:
                 AnimatedWeatherBackground(forecast: forecast, hour: hour)
             case .metal:

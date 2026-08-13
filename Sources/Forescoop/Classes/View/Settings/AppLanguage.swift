@@ -15,6 +15,9 @@ public enum AppLanguage: String, CaseIterable, Identifiable, Sendable {
     case system
     case english
     case spanish
+    case german
+    case french
+    case portugueseBrazil
 
     public var id: String { rawValue }
 
@@ -25,9 +28,12 @@ public enum AppLanguage: String, CaseIterable, Identifiable, Sendable {
     /// explicitly.
     public func title(locale: Locale) -> String {
         switch self {
-        case .system: Bundle.main.localizedString("System", locale: locale)
-        case .english: "English"
-        case .spanish: "Español"
+        case .system: "🌐 " + Bundle.main.localizedString("System", locale: locale)
+        case .english: "🇺🇸 English (US)"
+        case .spanish: "🇪🇸 Español (España)"
+        case .german: "🇩🇪 Deutsch"
+        case .french: "🇫🇷 Français"
+        case .portugueseBrazil: "🇧🇷 Português (Brasil)"
         }
     }
 
@@ -38,6 +44,9 @@ public enum AppLanguage: String, CaseIterable, Identifiable, Sendable {
         case .system: nil
         case .english: Locale(identifier: "en")
         case .spanish: Locale(identifier: "es")
+        case .german: Locale(identifier: "de")
+        case .french: Locale(identifier: "fr")
+        case .portugueseBrazil: Locale(identifier: "pt-BR")
         }
     }
 }
@@ -93,14 +102,22 @@ public extension Bundle {
     /// for the nonexistent `es.lproj/es.lproj/Localizable.strings` and
     /// silently falls back to returning `key` unchanged.
     func localizedString(_ key: String, locale: Locale, formatArguments: [CVarArg] = []) -> String {
-        guard let languageCode = locale.language.languageCode?.identifier,
-              let lprojPath = path(forResource: languageCode, ofType: "lproj"),
-              let stringsPath = Bundle(path: lprojPath)?.path(forResource: "Localizable", ofType: "strings"),
-              let table = NSDictionary(contentsOfFile: stringsPath) as? [String: String],
-              let format = table[key] else {
+        guard let languageCode = locale.language.languageCode?.identifier else {
             return formatArguments.isEmpty ? key : String(format: key, arguments: formatArguments)
         }
-        return formatArguments.isEmpty ? format : String(format: format, arguments: formatArguments)
+        // Most languages only ship a bare-language-code table ("es.lproj"),
+        // but region-specific variants like Brazilian Portuguese need the
+        // full "pt-BR.lproj" — the bare "pt" table doesn't exist, so that
+        // candidate is tried first and the language code is the fallback.
+        let regionQualified = locale.language.region.map { "\(languageCode)-\($0.identifier)" }
+        for candidate in [regionQualified, languageCode].compactMap({ $0 }) {
+            guard let lprojPath = path(forResource: candidate, ofType: "lproj"),
+                  let stringsPath = Bundle(path: lprojPath)?.path(forResource: "Localizable", ofType: "strings"),
+                  let table = NSDictionary(contentsOfFile: stringsPath) as? [String: String],
+                  let format = table[key] else { continue }
+            return formatArguments.isEmpty ? format : String(format: format, arguments: formatArguments)
+        }
+        return formatArguments.isEmpty ? key : String(format: key, arguments: formatArguments)
     }
 }
 
