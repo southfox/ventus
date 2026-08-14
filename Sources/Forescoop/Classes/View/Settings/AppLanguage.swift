@@ -123,6 +123,12 @@ public extension String {
     func localized(formatArguments: [CVarArg]) -> String {
         Bundle.forescoop.localizedString(self, locale: AppLanguageStore.currentLocale, formatArguments: formatArguments)
     }
+
+    /// Localizes `self` as a format string, substituting `formatArguments`,
+    /// using an explicit locale.
+    func localized(locale: Locale, formatArguments: [CVarArg]) -> String {
+        Bundle.forescoop.localizedString(self, locale: locale, formatArguments: formatArguments)
+    }
 }
 
 #if DEBUG

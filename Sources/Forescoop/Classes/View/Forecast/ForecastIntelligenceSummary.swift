@@ -19,14 +19,16 @@ public struct ForecastIntelligenceSummary: View {
         hour: String?,
         temperatureUnit: TemperatureUnit = DeviceForecastPreferences.temperatureUnit,
         windSpeedUnit: WindSpeedUnit = DeviceForecastPreferences.windSpeedUnit,
-        precipitationUnit: PrecipitationUnit = DeviceForecastPreferences.precipitationUnit
+        precipitationUnit: PrecipitationUnit = DeviceForecastPreferences.precipitationUnit,
+        locale: Locale = AppLanguageStore.currentLocale
     ) {
         let snapshot = ForecastIntelligenceSnapshot(
             forecast: forecast,
             hour: hour,
             temperatureUnit: temperatureUnit,
             windSpeedUnit: windSpeedUnit,
-            precipitationUnit: precipitationUnit
+            precipitationUnit: precipitationUnit,
+            locale: locale
         )
         self.snapshot = snapshot
         _summary = State(initialValue: snapshot.deterministicSummary)
@@ -80,7 +82,7 @@ public struct ForecastIntelligenceSummary: View {
         do {
             let session = LanguageModelSession(
                 model: SystemLanguageModel.default,
-                instructions: "You are a precise weather forecaster. Write one helpful sentence, under 28 words. Use only the supplied forecast facts. Do not invent safety advice or facts."
+                instructions: "You are a precise weather forecaster. Write one helpful sentence, under 28 words. Use only the supplied forecast facts. Do not invent safety advice or facts. \(snapshot.languageInstruction)"
             )
             let response = try await session.respond(to: snapshot.prompt)
             let generated = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -106,30 +108,42 @@ private struct ForecastIntelligenceSnapshot: Hashable, Sendable {
     let hasRain: Bool
     let humidity: Int?
     let cloudCover: Int?
+    let locale: Locale
 
     init(
         forecast: SpotForecast,
         hour: String?,
         temperatureUnit: TemperatureUnit,
         windSpeedUnit: WindSpeedUnit,
-        precipitationUnit: PrecipitationUnit
+        precipitationUnit: PrecipitationUnit,
+        locale: Locale
     ) {
         let hour = hour ?? forecast.currentForecastHour ?? "0"
         let source = forecast.forecast
         location = forecast.locationDisplayName()
         self.hour = hour
+        self.locale = locale
         let temperatureCelsius = source?.temperatureReal(hh: hour) ?? source?.temperature(hh: hour) ?? 0
-        temperature = Self.temperature(temperatureCelsius, unit: temperatureUnit)
+        temperature = Self.temperature(temperatureCelsius, unit: temperatureUnit, locale: locale)
         let windKnots = source?.windSpeed(hh: hour) ?? 0
         let gustKnots = source?.windGustsKnots(hh: hour)
-        wind = Self.wind(windKnots, unit: windSpeedUnit)
-        gust = gustKnots.map { Self.wind($0, unit: windSpeedUnit) }
+        wind = Self.wind(windKnots, unit: windSpeedUnit, locale: locale)
+        gust = gustKnots.map { Self.wind($0, unit: windSpeedUnit, locale: locale) }
         hasSignificantGust = gustKnots.map { $0 >= windKnots + 8 } ?? false
         let millimeters = source?.precipitation1(hh: hour) ?? source?.precipitation(hh: hour) ?? 0
-        rain = Self.precipitation(millimeters, unit: precipitationUnit)
+        rain = Self.precipitation(millimeters, unit: precipitationUnit, locale: locale)
         hasRain = millimeters > 0
         humidity = source?.relativeHumidity(hh: hour)
         cloudCover = source?.cloudCoverTotal(hh: hour)
+    }
+
+    /// The English name of `locale`'s language (e.g. "German"), used to steer
+    /// the on-device language model — English instructions are more reliable
+    /// for the model to follow than a translated language name would be.
+    var languageInstruction: String {
+        let code = locale.language.languageCode?.identifier ?? "en"
+        let name = Locale(identifier: "en").localizedString(forLanguageCode: code) ?? "English"
+        return "Respond in \(name)."
     }
 
     var prompt: String {
@@ -137,27 +151,27 @@ private struct ForecastIntelligenceSnapshot: Hashable, Sendable {
     }
 
     var deterministicSummary: String {
-        var phrases = ["\(location): \(temperature) with \(wind) wind"]
-        if let gust, hasSignificantGust { phrases.append("gusting to \(gust)") }
-        if hasRain { phrases.append("\(rain) of rain") }
-        if let cloudCover, cloudCover >= 75 { phrases.append("mostly cloudy") }
+        var phrases = ["%@: %@ with %@ wind".localized(locale: locale, formatArguments: [location, temperature, wind])]
+        if let gust, hasSignificantGust { phrases.append("gusting to %@".localized(locale: locale, formatArguments: [gust])) }
+        if hasRain { phrases.append("%@ of rain".localized(locale: locale, formatArguments: [rain])) }
+        if let cloudCover, cloudCover >= 75 { phrases.append("mostly cloudy".localized(locale: locale)) }
         return phrases.joined(separator: ", ") + "."
     }
 
-    private static func temperature(_ celsius: Double, unit: TemperatureUnit) -> String {
+    private static func temperature(_ celsius: Double, unit: TemperatureUnit, locale: Locale) -> String {
         let value = Temperature(celsius: celsius).value(in: unit)
-        return "\(value.formatted(.number.precision(.fractionLength(0))))\(unit.label)"
+        return "\(value.formatted(.number.precision(.fractionLength(0)).locale(locale)))\(unit.label)"
     }
 
-    private static func wind(_ knots: Double, unit: WindSpeedUnit) -> String {
+    private static func wind(_ knots: Double, unit: WindSpeedUnit, locale: Locale) -> String {
         let value = Knots(knots).value(in: unit) ?? knots
-        return "\(value.formatted(.number.precision(.fractionLength(0)))) \(unit.label)"
+        return "\(value.formatted(.number.precision(.fractionLength(0)).locale(locale))) \(unit.label)"
     }
 
-    private static func precipitation(_ millimeters: Double, unit: PrecipitationUnit) -> String {
+    private static func precipitation(_ millimeters: Double, unit: PrecipitationUnit, locale: Locale) -> String {
         let value = Precipitation(millimeters: millimeters).value(in: unit)
         let decimals = unit == .inches ? 2 : 1
-        return "\(value.formatted(.number.precision(.fractionLength(decimals)))) \(unit.label)"
+        return "\(value.formatted(.number.precision(.fractionLength(decimals)).locale(locale))) \(unit.label)"
     }
 }
 
