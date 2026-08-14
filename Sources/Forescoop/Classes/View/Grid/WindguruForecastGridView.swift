@@ -31,6 +31,7 @@ public struct WindguruForecastGridView: View {
     @State private var expandedComparisonRows = Set<String>()
     @State private var modelComparisonMode: ModelComparisonMode = .off
     @State private var showsCloudLayers = false
+    @State private var showsRowTitles = true
     @Environment(\.displayScale) private var displayScale
     @Environment(\.ventusTheme) private var theme
     @Environment(\.colorScheme) private var colorScheme
@@ -114,6 +115,16 @@ public struct WindguruForecastGridView: View {
                     }
                     .tint(isModelComparisonEnabled ? gridAccentColor : .secondary)
                 }
+                Button(
+                    displaysRowTitles ? "Hide row titles" : "Show row titles",
+                    systemImage: "sidebar.leading"
+                ) {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        showsRowTitles.toggle()
+                    }
+                }
+                .tint(displaysRowTitles ? gridAccentColor : .secondary)
+                .disabled(isModelComparisonEnabled)
             }
         }
     }
@@ -219,6 +230,13 @@ public struct WindguruForecastGridView: View {
         modelComparisonMode != .off
     }
 
+    /// Model comparison already needs the row-label column's width for its
+    /// own affordance, so row titles are forced off while comparing,
+    /// regardless of the user's manual `showsRowTitles` preference.
+    private var displaysRowTitles: Bool {
+        showsRowTitles && !isModelComparisonEnabled
+    }
+
     private var comparisonRowIDs: Set<String> {
         var ids: Set<String> = [
             "windSpeed", "windGusts", "windDirection", "temperature",
@@ -246,12 +264,18 @@ public struct WindguruForecastGridView: View {
     }
 
     private var labelHeader: some View {
-        Text("Updated")
-            .font(.caption.bold())
-            .padding(.horizontal, 8)
-            .frame(width: rowLabelWidth, height: gridHeaderHeight, alignment: .leading)
-            .background(gridLabelBackground)
-            .ventusGlassEffect(theme: theme, in: Rectangle())
+        Group {
+            if displaysRowTitles {
+                Text("Updated")
+            } else {
+                Image(systemName: "clock.arrow.trianglehead.2.counterclockwise.rotate.90")
+            }
+        }
+        .font(.caption.bold())
+        .padding(.horizontal, 8)
+        .frame(width: rowLabelWidth, height: gridHeaderHeight, alignment: displaysRowTitles ? .leading : .center)
+        .background(gridLabelBackground)
+        .ventusGlassEffect(theme: theme, in: Rectangle())
     }
 
     private var timeHeader: some View {
@@ -320,17 +344,17 @@ public struct WindguruForecastGridView: View {
     }
 
     @ViewBuilder private func gridRows(in column: GridColumn) -> some View {
-        gridRow(id: "windSpeed", label: unitLabel("Wind speed (\(viewModel.windSpeedUnit.label))", compactLabel: viewModel.windSpeedUnit.label, icon: "wind", selection: $viewModel.windSpeedUnit, unitLabel: \.label), values: { windSpeed($0) }, comparisonValues: { windSpeed($1, source: $0) }, background: windColor, in: column)
-        gridRow(id: "windGusts", label: unitLabel("Wind gusts (\(viewModel.windSpeedUnit.label))", compactLabel: viewModel.windSpeedUnit.label, icon: "wind.circle.fill", selection: $viewModel.windSpeedUnit, unitLabel: \.label), values: { windGusts($0) }, comparisonValues: { windGusts($1, source: $0) }, background: gustColor, in: column)
+        gridRow(id: "windSpeed", label: unitLabel("Wind speed (\(viewModel.windSpeedUnit.label))", icon: "wind", selection: $viewModel.windSpeedUnit, unitLabel: \.label), values: { windSpeed($0) }, comparisonValues: { windSpeed($1, source: $0) }, background: windColor, in: column)
+        gridRow(id: "windGusts", label: unitLabel("Wind gusts (\(viewModel.windSpeedUnit.label))", icon: "wind.circle.fill", selection: $viewModel.windSpeedUnit, unitLabel: \.label), values: { windGusts($0) }, comparisonValues: { windGusts($1, source: $0) }, background: gustColor, in: column)
         gridRow(id: "windDirection", label: windDirectionLabel, values: { windDirection($0) }, comparisonValues: { windDirection($1, source: $0) }, in: column)
-        gridRow(id: "temperature", label: unitLabel("Temperature (\(viewModel.temperatureUnit.label))", compactLabel: viewModel.temperatureUnit.label, icon: "thermometer.medium", selection: $viewModel.temperatureUnit, unitLabel: \.label), values: { temperature($0) }, comparisonValues: { temperature($1, source: $0) }, background: temperatureColor, in: column)
-        gridRow(id: "freezingLevel", label: unitLabel("Freezing level (\(viewModel.freezingLevelUnit.label))", compactLabel: viewModel.freezingLevelUnit.label, icon: "snowflake", selection: $viewModel.freezingLevelUnit, unitLabel: \.label), values: { freezingLevel($0) }, comparisonValues: { freezingLevel($1, source: $0) }, in: column)
+        gridRow(id: "temperature", label: unitLabel("Temperature (\(viewModel.temperatureUnit.label))", icon: "thermometer.medium", selection: $viewModel.temperatureUnit, unitLabel: \.label), values: { temperature($0) }, comparisonValues: { temperature($1, source: $0) }, background: temperatureColor, in: column)
+        gridRow(id: "freezingLevel", label: unitLabel("Freezing level (\(viewModel.freezingLevelUnit.label))", icon: "snowflake", selection: $viewModel.freezingLevelUnit, unitLabel: \.label), values: { freezingLevel($0) }, comparisonValues: { freezingLevel($1, source: $0) }, in: column)
         cloudRows(in: column)
-        gridRow(id: "precipitation", label: unitLabel("Precipitation (\(viewModel.precipitationUnit.label))", compactLabel: viewModel.precipitationUnit.label, icon: "cloud.rain", selection: $viewModel.precipitationUnit, unitLabel: \.label), values: { precipitation($0) }, comparisonValues: { precipitation($1, source: $0) }, background: precipitationColor, in: column)
-        gridRow(id: "pressure", label: unitLabel("Pressure (\(viewModel.pressureUnit.label))", compactLabel: viewModel.pressureUnit.label, icon: "gauge.medium", selection: $viewModel.pressureUnit, unitLabel: \.label), values: { pressure($0) }, comparisonValues: { pressure($1, source: $0) }, background: pressureColor, in: column)
+        gridRow(id: "precipitation", label: unitLabel("Precipitation (\(viewModel.precipitationUnit.label))", icon: "cloud.rain", selection: $viewModel.precipitationUnit, unitLabel: \.label), values: { precipitation($0) }, comparisonValues: { precipitation($1, source: $0) }, background: precipitationColor, in: column)
+        gridRow(id: "pressure", label: unitLabel("Pressure (\(viewModel.pressureUnit.label))", icon: "gauge.medium", selection: $viewModel.pressureUnit, unitLabel: \.label), values: { pressure($0) }, comparisonValues: { pressure($1, source: $0) }, background: pressureColor, in: column)
         gridRow(id: "humidity", label: rowLabel("Humidity (%)", icon: "humidity"), values: { humidity($0) }, comparisonValues: { humidity($1, source: $0) }, background: humidityColor, in: column)
         if hasWaveData {
-            gridRow(id: "waveHeight", label: unitLabel("Wave (\(viewModel.waveHeightUnit.label))", compactLabel: viewModel.waveHeightUnit.label, icon: "water.waves", selection: $viewModel.waveHeightUnit, unitLabel: \.label), values: { waveHeight($0) }, comparisonValues: { waveHeight($1, source: $0) }, background: waveColor, in: column)
+            gridRow(id: "waveHeight", label: unitLabel("Wave (\(viewModel.waveHeightUnit.label))", icon: "water.waves", selection: $viewModel.waveHeightUnit, unitLabel: \.label), values: { waveHeight($0) }, comparisonValues: { waveHeight($1, source: $0) }, background: waveColor, in: column)
             gridRow(id: "wavePeriod", label: rowLabel("Wave period (s)", icon: "waveform"), values: { wavePeriod($0) }, comparisonValues: { wavePeriod($1, source: $0) }, background: wavePeriodColor, in: column)
             gridRow(id: "waveDirection", label: rowLabel("Wave direction", icon: "location.north.line"), values: { waveDirection($0) }, comparisonValues: { waveDirection($1, source: $0) }, in: column)
         }
@@ -363,7 +387,7 @@ public struct WindguruForecastGridView: View {
                 }
                 .font(gridRowTitleFont)
                 .padding(.horizontal, 8)
-                .frame(width: rowLabelWidth, height: 30, alignment: showsRowTitles ? .leading : .center)
+                .frame(width: rowLabelWidth, height: 30, alignment: displaysRowTitles ? .leading : .center)
                 .background(gridLabelBackground)
 
                 if isExpanded {
@@ -372,7 +396,7 @@ public struct WindguruForecastGridView: View {
                             .font(.caption2)
                             .lineLimit(1)
                             .padding(.horizontal, 8)
-                            .frame(width: rowLabelWidth, height: 24, alignment: showsRowTitles ? .leading : .center)
+                            .frame(width: rowLabelWidth, height: 24, alignment: displaysRowTitles ? .leading : .center)
                             .background(gridLabelBackground)
                     }
                 }
@@ -534,13 +558,12 @@ public struct WindguruForecastGridView: View {
     @ViewBuilder
     private func unitLabel<Unit>(
         _ title: LocalizedStringKey,
-        compactLabel: String,
         icon: String,
         selection: Binding<Unit>,
         unitLabel: @escaping (Unit) -> String
     ) -> some View where Unit: CaseIterable & Identifiable & Hashable, Unit.AllCases: RandomAccessCollection, Unit.AllCases.Element == Unit {
         ForecastUnitSelector(title, selection: selection, unitTitle: unitLabel) {
-            rowLabel(title, compactTitle: compactLabel, icon: icon, isInteractive: true)
+            rowLabel(title, icon: icon, isInteractive: true)
         }
     }
 
@@ -548,7 +571,7 @@ public struct WindguruForecastGridView: View {
         Button {
             showsWindDirectionArrow.toggle()
         } label: {
-            rowLabel("Wind direction (\(showsWindDirectionArrow ? "→" : "X"))", compactTitle: showsWindDirectionArrow ? "→" : "X", icon: "location.north.line", isInteractive: true)
+            rowLabel("Wind direction (\(showsWindDirectionArrow ? "→" : "X"))", icon: "location.north.line", isInteractive: true)
         }
         .buttonStyle(.plain)
     }
@@ -571,21 +594,17 @@ public struct WindguruForecastGridView: View {
 
     private func rowLabel(
         _ title: LocalizedStringKey,
-        compactTitle: String? = nil,
         icon: String,
         isInteractive: Bool = false
     ) -> some View {
         Group {
-            if showsRowTitles {
+            if displaysRowTitles {
                 HStack(spacing: 4) {
                     rowIcon(icon)
                     Text(title)
                 }
             } else {
-                HStack(spacing: 3) {
-                    rowIcon(icon)
-                    if let compactTitle { Text(compactTitle) }
-                }
+                rowIcon(icon)
             }
         }
         .foregroundStyle(isInteractive ? gridAccentColor : Color.primary)
@@ -598,10 +617,15 @@ public struct WindguruForecastGridView: View {
             .frame(width: 16, alignment: .center)
     }
 
-    private var showsRowTitles: Bool { true }
     /// Leaves room for the longest icon + unit-aware row title without
-    /// truncating it, while the comparison affordance receives its own space.
-    private var rowLabelWidth: CGFloat { 152 + (isModelComparisonEnabled && viewModel.displayedModelForecasts.count > 1 ? 20 : 0) }
+    /// truncating it. Collapses to just enough width for the row icons when
+    /// row titles are hidden — manually, or automatically while comparing
+    /// models, which needs the row-label column for its own affordance
+    /// instead — giving the scrollable hour columns the freed-up space.
+    private var rowLabelWidth: CGFloat {
+        guard displaysRowTitles else { return 44 }
+        return 152
+    }
     private var gridHeaderHeight: CGFloat { 64 }
     private var cellSpacing: CGFloat { 1 / displayScale }
     /// Sunset uses a monospaced design, so the fixed title column adopts a
