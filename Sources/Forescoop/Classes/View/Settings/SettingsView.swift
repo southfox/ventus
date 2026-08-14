@@ -64,15 +64,15 @@ public struct SettingsView: View {
                     }
                     .pickerStyle(.inline)
                 } header: {
-                    Text("Layout")
+                    Text("Layout".localized)
                 } footer: {
-                    Text("Choose the default presentation for forecasts on this device.")
+                    Text("Choose the default presentation for forecasts on this device.".localized)
                 }
 
                 Section {
                     Picker("Weather background", selection: $weatherBackgroundStyle) {
                         ForEach(WeatherBackgroundStyle.allCases) { style in
-                            Label(style.title, systemImage: style.systemImage)
+                            Label(style.title.localized, systemImage: style.systemImage)
                                 .tag(style)
                         }
                     }
@@ -107,7 +107,7 @@ public struct SettingsView: View {
                 } header: {
                     Text("Language")
                 } footer: {
-                    Text("System follows the device's language. Choosing a language overrides it for Ventus only, starting the next time you open Ventus.")
+                    Text("System follows the device's language. Choosing a language overrides it for Ventus only.")
                 }
 
                 Section {
@@ -143,10 +143,11 @@ public struct SettingsView: View {
             VentusThemeStore.save(theme)
         }
         .onChange(of: appLanguage) { _, appLanguage in
-            // Bundle.main's language resolution isn't reliably reactive
-            // mid-session (Text and String(localized:) can each cache or
-            // resolve differently once already rendered), so this takes
-            // effect the next time the app launches rather than live.
+            // Bundle.main-backed lookups (Text and String(localized:)) don't
+            // reliably re-resolve just because `\.locale` changed on an
+            // already-rendered view, so the root view is given a fresh
+            // identity via `.id(appLanguage)` to force every localized
+            // string to be read again from scratch.
             AppLanguageStore.save(appLanguage)
         }
         .onChange(of: notificationsEnabled) { _, isEnabled in

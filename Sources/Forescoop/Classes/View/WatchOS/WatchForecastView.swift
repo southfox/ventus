@@ -77,9 +77,9 @@ public struct WatchForecastView: View {
             }
         }
         .onChange(of: appLanguage) { _, appLanguage in
-            // Takes effect next launch — see the note in SettingsView.
             AppLanguageStore.save(appLanguage)
         }
+        .id(appLanguage)
     }
 
     private func dashboard(for forecast: SpotForecast) -> some View {

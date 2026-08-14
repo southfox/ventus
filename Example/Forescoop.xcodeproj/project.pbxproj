@@ -39,6 +39,7 @@
 		C0DE00000000000000000103 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000100 /* Localizable.xcstrings */; };
 		C0DE00000000000000000104 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000100 /* Localizable.xcstrings */; };
 		C0DE00000000000000000105 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000100 /* Localizable.xcstrings */; };
+		C0DE00000000000000000106 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000100 /* Localizable.xcstrings */; };
 		E10100000000000000000001 /* ForescoopWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00100000000000000000002 /* ForescoopWidgetBundle.swift */; };
 		E10100000000000000000002 /* ForescoopWidgets in Frameworks */ = {isa = PBXBuildFile; productRef = E1010000000000000000000A /* ForescoopWidgets */; };
 		E10100000000000000000003 /* ForescoopIOSWidgets.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = E10100000000000000000004 /* ForescoopIOSWidgets.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -649,6 +650,7 @@
 			files = (
 				A00100000000000000000009 /* LaunchScreen.xib in Resources */,
 				A0010000000000000000000A /* Images.xcassets in Resources */,
+				C0DE00000000000000000106 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

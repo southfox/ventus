@@ -27,7 +27,7 @@ public enum VentusTheme: String, CaseIterable, Identifiable, Sendable {
 
     public var title: String {
         switch self {
-        case .system: "System Default"
+        case .system: "System"
         case .liquidGlass: "Liquid Glass"
         case .ocean: "Ocean"
         case .forest: "Forest"

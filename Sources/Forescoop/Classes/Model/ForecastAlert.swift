@@ -147,7 +147,7 @@ public struct ForecastAlert: Codable, Equatable, Identifiable, Sendable {
     }
 
     public var conditionsSummary: String {
-        conditions.map { "\($0.variable.title) \($0.comparator.symbol) \(formatted($0.value))\($0.variable.unit)" }
+        conditions.map { "\($0.variable.title.localized) \($0.comparator.symbol) \(formatted($0.value))\($0.variable.unit.localized)" }
             .joined(separator: ", ")
     }
 

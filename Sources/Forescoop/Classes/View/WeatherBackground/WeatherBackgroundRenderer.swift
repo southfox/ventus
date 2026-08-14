@@ -26,7 +26,7 @@ public enum WeatherBackgroundStyle: String, CaseIterable, Identifiable, Sendable
 
     public var title: String {
         switch self {
-        case .none: Bundle.main.localizedString("None", locale: AppLanguageStore.currentLocale)
+        case .none: "None".localized
         case .animated: "Native"
         case .metal: "Metal"
         case .spriteKit: "SpriteKit"

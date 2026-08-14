@@ -49,7 +49,7 @@ public extension SpotForecast {
             }
         }
 
-        let mixName = Bundle.main.localizedString("Forescoop Mix (%lld models)", locale: AppLanguageStore.currentLocale, formatArguments: [forecasts.count])
+        let mixName = "Forescoop Mix (%lld models)".localized(formatArguments: [forecasts.count])
         var model: [String: Any] = blendedWeather
         model["initdate"] = base.forecast?.initdate ?? ""
         model["initstamp"] = base.forecast?.initStamp ?? 0

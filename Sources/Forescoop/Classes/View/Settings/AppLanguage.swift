@@ -9,8 +9,7 @@
 import SwiftUI
 
 /// Overrides the app's display language independently of the device's
-/// system language. "System" follows whatever language the device is set
-/// to; the other cases pin the UI to a specific language's string table.
+/// system language. "System" follows whatever language the device is set to..
 public enum AppLanguage: String, CaseIterable, Identifiable, Sendable {
     case system
     case english
@@ -21,14 +20,9 @@ public enum AppLanguage: String, CaseIterable, Identifiable, Sendable {
 
     public var id: String { rawValue }
 
-    /// English and Spanish are deliberately shown in their own language
-    /// (matching Apple's own language pickers), so only "System" is
-    /// translated — using `locale` rather than the environment, since this
-    /// is read from call sites (like the picker row itself) that need it
-    /// explicitly.
     public func title(locale: Locale) -> String {
         switch self {
-        case .system: "🌐 " + Bundle.main.localizedString("System", locale: locale)
+        case .system: "🌐 " + "System".localized(locale: locale)
         case .english: "🇺🇸 English (US)"
         case .spanish: "🇪🇸 Español (España)"
         case .german: "🇩🇪 Deutsch"
@@ -51,12 +45,7 @@ public enum AppLanguage: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
-/// Applies the selected language override to a complete app scene.
-///
-/// `Text` and `String(localized:locale:)` both resolve their string table
-/// from this environment value once `Bundle.main` itself carries every
-/// language's strings (see `Sources/Forescoop/Resources/Localizable.xcstrings`,
-/// wired into each app target directly) — no bundle-swapping trick needed.
+/// Applies the selected language override to the scene; Text and String(localized:locale:) resolve using the environment locale when all languages are in Bundle.main (no bundle swap needed).
 public extension View {
     @ViewBuilder
     func appLanguage(_ language: AppLanguage) -> some View {
@@ -88,27 +77,21 @@ public enum AppLanguageStore {
 }
 
 public extension Bundle {
-    /// Looks `key` up in `locale`'s specific `.strings` table, independent
-    /// of the device's system language or `String(localized:locale:)`
-    /// (whose `locale:` parameter only affects argument formatting, not
-    /// which language's translation gets picked — confirmed by tracing
-    /// actual lookups, not assumed).
-    ///
-    /// Reads the compiled `.strings` file directly as a dictionary rather
-    /// than going through `Bundle.localizedString`: pointing a `Bundle` at
-    /// an `.lproj` folder and calling `localizedString` on it does *not*
-    /// work — that API expects `self` to be an app-root bundle containing
-    /// `xx.lproj` subdirectories, not a bundle that *is* one, so it looks
-    /// for the nonexistent `es.lproj/es.lproj/Localizable.strings` and
-    /// silently falls back to returning `key` unchanged.
+    /// The Forescoop package's own resource bundle, which carries every
+    /// language's compiled `Localizable.xcstrings` regardless of the app
+    /// target: several targets (including the `iOSnowatch` App Store
+    /// target, both widget extensions, and `Forescoop_Tests`) don't embed
+    /// `Localizable.xcstrings` into their own `Bundle.main` — only this
+    /// package's `Bundle.module` reliably has every `.lproj` table on every
+    /// target.
+    static var forescoop: Bundle { .module }
+
+    /// Looks up a key directly in the specified locale’s Localizable.strings (bypassing Bundle.localizedString and avoiding lproj bundle pitfalls) so translations respect the chosen app language rather than the device language.
     func localizedString(_ key: String, locale: Locale, formatArguments: [CVarArg] = []) -> String {
         guard let languageCode = locale.language.languageCode?.identifier else {
             return formatArguments.isEmpty ? key : String(format: key, arguments: formatArguments)
         }
-        // Most languages only ship a bare-language-code table ("es.lproj"),
-        // but region-specific variants like Brazilian Portuguese need the
-        // full "pt-BR.lproj" — the bare "pt" table doesn't exist, so that
-        // candidate is tried first and the language code is the fallback.
+        // Try the region-specific lproj (like "pt-BR.lproj") first, and fall back to the base language table (like "pt.lproj") if the regional one isn’t available.
         let regionQualified = locale.language.region.map { "\(languageCode)-\($0.identifier)" }
         for candidate in [regionQualified, languageCode].compactMap({ $0 }) {
             guard let lprojPath = path(forResource: candidate, ofType: "lproj"),
@@ -118,6 +101,27 @@ public extension Bundle {
             return formatArguments.isEmpty ? format : String(format: format, arguments: formatArguments)
         }
         return formatArguments.isEmpty ? key : String(format: key, arguments: formatArguments)
+    }
+}
+
+public extension String {
+    /// Localizes `self` using the app's current language override
+    /// (`AppLanguageStore.currentLocale`), independent of the device's
+    /// system language.
+    var localized: String {
+        Bundle.forescoop.localizedString(self, locale: AppLanguageStore.currentLocale)
+    }
+
+    /// Localizes `self` using an explicit locale, e.g. one read from
+    /// `@Environment(\.locale)` at the call site.
+    func localized(locale: Locale) -> String {
+        Bundle.forescoop.localizedString(self, locale: locale)
+    }
+
+    /// Localizes `self` as a format string, substituting `formatArguments`,
+    /// using the app's current language override.
+    func localized(formatArguments: [CVarArg]) -> String {
+        Bundle.forescoop.localizedString(self, locale: AppLanguageStore.currentLocale, formatArguments: formatArguments)
     }
 }
 

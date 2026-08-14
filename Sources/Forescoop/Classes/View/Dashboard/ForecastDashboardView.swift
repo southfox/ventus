@@ -388,6 +388,7 @@ public struct ForecastDashboardView: View {
         }
         .modifier(VentusThemeModifier(theme: theme))
         .appLanguage(appLanguage)
+        .id(appLanguage)
         .forecastAccessibilityContainer(
             "Ventus forecast dashboard",
             hint: "Choose a location, forecast hour, view mode, or settings.",
