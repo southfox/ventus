@@ -6,6 +6,9 @@
 import CoreLocation
 import Foundation
 import SwiftData
+#if os(iOS)
+import UIKit
+#endif
 
 @Model private final class SavedMapLocationRecord {
     @Attribute(.unique) var id: UUID
@@ -66,7 +69,23 @@ public struct SavedMapLocation: Codable, Identifiable, Sendable {
 }
 
 public enum SavedMapLocationStore {
-    fileprivate static let container = try! ModelContainer(for: SavedMapLocationRecord.self, VentusPreferenceRecord.self)
+    /// An unconfigured `ModelContainer(for:)` defaults to a generic
+    /// "default.store" filename, which collides with any other unconfigured
+    /// container sharing the same App Group (see `ForecastAlertStore`) —
+    /// whichever initializes first silently wins the schema, and the other's
+    /// reads/writes no-op forever. An explicit, uniquely named file avoids
+    /// the collision while keeping the store inside the App Group so widgets
+    /// can still read it.
+    fileprivate static let container: ModelContainer = {
+        let schema = Schema([SavedMapLocationRecord.self, VentusPreferenceRecord.self])
+        let configuration: ModelConfiguration
+        if let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.org.forescoop.shared") {
+            configuration = ModelConfiguration(schema: schema, url: groupURL.appending(path: "SavedMapLocations.store"))
+        } else {
+            configuration = ModelConfiguration(schema: schema)
+        }
+        return try! ModelContainer(for: schema, configurations: configuration)
+    }()
     public static let primarySpotID = "64141"
     private static let primaryLocation = SavedMapLocation(
         id: UUID(uuidString: "64141000-0000-4000-8000-000000000000")!,
@@ -151,7 +170,7 @@ public enum WeatherBackgroundStyleStore {
             .first(where: { $0.key == key })?
             .value
         if value == "lottie" { return .lottieAdriana }
-        return value.flatMap(WeatherBackgroundStyle.init(rawValue:)) ?? .lottieAdriana
+        return value.flatMap(WeatherBackgroundStyle.init(rawValue:)) ?? .none
     }
 
     public static func save(_ style: WeatherBackgroundStyle) {
@@ -244,7 +263,17 @@ public enum ForecastViewModeStore {
         let value = (try? context.fetch(FetchDescriptor<VentusPreferenceRecord>()))?
             .first(where: { $0.key == key })?
             .value
-        return value.flatMap(ForecastViewMode.init(rawValue:)) ?? .dashboard
+        return value.flatMap(ForecastViewMode.init(rawValue:)) ?? defaultMode
+    }
+
+    /// iPad has room for both the grid and the dashboard side by side, so it
+    /// defaults to `.workspace` on first launch instead of `.dashboard`.
+    private static var defaultMode: ForecastViewMode {
+#if os(iOS)
+        UIDevice.current.userInterfaceIdiom == .pad ? .workspace : .dashboard
+#else
+        .dashboard
+#endif
     }
 
     public static func save(_ mode: ForecastViewMode) {

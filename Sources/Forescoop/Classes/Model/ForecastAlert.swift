@@ -213,7 +213,19 @@ private final class ForecastAlertRecord {
 /// Persists the user's custom forecast alerts, independent of any Windguru
 /// account session.
 public enum ForecastAlertStore {
-    private static let container = try! ModelContainer(for: ForecastAlertRecord.self)
+    /// See the matching comment on `SavedMapLocationStore.container`: this
+    /// needs its own uniquely named file so it doesn't collide with that
+    /// container's "default.store" in the shared App Group.
+    private static let container: ModelContainer = {
+        let schema = Schema([ForecastAlertRecord.self])
+        let configuration: ModelConfiguration
+        if let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.org.forescoop.shared") {
+            configuration = ModelConfiguration(schema: schema, url: groupURL.appending(path: "ForecastAlerts.store"))
+        } else {
+            configuration = ModelConfiguration(schema: schema)
+        }
+        return try! ModelContainer(for: schema, configurations: configuration)
+    }()
 
     public static func load() -> [ForecastAlert] {
         let context = ModelContext(container)
