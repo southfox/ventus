@@ -9,7 +9,6 @@
 #if !os(watchOS)
 import SwiftUI
 
-/// The horizontally scrolling day, hour, and weather-symbol header.
 struct ForecastGridHourHeader: View {
     let hours: [String]
     let columnWidth: CGFloat
@@ -43,8 +42,6 @@ struct ForecastGridHourHeader: View {
     }
 }
 
-/// A single interactive day/hour/weather header cell that can also be composed
-/// with its data column for one continuous selection outline.
 struct ForecastGridHourCell: View {
     @Environment(\.ventusTheme) private var theme
     @Environment(\.colorScheme) private var colorScheme
@@ -87,8 +84,6 @@ struct ForecastGridHourCell: View {
                     isSelected ? accentColor.opacity(0.22) : Color.secondary.opacity(colorScheme == .dark ? 0.20 : 0.12)
                 }
             }
-            // The glass treatment must sit below the daylight layer; otherwise
-            // it washes out the night and twilight state on iPhone.
             .ventusGlassEffect(theme: theme, in: RoundedRectangle(cornerRadius: 3))
             .overlay {
                 Rectangle().fill(daylightOverlay(hour))
@@ -110,8 +105,6 @@ struct ForecastGridHourCell: View {
     private var accentColor: Color { theme.accentColor(for: colorScheme) }
 }
 
-/// The top half of the continuous selection outline that joins the sticky
-/// date/hour cell to its scrolling data column.
 struct ForecastGridHeaderSelectionBorder: Shape {
     let cornerRadius: CGFloat
 
@@ -134,8 +127,6 @@ struct ForecastGridHeaderSelectionBorder: Shape {
     }
 }
 
-/// The bottom half of the continuous selection outline that joins the sticky
-/// date/hour cell above it.
 struct ForecastGridDataSelectionBorder: Shape {
     let cornerRadius: CGFloat
 

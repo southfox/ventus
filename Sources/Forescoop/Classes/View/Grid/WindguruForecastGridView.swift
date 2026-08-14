@@ -14,7 +14,6 @@ import UIKit
 import AppKit
 #endif
 
-/// A compact, Windguru-inspired table for comparing forecast hours at a glance.
 public struct WindguruForecastGridView: View {
     public let forecast: SpotForecast
     public let coordinateLocationName: String?
@@ -84,9 +83,6 @@ public struct WindguruForecastGridView: View {
             )
         }
         .padding(.horizontal, 2)
-        // The dashboard attaches its weather treatment as this view's
-        // background. Claim the full navigation content height so it is not
-        // limited to the intrinsic height of the forecast table.
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .navigationTitle("Ventus")
 #if os(iOS)
@@ -294,7 +290,6 @@ public struct WindguruForecastGridView: View {
         )
     }
 
-    /// Keeps the day/hour row aligned with the horizontally scrolling columns.
     private var stickyGridHeader: some View {
         GeometryReader { geometry in
             HStack(spacing: cellSpacing) {
@@ -507,8 +502,6 @@ public struct WindguruForecastGridView: View {
         .frame(width: columnWidth)
     }
 
-    /// Combines the selected day/hour header and values so selection is drawn
-    /// once around the full forecast column, not as two separate rectangles.
     private func forecastColumn(for hour: String, includesHeader: Bool) -> some View {
         VStack(spacing: cellSpacing) {
             if includesHeader {
@@ -617,19 +610,12 @@ public struct WindguruForecastGridView: View {
             .frame(width: 16, alignment: .center)
     }
 
-    /// Leaves room for the longest icon + unit-aware row title without
-    /// truncating it. Collapses to just enough width for the row icons when
-    /// row titles are hidden — manually, or automatically while comparing
-    /// models, which needs the row-label column for its own affordance
-    /// instead — giving the scrollable hour columns the freed-up space.
     private var rowLabelWidth: CGFloat {
         guard displaysRowTitles else { return 44 }
         return 152
     }
     private var gridHeaderHeight: CGFloat { 64 }
     private var cellSpacing: CGFloat { 1 / displayScale }
-    /// Sunset uses a monospaced design, so the fixed title column adopts a
-    /// compact caption to preserve the table's existing width.
     private var gridRowTitleFont: Font { theme == .sunset ? .caption2 : .caption }
     private var gridAccentColor: Color { theme.accentColor(for: colorScheme) }
     @ViewBuilder private var gridLabelBackground: some View {
@@ -639,8 +625,6 @@ public struct WindguruForecastGridView: View {
             Color.primary.opacity(colorScheme == .dark ? 0.14 : 0.06)
         }
     }
-    /// The fixed header must be opaque; otherwise vertically scrolling labels
-    /// and values show through it and become difficult to read.
     @ViewBuilder private var pinnedGridHeaderBackground: some View {
         if theme.usesMaterial {
             Rectangle().fill(.regularMaterial)
@@ -716,7 +700,7 @@ public struct WindguruForecastGridView: View {
     private func temperature(_ hour: String, source: SpotForecast? = nil) -> GridCell {
         guard let value = weather(for: source)?.temperatureReal(hh: hour) ?? weather(for: source)?.temperature(hh: hour) else { return .empty }
         let converted = Temperature(celsius: value).value(in: viewModel.temperatureUnit)
-        return GridCell(value: converted, text: number(converted), colorValue: value)
+        return GridCell(value: converted, text: number(converted, precision: 1), colorValue: value)
     }
 
     private func freezingLevel(_ hour: String, source: SpotForecast? = nil) -> GridCell {
@@ -756,7 +740,7 @@ public struct WindguruForecastGridView: View {
         let temperature = sourceWeather?.temperatureReal(hh: hour) ?? sourceWeather?.temperature(hh: hour)
         return GridCell(
             value: converted,
-            text: number(converted),
+            text: number(converted, precision: 1),
             colorValue: millimeters,
             isSnow: millimeters > 0 && (temperature ?? .infinity) <= 0,
             usesAccumulatedPrecipitation: accumulatedPrecipitation != nil
@@ -819,8 +803,6 @@ public struct WindguruForecastGridView: View {
 
     private func temperatureColor(_ cell: GridCell) -> Color {
         guard let displayedTemperature = cell.value else { return .clear }
-        // Windguru's temperature colour thresholds are expressed in Celsius.
-        // Keep that scale stable even when the grid displays Fahrenheit.
         let celsius = cell.colorValue ?? (viewModel.temperatureUnit == .celsius
             ? displayedTemperature
             : (displayedTemperature - 32) * 5 / 9)
@@ -858,11 +840,6 @@ public struct WindguruForecastGridView: View {
         let green = Double(selected.color.green / 255)
         let blue = Double(selected.color.blue / 255)
         let sourceOpacity = Double(selected.color.alpha)
-
-        // Windguru profiles commonly use a white fill for neutral values
-        // (clouds, pressure and humidity). On a dark app surface that makes
-        // macOS's primary white cell text disappear. Preserve profile output
-        // in light mode, but blend bright fills into the dark grid surface.
         let opacity: Double
         if colorScheme == .dark {
             let luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue
@@ -890,8 +867,6 @@ public struct WindguruForecastGridView: View {
 }
 
 #if canImport(UIKit)
-/// Restricts UIKit scroll configuration to this grid instead of changing the
-/// app-wide `UIScrollView` appearance.
 private struct ScrollViewBounceDisabler: UIViewRepresentable {
     func makeUIView(context: Context) -> UIView { UIView(frame: .zero) }
 
