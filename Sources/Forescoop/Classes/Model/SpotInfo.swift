@@ -159,8 +159,6 @@ public extension SpotInfo {
     func isDaylight(at date: Date) -> Bool {
         guard let sunrise = daylightDate(from: sunrise, on: date),
               let sunset = daylightDate(from: sunset, on: date) else {
-            // Do not turn a forecast into permanent night when a provider omits
-            // its astronomical data.
             return true
         }
         return date >= sunrise && date <= sunset

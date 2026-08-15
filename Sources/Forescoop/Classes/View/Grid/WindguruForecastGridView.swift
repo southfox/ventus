@@ -112,16 +112,6 @@ public struct WindguruForecastGridView: View {
                     }
                     .tint(isModelComparisonEnabled ? gridAccentColor : .secondary)
                 }
-                Button(
-                    displaysRowTitles ? "Hide row titles" : "Show row titles",
-                    systemImage: "sidebar.leading"
-                ) {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        showsRowTitles.toggle()
-                    }
-                }
-                .tint(displaysRowTitles ? gridAccentColor : .secondary)
-                .disabled(isModelComparisonEnabled)
             }
         }
     }
@@ -188,11 +178,11 @@ public struct WindguruForecastGridView: View {
                     geometry.contentOffset.x
                 } action: { _, offset in
                     horizontalGridOffset = offset
-                    if offset > 0, showsRowTitles {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            showsRowTitles = false
-                        }
-                    }
+//                    if offset > columnWidth * 3, showsRowTitles {
+//                        withAnimation(.easeInOut(duration: 0.2)) {
+//                            showsRowTitles = false
+//                        }
+//                    }
                 }
             }
             .onAppear { scrollToSelectedHour(using: scrollProxy) }
@@ -233,7 +223,7 @@ public struct WindguruForecastGridView: View {
     }
 
     private var displaysRowTitles: Bool {
-        showsRowTitles && !isModelComparisonEnabled
+        showsRowTitles
     }
 
     private var comparisonRowIDs: Set<String> {
@@ -263,18 +253,29 @@ public struct WindguruForecastGridView: View {
     }
 
     private var labelHeader: some View {
-        Group {
-            if displaysRowTitles {
-                Text("Updated")
-            } else {
-                Image(systemName: "clock.arrow.trianglehead.2.counterclockwise.rotate.90")
-            }
+        Button {
+            toggleRowTitles()
+        } label: {
+            Image(systemName: "sidebar.leading")
+                .font(.caption.bold())
+                .padding(.horizontal, 8)
+                .frame(width: rowLabelWidth, height: gridHeaderHeight, alignment: displaysRowTitles ? .leading : .center)
+                .background(gridLabelBackground)
+                .ventusGlassEffect(theme: theme, in: Rectangle())
+                .contentShape(Rectangle())
         }
-        .font(.caption.bold())
-        .padding(.horizontal, 8)
-        .frame(width: rowLabelWidth, height: gridHeaderHeight, alignment: displaysRowTitles ? .leading : .center)
-        .background(gridLabelBackground)
-        .ventusGlassEffect(theme: theme, in: Rectangle())
+        .buttonStyle(.plain)
+        .foregroundStyle(displaysRowTitles ? gridAccentColor : .secondary)
+        .accessibilityLabel(displaysRowTitles ? "Hide row titles" : "Show row titles")
+        .highPriorityGesture(
+            TapGesture().onEnded { toggleRowTitles() }
+        )
+    }
+
+    private func toggleRowTitles() {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            showsRowTitles.toggle()
+        }
     }
 
     private var timeHeader: some View {
@@ -296,7 +297,7 @@ public struct WindguruForecastGridView: View {
     private var stickyGridHeader: some View {
         GeometryReader { geometry in
             HStack(spacing: cellSpacing) {
-                labelHeader
+                Color.clear.frame(width: rowLabelWidth, height: gridHeaderHeight)
 
                 timeHeader
                     .offset(x: -horizontalGridOffset)
@@ -306,6 +307,9 @@ public struct WindguruForecastGridView: View {
                         alignment: .leading
                     )
                     .clipped()
+            }
+            .overlay(alignment: .leading) {
+                labelHeader
             }
         }
         .frame(height: gridHeaderHeight)
