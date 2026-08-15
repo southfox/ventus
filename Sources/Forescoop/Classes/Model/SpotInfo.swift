@@ -171,9 +171,6 @@ public extension SpotInfo {
               let sunset = daylightDate(from: sunset, on: date) else {
             return .daylight
         }
-        if daylightTransition(at: date) != nil {
-            return .twilight
-        }
         return date >= sunrise && date <= sunset ? .daylight : .night
     }
 
@@ -246,7 +243,6 @@ public extension SpotInfo {
 
 public enum ForecastDaylightPhase: Sendable {
     case night
-    case twilight
     case daylight
 }
 

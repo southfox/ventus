@@ -664,8 +664,6 @@ public struct WindguruForecastGridView: View {
         switch forecast.daylightPhase(at: date) {
         case .night:
             return .black.opacity(theme.usesMaterial ? 0.42 : 0.50)
-        case .twilight:
-            return .gray.opacity(theme.usesMaterial ? 0.32 : 0.40)
         case .daylight:
             return .clear
         }
