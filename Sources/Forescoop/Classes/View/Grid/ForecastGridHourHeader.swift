@@ -67,9 +67,10 @@ struct ForecastGridHourCell: View {
                     if let daylightSymbol = daylightSymbol(hour) {
                         Image(systemName: daylightSymbol)
                             .foregroundStyle(.orange)
-                    }
-                    ForEach(weatherSymbols(hour).prefix(3), id: \.self) { symbol in
-                        Image(systemName: symbol)
+                    } else {
+                        ForEach(weatherSymbols(hour).prefix(3), id: \.self) { symbol in
+                            Image(systemName: symbol)
+                        }
                     }
                 }
                 .font(.caption2)
@@ -86,7 +87,12 @@ struct ForecastGridHourCell: View {
             }
             .ventusGlassEffect(theme: theme, in: RoundedRectangle(cornerRadius: 3))
             .overlay {
-                Rectangle().fill(daylightOverlay(hour))
+                // The sunrise/sunset icon needs the column's normal
+                // background to stay legible, so the day/night/twilight tint
+                // is skipped for the one hour that shows it.
+                if daylightSymbol(hour) == nil {
+                    Rectangle().fill(daylightOverlay(hour))
+                }
             }
             .overlay {
                 if isSelected {

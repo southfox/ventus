@@ -156,9 +156,6 @@ public extension SpotInfo {
         isDaylight(at: date)
     }
 
-    /// Whether an instant falls between the spot's reported sunrise and sunset.
-    /// Windguru supplies these as local times, so creating the bounds in the
-    /// spot's time zone is essential when the device is elsewhere.
     func isDaylight(at date: Date) -> Bool {
         guard let sunrise = daylightDate(from: sunrise, on: date),
               let sunset = daylightDate(from: sunset, on: date) else {
@@ -169,9 +166,6 @@ public extension SpotInfo {
         return date >= sunrise && date <= sunset
     }
 
-    /// A presentation-friendly daylight classification for forecast columns.
-    /// The hour around each transition is deliberately neutral so sunrise and
-    /// sunset do not read as either broad daylight or full night.
     func daylightPhase(at date: Date) -> ForecastDaylightPhase {
         guard let sunrise = daylightDate(from: sunrise, on: date),
               let sunset = daylightDate(from: sunset, on: date) else {
@@ -183,9 +177,6 @@ public extension SpotInfo {
         return date >= sunrise && date <= sunset ? .daylight : .night
     }
 
-    /// Identifies the local solar transition represented by a forecast hour.
-    /// A one-hour window lets hourly and three-hourly forecast grids show the
-    /// closest available column for the spot's supplied transition time.
     func daylightTransition(at date: Date) -> ForecastDaylightTransition? {
         guard let sunrise = daylightDate(from: sunrise, on: date),
               let sunset = daylightDate(from: sunset, on: date) else {
@@ -197,8 +188,6 @@ public extension SpotInfo {
         return nil
     }
 
-    /// Returns the solar transition contained by a forecast-column interval.
-    /// This avoids presenting the same event in both neighbouring columns.
     func daylightTransition(from start: Date, until end: Date) -> ForecastDaylightTransition? {
         guard start < end,
               let sunrise = daylightDate(from: sunrise, on: start),
