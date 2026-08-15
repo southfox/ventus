@@ -78,8 +78,6 @@ public extension Spot {
         nickname
     }
 
-    /// User-facing spot title. Windguru's identifier is useful when places
-    /// share a name, so keep it beside the name whenever it is available.
     var displayName: String {
         let title = name?.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let identifier, !identifier.isEmpty, identifier != "0" else { return title?.isEmpty == false ? title! : "Unknown location" }

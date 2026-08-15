@@ -9,13 +9,13 @@
 #if !os(watchOS)
 import SwiftUI
 
-/// Location and map actions shared by dashboard and grid forecast headers.
 struct ForecastLocationHeader: View {
     @Environment(\.ventusTheme) private var theme
     @Environment(\.colorScheme) private var colorScheme
     let locationName: String
     let onSelectLocation: () -> Void
     let onShowMap: () -> Void
+    let font: Font = .title.bold()
 
     var body: some View {
         HStack(spacing: 8) {
@@ -33,7 +33,7 @@ struct ForecastLocationHeader: View {
             )
 #endif
         }
-        .font(.title.bold())
+        .font(font)
         .foregroundStyle(theme.accentColor(for: colorScheme))
     }
 }

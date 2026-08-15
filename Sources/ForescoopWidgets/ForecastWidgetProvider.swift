@@ -1,3 +1,11 @@
+//
+//  ForecastWidgetProvider.swift
+//  Forescoop package
+//
+//  Created by Javier Fuchs on 8/15/26.
+//  Copyright © 2026 Mobile Patagonia. All rights reserved.
+//
+
 #if canImport(WidgetKit) && !os(tvOS)
 import Forescoop
 import SwiftUI
@@ -19,6 +27,9 @@ public struct ForecastWidgetProvider: TimelineProvider {
     }
 
     private func currentEntry() -> ForecastWidgetEntry {
+        if let snapshot = SharedForecastSnapshotStore.load() {
+            return entry(from: snapshot)
+        }
         guard let forecast = ForecastWindguruMockup().dashboardPreviewForecast else { return .placeholder }
         let hour = forecast.currentForecastHour
         let units = VentusForecastUnitStore.load()
@@ -50,6 +61,29 @@ public struct ForecastWidgetProvider: TimelineProvider {
             low: today?.low ?? temperatureText(temperature, unit: units.temperatureUnit),
             hourly: hourly,
             daily: daily
+        )
+    }
+
+    private func entry(from snapshot: SharedForecastSnapshot) -> ForecastWidgetEntry {
+        ForecastWidgetEntry(
+            date: snapshot.date,
+            locationName: snapshot.locationName,
+            temperature: snapshot.temperature,
+            wind: snapshot.wind,
+            gust: snapshot.gust,
+            windDirection: snapshot.windDirection,
+            rain: snapshot.rain,
+            humidity: snapshot.humidity,
+            cloudCover: snapshot.cloudCover,
+            pressure: snapshot.pressure,
+            symbolName: snapshot.symbolName,
+            condition: snapshot.condition,
+            high: snapshot.high,
+            low: snapshot.low,
+            hourly: snapshot.hourly.map { ForecastWidgetHour(label: $0.label, symbolName: $0.symbolName, temperature: $0.temperature) },
+            daily: snapshot.daily.map {
+                ForecastWidgetDay(label: $0.label, symbolName: $0.symbolName, low: $0.low, high: $0.high, lowValue: $0.lowValue, highValue: $0.highValue)
+            }
         )
     }
 

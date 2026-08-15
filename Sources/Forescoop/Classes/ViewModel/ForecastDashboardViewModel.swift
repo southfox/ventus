@@ -11,10 +11,6 @@ import Combine
 import CoreLocation
 import Foundation
 
-/// Owns dashboard domain state that is independent of SwiftUI presentation.
-///
-/// Forecast loading will move here incrementally; profile loading is the first
-/// migrated workflow so views no longer perform account service calls directly.
 @MainActor
 public final class ForecastDashboardViewModel: ObservableObject {
     @Published public private(set) var userProfile: User?
@@ -132,11 +128,23 @@ public final class ForecastDashboardViewModel: ObservableObject {
         )
     }
 
+    private func persistWidgetSnapshot() {
+        guard let forecast else { return }
+        let preferences = ForecastUnitPreferences(
+            temperatureUnit: temperatureUnit,
+            windSpeedUnit: windSpeedUnit,
+            waveHeightUnit: waveHeightUnit,
+            pressureUnit: pressureUnit,
+            precipitationUnit: precipitationUnit,
+            freezingLevelUnit: freezingLevelUnit
+        )
+        SharedForecastSnapshotStore.save(.make(from: forecast, units: preferences))
+    }
+
     public func clearUserProfile() {
         userProfile = nil
     }
 
-    /// Clears forecast data scoped to the prior Windguru session or spot.
     func resetSessionForecastState() {
         selectedModelIDs = []
         usableModelIDs = []
@@ -157,8 +165,6 @@ public final class ForecastDashboardViewModel: ObservableObject {
         savedMapLocations = SavedMapLocationStore.clearSessionData()
     }
 
-    /// Sets deterministic, already-loaded content for an Xcode preview.
-    /// Preview rendering must not depend on credentials or network requests.
     func usePreviewForecast(_ forecast: SpotForecast, spotID: String, modelForecasts: [SpotForecast] = []) {
         let sources = modelForecasts.isEmpty ? [forecast] : modelForecasts
         self.forecast = (try? SpotForecast.blended(sources)) ?? forecast
@@ -294,6 +300,7 @@ public final class ForecastDashboardViewModel: ObservableObject {
             selectedHour = closestHour(to: Date(), in: forecast)
             severeWeatherAlert = ForecastSevereWeatherNotifier.evaluate(forecast)
             ForecastSevereWeatherNotifier.evaluateCustomAlerts(forecast)
+            persistWidgetSnapshot()
             return true
         } catch {
             errorMessage = forecastErrorMessage(for: error)
@@ -351,7 +358,10 @@ public final class ForecastDashboardViewModel: ObservableObject {
             usableModelIDs = selectedModelIDs
             selectedHour = forecast.flatMap { closestHour(to: Date(), in: $0) }
             severeWeatherAlert = forecast.flatMap(ForecastSevereWeatherNotifier.evaluate)
-            if let forecast { ForecastSevereWeatherNotifier.evaluateCustomAlerts(forecast) }
+            if let forecast {
+                ForecastSevereWeatherNotifier.evaluateCustomAlerts(forecast)
+            }
+            persistWidgetSnapshot()
         } catch {
             errorMessage = forecastErrorMessage(for: error)
         }

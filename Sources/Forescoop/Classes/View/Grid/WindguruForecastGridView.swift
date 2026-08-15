@@ -72,6 +72,7 @@ public struct WindguruForecastGridView: View {
                 onSelectLocation: onSelectLocation,
                 onShowMap: onShowMap
             )
+            .font(.default.bold())
 
             frozenGrid(scrollsVertically: true)
             ForecastGridModelSelector(
@@ -226,9 +227,6 @@ public struct WindguruForecastGridView: View {
         modelComparisonMode != .off
     }
 
-    /// Model comparison already needs the row-label column's width for its
-    /// own affordance, so row titles are forced off while comparing,
-    /// regardless of the user's manual `showsRowTitles` preference.
     private var displaysRowTitles: Bool {
         showsRowTitles && !isModelComparisonEnabled
     }
@@ -856,7 +854,6 @@ public struct WindguruForecastGridView: View {
     private struct GridCell {
         let value: Double?
         let text: String
-        /// Raw value in the fixed unit expected by the Windguru colour palette.
         var colorValue: Double? = nil
         var isDirection = false
         var isSnow = false
