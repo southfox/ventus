@@ -188,6 +188,11 @@ public struct WindguruForecastGridView: View {
                     geometry.contentOffset.x
                 } action: { _, offset in
                     horizontalGridOffset = offset
+                    if offset > 0, showsRowTitles {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            showsRowTitles = false
+                        }
+                    }
                 }
             }
             .onAppear { scrollToSelectedHour(using: scrollProxy) }

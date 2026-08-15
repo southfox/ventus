@@ -9,9 +9,6 @@
 #if !os(watchOS)
 import SwiftUI
 
-/// Places the forecast grid and dashboard side by side in a wide container,
-/// or one above the other in a tall container. Both supplied views retain the
-/// same parent state, keeping hour, location, model, and unit changes synced.
 struct ForecastGridDashboardWorkspace<GridContent: View, DashboardContent: View>: View {
     private let gridContent: () -> GridContent
     private let dashboardContent: () -> DashboardContent

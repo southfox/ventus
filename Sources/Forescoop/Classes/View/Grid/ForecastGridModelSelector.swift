@@ -9,7 +9,6 @@
 #if !os(watchOS)
 import SwiftUI
 
-/// Inline toggle list for the models represented in the forecast grid.
 struct ForecastGridModelSelector: View {
     @Environment(\.ventusTheme) private var theme
     @Environment(\.colorScheme) private var colorScheme

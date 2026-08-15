@@ -87,9 +87,6 @@ struct ForecastGridHourCell: View {
             }
             .ventusGlassEffect(theme: theme, in: RoundedRectangle(cornerRadius: 3))
             .overlay {
-                // The sunrise/sunset icon needs the column's normal
-                // background to stay legible, so the day/night/twilight tint
-                // is skipped for the one hour that shows it.
                 if daylightSymbol(hour) == nil {
                     Rectangle().fill(daylightOverlay(hour))
                 }
