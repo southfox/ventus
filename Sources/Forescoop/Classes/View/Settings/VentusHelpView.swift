@@ -21,10 +21,10 @@ public struct VentusHelpView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Label("Welcome to Ventus", systemImage: "wind")
+                    Label("Welcome to Ventus".localized, systemImage: "wind")
                         .font(.title.bold())
                         .foregroundStyle(.tint)
-                    Text("A practical guide to Windguru-powered forecasts across your Apple devices.")
+                    Text("A practical guide to Windguru-powered forecasts across your Apple devices.".localized)
                         .foregroundStyle(.secondary)
                 }
 
@@ -32,41 +32,41 @@ public struct VentusHelpView: View {
                     VStack(alignment: .leading, spacing: 14) {
                         HelpStep(
                             number: 1,
-                            title: "Choose a location",
-                            detail: "Use the location button to search Windguru spots, choose a saved place, select the map, or use your current location."
+                            title: "Choose a location".localized,
+                            detail: "Use the location button to search Windguru spots, choose a saved place, select the map, or use your current location.".localized
                         )
                         HelpStep(
                             number: 2,
-                            title: "Pick the forecast view",
-                            detail: "Switch between Forecast Dashboard, Forecast Grid, or Grid and Dashboard from the menu or Settings."
+                            title: "Pick the forecast view".localized,
+                            detail: "Switch between Forecast Dashboard, Forecast Grid, or Grid and Dashboard from the menu or Settings.".localized
                         )
                         HelpStep(
                             number: 3,
-                            title: "Read and compare",
-                            detail: "Tap a grid hour to inspect it in the dashboard. Select units from their blue-tinted labels, then compare selected forecast models when available."
+                            title: "Read and compare".localized,
+                            detail: "Tap a grid hour to inspect it in the dashboard. Select units from their blue-tinted labels, then compare selected forecast models when available.".localized
                         )
                     }
                     .padding(.vertical, 4)
                 } label: {
-                    Label("Quick guide", systemImage: "list.number")
+                    Label("Quick guide".localized, systemImage: "list.number")
                 }
 
                 VStack(alignment: .leading, spacing: 12) {
-                    Label("Ventus across Apple devices", systemImage: "apple.logo")
+                    Label("Ventus across Apple devices".localized, systemImage: "apple.logo")
                         .font(.headline)
 
-                    Text("These interface previews show how the same forecast workflow adapts to each Ventus app.")
+                    Text("These interface previews show how the same forecast workflow adapts to each Ventus app.".localized)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
 
                     ScrollView(.horizontal) {
                         HStack(alignment: .top, spacing: 14) {
-                            HelpPlatformPreview(name: "iPhone", systemImage: "iphone", layout: .phone)
-                            HelpPlatformPreview(name: "iPad", systemImage: "ipad", layout: .split)
-                            HelpPlatformPreview(name: "Mac", systemImage: "laptopcomputer", layout: .split)
-                            HelpPlatformPreview(name: "Vision", systemImage: "visionpro", layout: .spatial)
-                            HelpPlatformPreview(name: "Watch", systemImage: "applewatch", layout: .watch)
-                            HelpPlatformPreview(name: "Apple TV", systemImage: "appletv", layout: .television)
+                            HelpPlatformPreview(name: "iPhone".localized, systemImage: "iphone", layout: .phone)
+                            HelpPlatformPreview(name: "iPad".localized, systemImage: "ipad", layout: .split)
+                            HelpPlatformPreview(name: "Mac".localized, systemImage: "laptopcomputer", layout: .split)
+                            HelpPlatformPreview(name: "Vision".localized, systemImage: "visionpro", layout: .spatial)
+                            HelpPlatformPreview(name: "Watch".localized, systemImage: "applewatch", layout: .watch)
+                            HelpPlatformPreview(name: "Apple TV".localized, systemImage: "appletv", layout: .television)
                         }
                         .padding(.vertical, 2)
                     }
@@ -75,34 +75,34 @@ public struct VentusHelpView: View {
 
                 HelpSection {
                     VStack(alignment: .leading, spacing: 12) {
-                        HelpFeature(symbol: "cpu", title: "Models depend on the location", detail: "Each spot exposes the forecast models that cover it. The available selection can change when you choose another location or sign in to a different account tier.")
-                        HelpFeature(symbol: "circle.hexagongrid", title: "Forescoop Mix", detail: "When multiple sources are selected, Ventus presents a Forescoop Mix: one continuous forecast assembled from the selected model data available for each hour.")
-                        HelpFeature(symbol: "arrow.left.and.right", title: "Compare before relying on a forecast", detail: "In Forecast Grid, use Compare models to reveal source values row by row, or Compare all to expand every forecast field at once.")
-                        HelpFeature(symbol: "checklist", title: "Choose the sources", detail: "Tap the Forescoop Mix model summary below the grid to expand the checkbox list. Keep at least one model selected, then use the mix and comparison tools to judge agreement.")
+                        HelpFeature(symbol: "cpu", title: "Models depend on the location".localized, detail: "Each spot exposes the forecast models that cover it. The available selection can change when you choose another location or sign in to a different account tier.".localized)
+                        HelpFeature(symbol: "circle.hexagongrid", title: "Forescoop Mix", detail: "When multiple sources are selected, Ventus presents a Forescoop Mix: one continuous forecast assembled from the selected model data available for each hour.".localized)
+                        HelpFeature(symbol: "arrow.left.and.right", title: "Compare before relying on a forecast".localized, detail: "In Forecast Grid, use Compare models to reveal source values row by row, or Compare all to expand every forecast field at once.".localized)
+                        HelpFeature(symbol: "checklist", title: "Choose the sources".localized, detail: "Tap the Forescoop Mix model summary below the grid to expand the checkbox list. Keep at least one model selected, then use the mix and comparison tools to judge agreement.".localized)
                     }
                     .padding(.vertical, 4)
                 } label: {
-                    Label("Understanding forecast models", systemImage: "cpu")
+                    Label("Understanding forecast models".localized, systemImage: "cpu")
                 }
 
                 HelpSection {
                     VStack(alignment: .leading, spacing: 12) {
-                        HelpFeature(symbol: "tablecells", title: "Forecast Grid", detail: "Scroll through hours, tap a column to select it, and use the comparison control to inspect individual or all model sources.")
-                        HelpFeature(symbol: "rectangle.split.2x1", title: "Grid and Dashboard", detail: "Drag the separator to choose your preferred balance. The selected hour, units, location, and models stay synchronized.")
-                        HelpFeature(symbol: "cpu", title: "Forecast models", detail: "Ventus combines selected models into a Forescoop Mix. Expand the model summary in the grid to change the selected sources.")
-                        HelpFeature(symbol: "map", title: "Maps and saved locations", detail: "View forecast locations on the map, keep places locally, and use Windguru favorites when signed in.")
+                        HelpFeature(symbol: "tablecells", title: "Forecast Grid".localized, detail: "Scroll through hours, tap a column to select it, and use the comparison control to inspect individual or all model sources.".localized)
+                        HelpFeature(symbol: "rectangle.split.2x1", title: "Grid and Dashboard".localized, detail: "Drag the separator to choose your preferred balance. The selected hour, units, location, and models stay synchronized.".localized)
+                        HelpFeature(symbol: "cpu", title: "Forecast models".localized, detail: "Ventus combines selected models into a Forescoop Mix. Expand the model summary in the grid to change the selected sources.".localized)
+                        HelpFeature(symbol: "map", title: "Maps and saved locations".localized, detail: "View forecast locations on the map, keep places locally, and use Windguru favorites when signed in.".localized)
                     }
                     .padding(.vertical, 4)
                 } label: {
-                    Label("Forecast essentials", systemImage: "book")
+                    Label("Forecast essentials".localized, systemImage: "book")
                 }
 
                 VStack(alignment: .leading, spacing: 10) {
                     Link(destination: windguruHelpURL) {
-                        Label("Open Windguru introductory help", systemImage: "safari")
+                        Label("Open Windguru introductory help".localized, systemImage: "safari")
                     }
                     Link(destination: windguruModelsURL) {
-                        Label("Open Windguru forecast model help", systemImage: "safari")
+                        Label("Open Windguru forecast model help".localized, systemImage: "safari")
                     }
                 }
                 .font(.footnote)
@@ -110,11 +110,11 @@ public struct VentusHelpView: View {
             .frame(maxWidth: 900, alignment: .leading)
             .padding()
         }
-        .navigationTitle("Help")
+        .navigationTitle("Help".localized)
 #if os(macOS)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button("Close") { dismiss() }
+                Button("Close".localized) { dismiss() }
                     .keyboardShortcut(.cancelAction)
             }
         }
@@ -247,7 +247,7 @@ private struct HelpPlatformPreview: View {
                     .font(.caption.bold())
                 Text("12 kn")
                     .font(.title3.monospacedDigit())
-                Text("Cloudy")
+                Text("Cloudy".localized)
                     .font(.caption2)
             }
         case .television:
@@ -257,7 +257,7 @@ private struct HelpPlatformPreview: View {
                     miniGrid
                     miniDashboard
                 }
-                Label("Remote-friendly forecast", systemImage: "rectangle.on.rectangle")
+                Label("Remote-friendly forecast".localized, systemImage: "rectangle.on.rectangle")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }

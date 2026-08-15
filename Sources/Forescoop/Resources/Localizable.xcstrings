@@ -8303,6 +8303,678 @@
           }
         }
       }
+    },
+    "Choose a location" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ort auswählen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige una ubicación"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir un lieu"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha um local"
+          }
+        }
+      }
+    },
+    "Use the location button to search Windguru spots, choose a saved place, select the map, or use your current location." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwende die Ortsschaltfläche, um Windguru-Spots zu suchen, einen gespeicherten Ort auszuwählen, die Karte zu öffnen oder deinen aktuellen Standort zu verwenden."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa el botón de ubicación para buscar spots de Windguru, elegir un lugar guardado, abrir el mapa o usar tu ubicación actual."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utilisez le bouton de localisation pour rechercher des spots Windguru, choisir un lieu enregistré, ouvrir la carte ou utiliser votre position actuelle."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use o botão de localização para pesquisar spots do Windguru, escolher um local salvo, abrir o mapa ou usar sua localização atual."
+          }
+        }
+      }
+    },
+    "Pick the forecast view" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorhersageansicht wählen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige la vista de pronóstico"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir l'affichage des prévisions"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha a exibição da previsão"
+          }
+        }
+      }
+    },
+    "Switch between Forecast Dashboard, Forecast Grid, or Grid and Dashboard from the menu or Settings." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wechsle im Menü oder in den Einstellungen zwischen Vorhersage-Dashboard, Vorhersage-Raster oder Raster und Dashboard."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cambia entre Panel de pronóstico, Cuadrícula de pronóstico o Cuadrícula y panel desde el menú o los ajustes."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Basculez entre Tableau de bord des prévisions, Grille des prévisions ou Grille et tableau de bord depuis le menu ou les réglages."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alterne entre Painel de previsão, Grade de previsão ou Grade e painel pelo menu ou nos Ajustes."
+          }
+        }
+      }
+    },
+    "Read and compare" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lesen und vergleichen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leer y comparar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lire et comparer"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ler e comparar"
+          }
+        }
+      }
+    },
+    "Tap a grid hour to inspect it in the dashboard. Select units from their blue-tinted labels, then compare selected forecast models when available." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippe auf eine Rasterstunde, um sie im Dashboard genauer zu betrachten. Wähle Einheiten über ihre blau hinterlegten Beschriftungen aus und vergleiche anschließend die ausgewählten Vorhersagemodelle, sofern verfügbar."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca una hora de la cuadrícula para inspeccionarla en el panel. Selecciona las unidades desde sus etiquetas con fondo azul y luego compara los modelos de pronóstico seleccionados cuando estén disponibles."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touchez une heure de la grille pour l'examiner dans le tableau de bord. Sélectionnez les unités à partir de leurs étiquettes teintées de bleu, puis comparez les modèles de prévision sélectionnés lorsqu'ils sont disponibles."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque em uma hora da grade para inspecioná-la no painel. Selecione as unidades pelos rótulos com destaque azul e, em seguida, compare os modelos de previsão selecionados quando disponíveis."
+          }
+        }
+      }
+    },
+    "iPhone" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone"
+          }
+        }
+      }
+    },
+    "iPad" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPad"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPad"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPad"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPad"
+          }
+        }
+      }
+    },
+    "Mac" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mac"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mac"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mac"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mac"
+          }
+        }
+      }
+    },
+    "Vision" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vision"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vision"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vision"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vision"
+          }
+        }
+      }
+    },
+    "Watch" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watch"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watch"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watch"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watch"
+          }
+        }
+      }
+    },
+    "Apple TV" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV"
+          }
+        }
+      }
+    },
+    "Models depend on the location" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modelle hängen vom Ort ab"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los modelos dependen de la ubicación"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les modèles dépendent du lieu"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os modelos dependem do local"
+          }
+        }
+      }
+    },
+    "Each spot exposes the forecast models that cover it. The available selection can change when you choose another location or sign in to a different account tier." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeder Spot zeigt die Vorhersagemodelle, die ihn abdecken. Die verfügbare Auswahl kann sich ändern, wenn du einen anderen Ort wählst oder dich mit einer anderen Kontostufe anmeldest."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada spot muestra los modelos de pronóstico que lo cubren. La selección disponible puede cambiar si eliges otra ubicación o inicias sesión con un nivel de cuenta distinto."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chaque spot présente les modèles de prévision qui le couvrent. La sélection disponible peut changer si vous choisissez un autre lieu ou si vous vous connectez avec un niveau de compte différent."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada spot exibe os modelos de previsão que o cobrem. A seleção disponível pode mudar ao escolher outro local ou entrar com um nível de conta diferente."
+          }
+        }
+      }
+    },
+    "When multiple sources are selected, Ventus presents a Forescoop Mix: one continuous forecast assembled from the selected model data available for each hour." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wenn mehrere Quellen ausgewählt sind, zeigt Ventus einen Forescoop Mix: eine durchgehende Vorhersage, die aus den Daten der ausgewählten Modelle für jede Stunde zusammengestellt wird."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuando se seleccionan varias fuentes, Ventus presenta un Forescoop Mix: un pronóstico continuo compuesto por los datos de los modelos seleccionados disponibles para cada hora."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lorsque plusieurs sources sont sélectionnées, Ventus présente un Forescoop Mix : une prévision continue composée des données des modèles sélectionnés disponibles pour chaque heure."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quando várias fontes são selecionadas, o Ventus apresenta um Forescoop Mix: uma previsão contínua montada a partir dos dados dos modelos selecionados disponíveis para cada hora."
+          }
+        }
+      }
+    },
+    "Compare before relying on a forecast" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vergleichen, bevor du dich auf eine Vorhersage verlässt"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compara antes de confiar en un pronóstico"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comparez avant de vous fier à une prévision"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compare antes de confiar em uma previsão"
+          }
+        }
+      }
+    },
+    "In Forecast Grid, use Compare models to reveal source values row by row, or Compare all to expand every forecast field at once." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwende im Vorhersage-Raster „Modelle vergleichen“, um die Quellwerte zeilenweise anzuzeigen, oder „Alle vergleichen“, um alle Vorhersagefelder gleichzeitig zu erweitern."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En la Cuadrícula de pronóstico, usa Comparar modelos para mostrar los valores de las fuentes fila por fila, o Comparar todo para expandir todos los campos de pronóstico a la vez."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans la Grille des prévisions, utilisez Comparer les modèles pour afficher les valeurs des sources ligne par ligne, ou Tout comparer pour développer tous les champs de prévision à la fois."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Grade de previsão, use Comparar modelos para exibir os valores das fontes linha por linha, ou Comparar tudo para expandir todos os campos de previsão de uma vez."
+          }
+        }
+      }
+    },
+    "Choose the sources" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quellen auswählen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige las fuentes"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir les sources"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha as fontes"
+          }
+        }
+      }
+    },
+    "Tap the Forescoop Mix model summary below the grid to expand the checkbox list. Keep at least one model selected, then use the mix and comparison tools to judge agreement." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippe auf die Forescoop-Mix-Modellübersicht unterhalb des Rasters, um die Checkbox-Liste zu erweitern. Behalte mindestens ein ausgewähltes Modell bei und nutze dann die Mix- und Vergleichswerkzeuge, um die Übereinstimmung zu beurteilen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca el resumen del modelo Forescoop Mix debajo de la cuadrícula para expandir la lista de casillas. Mantén al menos un modelo seleccionado y luego usa las herramientas de mezcla y comparación para evaluar la coincidencia."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touchez le résumé du modèle Forescoop Mix sous la grille pour développer la liste à cocher. Gardez au moins un modèle sélectionné, puis utilisez les outils de mélange et de comparaison pour évaluer la cohérence."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque no resumo do modelo Forescoop Mix abaixo da grade para expandir a lista de caixas de seleção. Mantenha pelo menos um modelo selecionado e, em seguida, use as ferramentas de mix e comparação para avaliar a concordância."
+          }
+        }
+      }
+    },
+    "Scroll through hours, tap a column to select it, and use the comparison control to inspect individual or all model sources." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blättere durch die Stunden, tippe auf eine Spalte, um sie auszuwählen, und verwende die Vergleichssteuerung, um einzelne oder alle Modellquellen zu prüfen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desplázate por las horas, toca una columna para seleccionarla y usa el control de comparación para inspeccionar fuentes individuales o todas las fuentes de modelos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faites défiler les heures, touchez une colonne pour la sélectionner, et utilisez le contrôle de comparaison pour examiner une ou toutes les sources de modèles."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Percorra as horas, toque em uma coluna para selecioná-la e use o controle de comparação para inspecionar fontes de modelo individuais ou todas."
+          }
+        }
+      }
+    },
+    "Drag the separator to choose your preferred balance. The selected hour, units, location, and models stay synchronized." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ziehe den Trenner, um dein bevorzugtes Verhältnis festzulegen. Die ausgewählte Stunde, Einheiten, der Ort und die Modelle bleiben synchronisiert."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arrastra el separador para elegir el equilibrio que prefieras. La hora seleccionada, las unidades, la ubicación y los modelos permanecen sincronizados."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faites glisser le séparateur pour choisir l'équilibre souhaité. L'heure sélectionnée, les unités, le lieu et les modèles restent synchronisés."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arraste o separador para escolher o equilíbrio de sua preferência. A hora selecionada, as unidades, o local e os modelos permanecem sincronizados."
+          }
+        }
+      }
+    },
+    "Ventus combines selected models into a Forescoop Mix. Expand the model summary in the grid to change the selected sources." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ventus kombiniert ausgewählte Modelle zu einem Forescoop Mix. Erweitere die Modellübersicht im Raster, um die ausgewählten Quellen zu ändern."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ventus combina los modelos seleccionados en un Forescoop Mix. Expande el resumen del modelo en la cuadrícula para cambiar las fuentes seleccionadas."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ventus combine les modèles sélectionnés en un Forescoop Mix. Développez le résumé du modèle dans la grille pour modifier les sources sélectionnées."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Ventus combina os modelos selecionados em um Forescoop Mix. Expanda o resumo do modelo na grade para alterar as fontes selecionadas."
+          }
+        }
+      }
+    },
+    "Maps and saved locations" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karten und gespeicherte Orte"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mapas y ubicaciones guardadas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cartes et lieux enregistrés"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mapas e locais salvos"
+          }
+        }
+      }
+    },
+    "View forecast locations on the map, keep places locally, and use Windguru favorites when signed in." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeige Vorhersageorte auf der Karte an, speichere Orte lokal und nutze Windguru-Favoriten, wenn du angemeldet bist."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visualiza las ubicaciones de pronóstico en el mapa, guarda lugares localmente y usa los favoritos de Windguru cuando hayas iniciado sesión."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Affichez les lieux de prévision sur la carte, conservez des lieux localement et utilisez les favoris Windguru une fois connecté."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veja os locais de previsão no mapa, mantenha locais salvos localmente e use os favoritos do Windguru ao entrar na conta."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"
