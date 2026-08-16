@@ -94,7 +94,6 @@ public struct ForecastIntelligenceSummary: View {
 }
 
 private struct ForecastIntelligenceSnapshot: Hashable, Sendable {
-    let location: String
     let hour: String
     let temperature: String
     let wind: String
@@ -116,7 +115,6 @@ private struct ForecastIntelligenceSnapshot: Hashable, Sendable {
     ) {
         let hour = hour ?? forecast.currentForecastHour ?? "0"
         let source = forecast.forecast
-        location = forecast.locationDisplayName()
         self.hour = hour
         self.locale = locale
         let temperatureCelsius = source?.temperatureReal(hh: hour) ?? source?.temperature(hh: hour) ?? 0
@@ -140,11 +138,11 @@ private struct ForecastIntelligenceSnapshot: Hashable, Sendable {
     }
 
     var prompt: String {
-        "Location: \(location). Forecast hour: \(hour). Temperature: \(temperature). Wind: \(wind). Gusts: \(gust ?? "unavailable"). Rain: \(rain). Humidity: \(humidity.map(String.init) ?? "unavailable")%. Cloud cover: \(cloudCover.map(String.init) ?? "unavailable")%."
+        "Forecast hour: \(hour). Temperature: \(temperature). Wind: \(wind). Gusts: \(gust ?? "unavailable"). Rain: \(rain). Humidity: \(humidity.map(String.init) ?? "unavailable")%. Cloud cover: \(cloudCover.map(String.init) ?? "unavailable")%."
     }
 
     var deterministicSummary: String {
-        var phrases = ["%@: %@ with %@ wind".localized(locale: locale, formatArguments: [location, temperature, wind])]
+        var phrases = ["%@ with %@ wind".localized(locale: locale, formatArguments: [temperature, wind])]
         if let gust, hasSignificantGust { phrases.append("gusting to %@".localized(locale: locale, formatArguments: [gust])) }
         if hasRain { phrases.append("%@ of rain".localized(locale: locale, formatArguments: [rain])) }
         if let cloudCover, cloudCover >= 75 { phrases.append("mostly cloudy".localized(locale: locale)) }
