@@ -11,7 +11,6 @@ import CoreLocation
 @preconcurrency import MapKit
 import SwiftUI
 
-/// Shared saved and favorite location annotations for forecast maps.
 @MainActor
 struct ForecastLocationAnnotations: MapContent {
     let savedLocations: [SavedMapLocation]

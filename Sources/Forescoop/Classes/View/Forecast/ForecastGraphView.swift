@@ -7,7 +7,6 @@
 import ForescoopGraph
 import SwiftUI
 
-/// Maps the app's forecast model into the independently compiled graph target.
 public struct ForecastGraphView: View {
     public let forecast: SpotForecast
     @Binding public var selectedHour: String?
@@ -96,5 +95,18 @@ public struct ForecastGraphView: View {
             identifier: "forecast.graph"
         )
     }
+}
+#endif
+
+#if DEBUG
+#Preview("Unavailable") {
+    ForecastGraphView(
+        forecast: .init(),
+        selectedHour: .constant(nil),
+        windSpeedUnit: .constant(.knots),
+        modelForecasts: [],
+        modelNamesByID: [:],
+        isModelComparisonEnabled: .constant(false)
+    )
 }
 #endif

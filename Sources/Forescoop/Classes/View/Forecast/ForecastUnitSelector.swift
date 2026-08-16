@@ -8,10 +8,6 @@
 
 import SwiftUI
 
-/// Selects a forecast unit without making two-choice controls unnecessarily modal.
-///
-/// Celsius/Fahrenheit and other binary unit sets toggle immediately. Sets with
-/// three or more choices retain a menu so every value remains discoverable.
 struct ForecastUnitSelector<Unit, Label: View>: View where Unit: CaseIterable & Identifiable & Hashable, Unit.AllCases: RandomAccessCollection, Unit.AllCases.Element == Unit {
     private let title: LocalizedStringKey
     @Binding private var selection: Unit

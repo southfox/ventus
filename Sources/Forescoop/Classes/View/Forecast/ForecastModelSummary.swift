@@ -9,7 +9,6 @@
 #if !os(watchOS)
 import SwiftUI
 
-/// Shared compact model summary used by the dashboard and forecast grid.
 struct ForecastModelSummary: View {
     let title: String
     let onSelect: () -> Void

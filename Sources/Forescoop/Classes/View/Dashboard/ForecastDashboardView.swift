@@ -161,9 +161,6 @@ public struct ForecastDashboardView: View {
 
     private func startSession(username: String, isProUser: Bool) {
         account.signIn(username: username, isProUser: isProUser)
-        // Do not reuse the previous session's model cache. A PRO session can
-        // expose more models for the same spot, while a regular session must
-        // return to the public forecast set.
         viewModel.resetSessionForecastState()
         activeSheet = nil
         Task {
@@ -215,17 +212,9 @@ public struct ForecastDashboardView: View {
                         .accessibilityLabel(severeWeatherAlert.title + ". " + severeWeatherAlert.body)
                 }
             }
-            // Apply the renderer after this container has its final scene
-            // dimensions. Applying it to the content above would leave an
-            // animated background at the narrower portrait/content width
-            // after an iPad rotates to landscape.
             .background {
                 if let forecast {
                     if content == .graph {
-                        // A graph needs a quiet surface. More importantly,
-                        // keeping animated weather renderers out of this
-                        // destination lets its SwiftUI preview update
-                        // independently and quickly.
                         Group {
                             if theme.usesMaterial {
                                 Rectangle().fill(.ultraThinMaterial)
@@ -402,8 +391,6 @@ public struct ForecastDashboardView: View {
             AboutView()
         }
 #if os(macOS)
-        // A desktop About view should use meaningful window real estate rather
-        // than its phone-sized intrinsic List width.
         .frame(
             width: max(640, appWindowSize.width * 0.5),
             height: max(480, appWindowSize.height * 0.5)
@@ -477,8 +464,6 @@ public struct ForecastDashboardView: View {
 
     private var forecastContentMaximumWidth: CGFloat? {
 #if os(tvOS)
-        // A television has ample horizontal space; do not letterbox the
-        // dashboard inside the phone and iPad reading-width constraint.
         nil
 #else
         1_100

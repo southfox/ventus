@@ -10,7 +10,6 @@
 @preconcurrency import MapKit
 import SwiftUI
 
-/// Shows saved and favorite locations alongside the wide dashboard layout.
 @MainActor
 struct DashboardLocationWorkspace: View {
     let savedLocations: [SavedMapLocation]

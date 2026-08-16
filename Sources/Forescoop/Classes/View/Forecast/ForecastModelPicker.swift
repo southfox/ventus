@@ -11,7 +11,6 @@ import SwiftUI
 public struct ForecastModelPicker: View {
     let spotID: String
     let selectedModelIDs: Set<String>
-    /// Model IDs verified by the dashboard to return usable forecast hours.
     let usableModelIDs: Set<String>
     let isProUser: Bool
     let onModelSelected: ([String]) -> Void

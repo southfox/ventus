@@ -9,7 +9,6 @@
 #if !os(watchOS)
 import SwiftUI
 
-/// A deliberately calm, non-technical failure state used in release builds.
 struct ForecastOfflineView: View {
     let retry: () -> Void
     let debugError: String?

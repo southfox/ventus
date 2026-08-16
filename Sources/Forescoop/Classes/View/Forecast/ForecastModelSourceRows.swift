@@ -9,7 +9,6 @@
 #if !os(watchOS)
 import SwiftUI
 
-/// An inline disclosure that shows the selected models' source values for one forecast metric.
 public struct ForecastModelSourceRows: View {
     @Environment(\.ventusTheme) private var theme
     public let forecasts: [SpotForecast]

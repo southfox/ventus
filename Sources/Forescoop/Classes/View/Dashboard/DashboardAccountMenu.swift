@@ -9,7 +9,6 @@
 #if !os(watchOS)
 import SwiftUI
 
-/// The dashboard hamburger menu. The parent owns navigation and session actions.
 struct DashboardAccountMenu: View {
     let isShowingGrid: Bool
     let isShowingWorkspace: Bool

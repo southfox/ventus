@@ -5,8 +5,6 @@ import SwiftUI
 import FoundationModels
 #endif
 
-/// A concise forecast explanation generated on-device when Apple Intelligence
-/// is available. The deterministic summary keeps this useful on every device.
 public struct ForecastIntelligenceSummary: View {
     @Environment(\.ventusTheme) private var theme
     @Environment(\.colorScheme) private var colorScheme
@@ -90,8 +88,6 @@ public struct ForecastIntelligenceSummary: View {
                 summary = generated
             }
         } catch {
-            // The deterministic summary is deliberately retained when the
-            // on-device model is unavailable, disabled, or declines a prompt.
         }
 #endif
     }
@@ -137,9 +133,6 @@ private struct ForecastIntelligenceSnapshot: Hashable, Sendable {
         cloudCover = source?.cloudCoverTotal(hh: hour)
     }
 
-    /// The English name of `locale`'s language (e.g. "German"), used to steer
-    /// the on-device language model — English instructions are more reliable
-    /// for the model to follow than a translated language name would be.
     var languageInstruction: String {
         let code = locale.language.languageCode?.identifier ?? "en"
         let name = Locale(identifier: "en").localizedString(forLanguageCode: code) ?? "English"

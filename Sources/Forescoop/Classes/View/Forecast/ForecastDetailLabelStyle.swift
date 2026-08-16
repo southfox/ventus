@@ -8,7 +8,6 @@
 
 import SwiftUI
 
-/// Gives every forecast detail icon a consistent leading column.
 struct ForecastDetailLabelStyle: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack(spacing: 8) {
@@ -18,3 +17,11 @@ struct ForecastDetailLabelStyle: LabelStyle {
         }
     }
 }
+
+#if DEBUG
+#Preview("ForecastDetailLabelStyle") {
+    Label("Rain", systemImage: "cloud.rain.fill")
+        .labelStyle(ForecastDetailLabelStyle())
+        .padding()
+}
+#endif

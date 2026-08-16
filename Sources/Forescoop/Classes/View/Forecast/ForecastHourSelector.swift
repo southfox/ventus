@@ -56,9 +56,6 @@ public struct ForecastHourSelector: View {
             Spacer()
 
 #if os(tvOS)
-            // tvOS's focus-driven picker styles render as an unlabeled tick-mark
-            // scrubber, which hides the selected hour. Navigation is already
-            // handled by the previous/next buttons, so just display the value.
             Text(selection.map(hourLabel(for:)) ?? "")
                 .fontWeight(selection == currentHour ? .bold : .regular)
                 .fixedSize(horizontal: false, vertical: true)
@@ -111,8 +108,6 @@ public struct ForecastHourSelector: View {
             : date.formatted(.dateTime.weekday(.abbreviated).day())
         let formatter = DateFormatter()
         formatter.locale = .autoupdatingCurrent
-        // The localized `j` hour skeleton follows the user's 12/24-hour
-        // preference while omitting minutes: "9 AM" or "21".
         formatter.setLocalizedDateFormatFromTemplate("j")
         let suffix = formatter.dateFormat.contains("a") ? "" : " hs"
         return "\(day), \(formatter.string(from: date))\(suffix)"

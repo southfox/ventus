@@ -16,7 +16,6 @@ struct ForecastModelOption: Identifiable {
     var id: String { identifier }
 }
 
-/// Reusable model rows for both the modal picker and inline forecast grid.
 struct ForecastModelSelectionList: View {
     @Environment(\.ventusTheme) private var theme
     let models: [ForecastModelOption]
