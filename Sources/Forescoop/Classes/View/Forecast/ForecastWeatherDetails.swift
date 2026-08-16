@@ -21,9 +21,9 @@ public struct ForecastDaylightSummary: View {
         if let sunrise = forecast.sunrise,
            let sunset = forecast.sunset {
             HStack(spacing: 16) {
-                Label("Sunrise \(sunrise)", systemImage: "sunrise.fill")
+                Label("\(sunrise)", systemImage: "sunrise.fill")
                 Spacer(minLength: 12)
-                Label("Sunset \(sunset)", systemImage: "sunset.fill")
+                Label("\(sunset)", systemImage: "sunset.fill")
             }
             .font(.subheadline.weight(.medium))
             .foregroundStyle(theme.accentColor)
