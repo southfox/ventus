@@ -228,7 +228,7 @@ public struct WindguruForecastGridView: View {
 
     private var comparisonRowIDs: Set<String> {
         var ids: Set<String> = [
-            "windSpeed", "windGusts", "windDirection", "temperature",
+            "windSpeed", "windGusts", "windDirection", "temperature", "temperatureReal",
             "freezingLevel", "cloudCover", "precipitation", "pressure", "humidity"
         ]
         if hasWaveData {
@@ -350,6 +350,7 @@ public struct WindguruForecastGridView: View {
         gridRow(id: "windGusts", label: unitLabel("Wind gusts (\(viewModel.windSpeedUnit.label))", icon: "wind.circle.fill", selection: $viewModel.windSpeedUnit, unitLabel: \.label), values: { windGusts($0) }, comparisonValues: { windGusts($1, source: $0) }, background: gustColor, in: column)
         gridRow(id: "windDirection", label: windDirectionLabel, values: { windDirection($0) }, comparisonValues: { windDirection($1, source: $0) }, in: column)
         gridRow(id: "temperature", label: unitLabel("Temperature (\(viewModel.temperatureUnit.label))", icon: "thermometer.medium", selection: $viewModel.temperatureUnit, unitLabel: \.label), values: { temperature($0) }, comparisonValues: { temperature($1, source: $0) }, background: temperatureColor, in: column)
+        gridRow(id: "temperatureReal", label: unitLabel("Real temperature (\(viewModel.temperatureUnit.label))", icon: "thermometer.variable", selection: $viewModel.temperatureUnit, unitLabel: \.label), values: { temperatureReal($0) }, comparisonValues: { temperatureReal($1, source: $0) }, background: temperatureColor, in: column)
         gridRow(id: "freezingLevel", label: unitLabel("Freezing level (\(viewModel.freezingLevelUnit.label))", icon: "snowflake", selection: $viewModel.freezingLevelUnit, unitLabel: \.label), values: { freezingLevel($0) }, comparisonValues: { freezingLevel($1, source: $0) }, in: column)
         cloudRows(in: column)
         gridRow(id: "precipitation", label: unitLabel("Precipitation (\(viewModel.precipitationUnit.label))", icon: "cloud.rain", selection: $viewModel.precipitationUnit, unitLabel: \.label), values: { precipitation($0) }, comparisonValues: { precipitation($1, source: $0) }, background: precipitationColor, in: column)
@@ -704,6 +705,14 @@ public struct WindguruForecastGridView: View {
 
     private func temperature(_ hour: String, source: SpotForecast? = nil) -> GridCell {
         guard let value = weather(for: source)?.temperatureReal(hh: hour) ?? weather(for: source)?.temperature(hh: hour) else { return .empty }
+        let converted = Temperature(celsius: value).value(in: viewModel.temperatureUnit)
+        return GridCell(value: converted, text: number(converted, precision: 1), colorValue: value)
+    }
+
+    /// TMPE only (no fallback to TMP), alongside the "temperature" row above
+    /// which already prefers TMPE but silently falls back to TMP.
+    private func temperatureReal(_ hour: String, source: SpotForecast? = nil) -> GridCell {
+        guard let value = weather(for: source)?.temperatureReal(hh: hour) else { return .empty }
         let converted = Temperature(celsius: value).value(in: viewModel.temperatureUnit)
         return GridCell(value: converted, text: number(converted, precision: 1), colorValue: value)
     }

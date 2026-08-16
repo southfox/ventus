@@ -100,9 +100,17 @@ public struct ForecastOverview: View {
                         selection: $temperatureUnit,
                         unitTitle: \.label
                     ) {
-                        Label(temperature, systemImage: "thermometer.medium")
-                            .font(.system(size: 44, weight: .semibold))
-                            .foregroundStyle(theme.accentColor)
+                        HStack {
+                            Label(temperature, systemImage: "thermometer.medium")
+                                .font(.system(size: 44, weight: .semibold))
+                                .foregroundStyle(theme.accentColor)
+                            if let rawTemperature {
+                                Text("/")
+                                Label(rawTemperature, systemImage: "")
+                                    .font(.system(size: 44, weight: .semibold))
+                                    .foregroundStyle(theme.accentColor)
+                            }
+                        }
                     }
                     .accessibilityLabel("Temperature")
 
@@ -113,6 +121,15 @@ public struct ForecastOverview: View {
                         .labelStyle(.iconOnly)
                         .foregroundStyle(theme.accentColor)
                     }
+                }
+
+                if let highTemperatureText, let lowTemperatureText {
+                    HStack(spacing: 12) {
+                        Label(lowTemperatureText, systemImage: "thermometer.low")
+                        Label(highTemperatureText, systemImage: "thermometer.high")
+                    }
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
                 }
 
                 if showsTemperatureSources {
@@ -138,6 +155,28 @@ public struct ForecastOverview: View {
         let hour = selectedHour ?? source.currentForecastHour
         guard let value = source.forecast?.temperatureReal(hh: hour) ?? source.forecast?.temperature(hh: hour) else { return "—" }
         return "\(Temperature(celsius: value).value(in: temperatureUnit).forecastFormatted())\(temperatureUnit.label)"
+    }
+
+    private var rawTemperature: String? {
+        let hour = selectedHour ?? forecast.currentForecastHour
+        guard let value = forecast.forecast?.temperature(hh: hour) else { return nil }
+        return "\(Temperature(celsius: value).value(in: temperatureUnit).forecastFormatted())\(temperatureUnit.label)"
+    }
+
+    private var realTemperature: String? {
+        let hour = selectedHour ?? forecast.currentForecastHour
+        guard let value = forecast.forecast?.temperatureReal(hh: hour) else { return nil }
+        return "\(Temperature(celsius: value).value(in: temperatureUnit).forecastFormatted())\(temperatureUnit.label)"
+    }
+
+    private var highTemperatureText: String? {
+        guard let range = forecast.dailyTemperatureRange(hour: selectedHour) else { return nil }
+        return "\(Temperature(celsius: range.high).value(in: temperatureUnit).forecastFormatted())\(temperatureUnit.label)"
+    }
+
+    private var lowTemperatureText: String? {
+        guard let range = forecast.dailyTemperatureRange(hour: selectedHour) else { return nil }
+        return "\(Temperature(celsius: range.low).value(in: temperatureUnit).forecastFormatted())\(temperatureUnit.label)"
     }
 
     private var supportsModelComparison: Bool { isModelComparisonEnabled && modelForecasts.count > 1 }

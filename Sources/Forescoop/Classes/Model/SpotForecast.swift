@@ -107,7 +107,21 @@ public extension SpotForecast {
             ?? .current
         return calendar.date(byAdding: .hour, value: offset, to: calendar.startOfDay(for: referenceDate))
     }
-    
+
+    func dailyTemperatureRange(hour: String?) -> (low: Double, high: Double)? {
+        guard let date = forecastDate(hour: hour) else { return nil }
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timezone
+            ?? TimeZone(secondsFromGMT: gmtHourOffset * 3_600)
+            ?? .current
+        let day = calendar.startOfDay(for: date)
+        let temperatures = availableForecastHours
+            .filter { calendar.startOfDay(for: forecastDate(hour: $0) ?? date) == day }
+            .compactMap { forecast?.temperatureReal(hh: $0) ?? forecast?.temperature(hh: $0) }
+        guard let low = temperatures.min(), let high = temperatures.max() else { return nil }
+        return (low, high)
+    }
+
     var numberOfForecasts: Int {
         forecasts.count
     }
