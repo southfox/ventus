@@ -136,8 +136,6 @@ public extension SharedForecastSnapshot {
             .compactMap { hour -> (hour: String, offset: Int)? in Int(hour).map { (hour, $0) } }
             .filter { $0.offset >= currentOffset }
             .sorted { $0.offset < $1.offset }
-            // The extra-large iPad widget shows a longer outlook; compact
-            // families select the first six entries in their own layout.
             .prefix(10)
             .map { item in
                 let date = forecast.forecastDate(hour: item.hour) ?? .now
@@ -156,7 +154,6 @@ public extension SharedForecastSnapshot {
         let grouped = Dictionary(grouping: forecast.availableForecastHours) { hour in
             calendar.startOfDay(for: forecast.forecastDate(hour: hour) ?? .now)
         }
-        // The iPad extra-large widget presents a complete ten-day outlook.
         let dates = grouped.keys.sorted().prefix(10)
         return dates.compactMap { date in
             guard let hours = grouped[date] else { return nil }
@@ -182,8 +179,10 @@ public extension SharedForecastSnapshot {
         if symbols.contains(where: { $0.contains("snow") }) { return "Snow" }
         if symbols.contains(where: { $0.contains("rain") || $0.contains("drizzle") }) { return "Rain" }
         if symbols.contains(where: { $0.contains("fog") }) { return "Foggy" }
-        if symbols.contains(where: { $0.contains("cloud") }) { return "Cloudy" }
-        if symbols.contains("wind") { return "Windy" }
+        if symbols.contains("cloud.fill") { return "Overcast" }
+        if symbols.contains(where: { $0.hasPrefix("cloud.sun") || $0.hasPrefix("cloud.moon") }) { return "Partly Cloudy" }
+        if symbols.contains("cloud") { return "Cloudy" }
+        if symbols.contains(where: { $0.hasPrefix("wind") || $0.hasPrefix("tornado") || $0.hasPrefix("tropicalstorm") || $0.hasPrefix("hurricane") }) { return "Windy" }
         return "Clear"
     }
 

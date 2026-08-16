@@ -162,11 +162,13 @@ public extension SpotForecast {
         if let windSymbol = SpotForecast.windSymbolName(forBeaufort: beaufort) {
             symbols.append(windSymbol)
         }
-
+        
         if humidity >= 95 && cloudCover >= 80 {
             symbols.append("cloud.fog")
-        } else if cloudCover >= 80 {
+        } else if cloudCover >= 70 {
             symbols.append("cloud.fill")
+        } else if cloudCover >= 30 {
+            symbols.append("cloud")
         } else if cloudCover > 0 {
             symbols.append(isNight ? "cloud.moon.fill" : "cloud.sun.fill")
         } else {
