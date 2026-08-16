@@ -78,8 +78,6 @@ public class SpotForecast: SpotInfo {
 
 public extension SpotForecast {
 
-    /// The preferred title for a forecast location, including a reverse-geocoded
-    /// name for coordinate-only PRO forecasts when one is available.
     func locationDisplayName(coordinateLocationName: String? = nil) -> String {
         guard isCoordinateLocation,
               let coordinateLocationName,
@@ -101,10 +99,6 @@ public extension SpotForecast {
         return hours.last(where: { $0.1 <= currentHourInt })?.0 ?? hours.first?.0
     }
 
-    /// The local calendar date represented by a forecast hour offset.
-    ///
-    /// Windguru's hour keys are displayed relative to today's midnight: `27` is
-    /// therefore tomorrow at 03:00, regardless of when the forecast was fetched.
     func forecastDate(hour: String?, relativeTo referenceDate: Date = Date()) -> Date? {
         guard let offset = Int(hour ?? "") else { return nil }
         var calendar = Calendar(identifier: .gregorian)
@@ -130,17 +124,14 @@ public extension SpotForecast {
         forecastModel?.forecast
     }
     
-    /// The current weather symbol, using the nearest available forecast hour.
     var weatherInfo: String {
         weatherSymbolName(hour: currentForecastHour)
     }
 
-    /// The primary SF Symbol matching the weather data for a particular forecast hour.
     func weatherSymbolName(hour: String?) -> String {
         weatherSymbolNames(hour: hour).first ?? "sun.max.fill"
     }
 
-    /// SF Symbols matching all applicable weather conditions for a forecast hour.
     func weatherSymbolNames(hour: String?) -> [String] {
         let precipitation = forecast?.precipitation(hh: hour)
             ?? forecast?.precipitation1(hh: hour)
@@ -149,14 +140,13 @@ public extension SpotForecast {
         let cloudCover = forecast?.cloudCoverTotal(hh: hour) ?? 0
         let humidity = forecast?.relativeHumidity(hh: hour) ?? 0
         let windSpeed = forecast?.windSpeed(hh: hour) ?? 0
-        let windGusts = forecast?.windGusts(hh: hour) ?? 0
+        let windGusts = forecast?.windGustsKnots(hh: hour) ?? 0
         let isNight = !isDaylight(at: forecastDate(hour: hour) ?? Date())
         var symbols: [String] = []
 
-        if windGusts >= 60 {
-            symbols.append("tornado")
-        } else if windSpeed > 0 {
-            symbols.append("wind")
+        let beaufort = max(Knots(windSpeed).bft ?? 0, Knots(windGusts).bft ?? 0)
+        if let windSymbol = SpotForecast.windSymbolName(forBeaufort: beaufort) {
+            symbols.append(windSymbol)
         }
 
         if humidity >= 95 && cloudCover >= 80 {
@@ -180,6 +170,17 @@ public extension SpotForecast {
         }
 
         return symbols
+    }
+
+    static func windSymbolName(forBeaufort beaufort: Int) -> String? {
+        let ladder = [
+            "wind", "wind.circle", "wind.circle.fill",
+            "tornado", "tornado.circle", "tornado.circle.fill",
+            "tropicalstorm", "tropicalstorm.circle", "tropicalstorm.circle.fill",
+            "hurricane", "hurricane.circle", "hurricane.circle.fill",
+        ]
+        guard beaufort > 0 else { return nil }
+        return ladder[min(beaufort, ladder.count) - 1]
     }
     
     var asHourString: String {
@@ -221,7 +222,6 @@ public extension SpotForecast {
         "°C"
     }
     
-    // name contains the location in this object
     var asCurrentLocation: String? {
         name
     }

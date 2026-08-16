@@ -73,8 +73,6 @@ public struct ForecastDashboardView: View {
             viewModel.usePreviewForecast(previewForecast, spotID: initialSpotID, modelForecasts: previewModelForecasts)
         }
         _viewModel = StateObject(wrappedValue: viewModel)
-        // Comparison is an explicit user choice, including in previews that
-        // load several model sources.
         _showsDashboardModelComparison = State(initialValue: false)
         _account = StateObject(wrappedValue: WindguruAccount())
         spotSearch = { try await forecastService.searchSpots(byLocation: $0) }

@@ -143,11 +143,6 @@ public struct SettingsView: View {
             VentusThemeStore.save(theme)
         }
         .onChange(of: appLanguage) { _, appLanguage in
-            // Bundle.main-backed lookups (Text and String(localized:)) don't
-            // reliably re-resolve just because `\.locale` changed on an
-            // already-rendered view, so the root view is given a fresh
-            // identity via `.id(appLanguage)` to force every localized
-            // string to be read again from scratch.
             AppLanguageStore.save(appLanguage)
         }
         .onChange(of: notificationsEnabled) { _, isEnabled in
@@ -161,15 +156,13 @@ public struct SettingsView: View {
     }
 }
 
-#if !os(watchOS)
-#Preview {
+#if os(watchOS)
+#Preview("watchos") {
     SettingsView(
         weatherBackgroundStyle: .constant(.lottieAdriana),
         forecastViewMode: .constant(.dashboard),
         theme: .constant(.system),
-        appLanguage: .constant(.system),
-        forecastService: ForecastWindguruMockup(),
-        account: WindguruAccount()
+        appLanguage: .constant(.system)
     )
 }
 #else
@@ -178,7 +171,9 @@ public struct SettingsView: View {
         weatherBackgroundStyle: .constant(.lottieAdriana),
         forecastViewMode: .constant(.dashboard),
         theme: .constant(.system),
-        appLanguage: .constant(.system)
+        appLanguage: .constant(.system),
+        forecastService: ForecastWindguruMockup(),
+        account: WindguruAccount()
     )
 }
 #endif
