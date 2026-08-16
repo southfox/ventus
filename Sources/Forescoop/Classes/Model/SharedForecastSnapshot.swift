@@ -45,6 +45,7 @@ public struct SharedForecastSnapshot: Codable, Sendable {
     public let date: Date
     public let locationName: String
     public let temperature: String
+    public let rawTemperature: String
     public let wind: String
     public let gust: String
     public let windDirection: String
@@ -63,6 +64,7 @@ public struct SharedForecastSnapshot: Codable, Sendable {
         date: Date,
         locationName: String,
         temperature: String,
+        rawTemperature: String,
         wind: String,
         gust: String,
         windDirection: String,
@@ -80,6 +82,7 @@ public struct SharedForecastSnapshot: Codable, Sendable {
         self.date = date
         self.locationName = locationName
         self.temperature = temperature
+        self.rawTemperature = rawTemperature
         self.wind = wind
         self.gust = gust
         self.windDirection = windDirection
@@ -100,6 +103,7 @@ public extension SharedForecastSnapshot {
     static func make(from forecast: SpotForecast, units: ForecastUnitPreferences) -> SharedForecastSnapshot {
         let hour = forecast.currentForecastHour
         let temperature = forecast.forecast?.temperatureReal(hh: hour) ?? forecast.forecast?.temperature(hh: hour) ?? 0
+        let rawTemperature = forecast.forecast?.temperature(hh: hour)
         let wind = forecast.forecast?.windSpeed(hh: hour) ?? 0
         let gust = forecast.forecast?.windGustsKnots(hh: hour) ?? 0
         let rain = forecast.forecast?.precipitation1(hh: hour) ?? forecast.forecast?.precipitation(hh: hour) ?? 0
@@ -114,6 +118,7 @@ public extension SharedForecastSnapshot {
             date: .now,
             locationName: forecast.locationDisplayName(),
             temperature: "\(Temperature(celsius: temperature).value(in: units.temperatureUnit).formatted(.number.precision(.fractionLength(0))))\(units.temperatureUnit.label)",
+            rawTemperature: rawTemperature.map { "\(Temperature(celsius: $0).value(in: units.temperatureUnit).formatted(.number.precision(.fractionLength(0))))\(units.temperatureUnit.label)" } ?? "—",
             wind: windText(wind, unit: units.windSpeedUnit),
             gust: windText(gust, unit: units.windSpeedUnit),
             windDirection: forecast.forecast?.windDirectionName(hh: hour) ?? "—",

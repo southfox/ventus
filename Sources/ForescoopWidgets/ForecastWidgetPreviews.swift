@@ -6,6 +6,7 @@ extension ForecastWidgetEntry {
         date: .now,
         locationName: "Cerro Catedral",
         temperature: "6°C",
+        rawTemperature: "5°C",
         wind: "22 kt",
         gust: "31 kt",
         windDirection: "WNW",

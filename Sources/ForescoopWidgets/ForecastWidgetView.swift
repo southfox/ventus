@@ -95,6 +95,9 @@ public struct ForecastWidgetView: View {
                     .widgetAccentable()
                 Text(entry.temperature)
                     .font(.title.bold())
+                Text(entry.rawTemperature)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
             Spacer(minLength: 0)
             VStack(alignment: .leading, spacing: 4) {
@@ -192,8 +195,13 @@ public struct ForecastWidgetView: View {
                 Text(entry.locationName)
                     .font(.headline)
                     .lineLimit(1)
-                Text(entry.temperature)
-                    .font(.system(size: 48, weight: .light, design: .rounded))
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Text(entry.temperature)
+                        .font(.system(size: 48, weight: .light, design: .rounded))
+                    Text(entry.rawTemperature)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
             }
             Spacer()
             VStack(alignment: .trailing, spacing: 2) {

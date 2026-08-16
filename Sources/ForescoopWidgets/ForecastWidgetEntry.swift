@@ -6,6 +6,7 @@ public struct ForecastWidgetEntry: TimelineEntry, Sendable {
     public let date: Date
     public let locationName: String
     public let temperature: String
+    public let rawTemperature: String
     public let wind: String
     public let gust: String
     public let windDirection: String
@@ -24,6 +25,7 @@ public struct ForecastWidgetEntry: TimelineEntry, Sendable {
         date: .now,
         locationName: "Bariloche",
         temperature: "12°C",
+        rawTemperature: "11°C",
         wind: "10 kt",
         gust: "16 kt",
         windDirection: "W",
