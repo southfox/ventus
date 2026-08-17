@@ -21,22 +21,15 @@ public struct MetalWeatherBackground: WeatherBackground {
     private let condition: MetalWeatherCondition
 
     public init(forecast: SpotForecast, hour: String? = nil) {
-        let selectedHour = hour ?? forecast.currentForecastHour
-        let weather = forecast.forecast
-        let precipitation = weather?.precipitation(hh: selectedHour) ?? weather?.precipitation1(hh: selectedHour) ?? 0
-        let symbols = forecast.weatherSymbolNames(hour: selectedHour)
-        let direction = weather?.windDirection(hh: selectedHour) ?? 270
-        let downwindDirection = (direction + 180) * .pi / 180
-        let windSpeed = max(weather?.windSpeed(hh: selectedHour) ?? 0, weather?.windGustsKnots(hh: selectedHour) ?? 0)
+        let sharedCondition = WeatherBackgroundCondition(forecast: forecast, hour: hour)
+        let downwindDirection = sharedCondition.windTravelDirectionDegrees * .pi / 180
 
         condition = MetalWeatherCondition(
-            isSnowy: symbols.contains { $0.contains("snow") },
-            showsRainbow: symbols.contains { $0.contains("sun") }
-                && precipitation > 0
-                && !symbols.contains(where: { $0.contains("snow") }),
-            precipitationMillimeters: precipitation,
+            isSnowy: sharedCondition.isSnowy,
+            showsRainbow: sharedCondition.showsRainbow,
+            precipitationMillimeters: sharedCondition.precipitationMillimeters,
             windVector: SIMD2(Float(sin(downwindDirection)), Float(-cos(downwindDirection))),
-            windSpeedKnots: windSpeed
+            windSpeedKnots: max(sharedCondition.windSpeedKnots, sharedCondition.windGustKnots)
         )
     }
 

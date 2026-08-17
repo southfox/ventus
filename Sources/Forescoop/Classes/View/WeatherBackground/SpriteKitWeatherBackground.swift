@@ -25,31 +25,20 @@ public struct SpriteKitWeatherBackground: WeatherBackground {
     private let condition: SpriteWeatherCondition
 
     public init(forecast: SpotForecast, hour: String? = nil) {
-        let selectedHour = hour ?? forecast.currentForecastHour
-        let weather = forecast.forecast
-        let symbols = forecast.weatherSymbolNames(hour: selectedHour)
-        let precipitation = weather?.precipitation(hh: selectedHour)
-            ?? weather?.precipitation1(hh: selectedHour)
-            ?? 0
-        let windDirection = weather?.windDirection(hh: selectedHour) ?? 270
-        let downwindRadians = (windDirection + 180) * .pi / 180
+        let sharedCondition = WeatherBackgroundCondition(forecast: forecast, hour: hour)
+        let downwindRadians = sharedCondition.windTravelDirectionDegrees * .pi / 180
 
         condition = SpriteWeatherCondition(
-            isSunny: symbols.contains { $0.contains("sun") },
-            isCloudy: symbols.contains { $0.contains("cloud") },
-            isSnowy: symbols.contains { $0.contains("snow") },
-            showsRainbow: symbols.contains { $0.contains("sun") }
-                && precipitation > 0
-                && !symbols.contains(where: { $0.contains("snow") }),
-            precipitationMillimeters: precipitation,
+            isSunny: sharedCondition.isSunny,
+            isCloudy: sharedCondition.isCloudy,
+            isSnowy: sharedCondition.isSnowy,
+            showsRainbow: sharedCondition.showsRainbow,
+            precipitationMillimeters: sharedCondition.precipitationMillimeters,
             windVector: CGPoint(
                 x: sin(downwindRadians),
                 y: -cos(downwindRadians)
             ),
-            windSpeedKnots: max(
-                weather?.windSpeed(hh: selectedHour) ?? 0,
-                weather?.windGustsKnots(hh: selectedHour) ?? 0
-            )
+            windSpeedKnots: max(sharedCondition.windSpeedKnots, sharedCondition.windGustKnots)
         )
     }
 

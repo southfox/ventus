@@ -9,48 +9,37 @@
 import SwiftUI
 
 public struct AnimatedWeatherBackground: WeatherBackground {
-    let symbolNames: [String]
-    let precipitationMillimeters: Double
-    let windSpeedKnots: Double
-    let windDirectionDegrees: Double?
-    let windGustKnots: Double
-    let cloudCoverPercent: Int
-    let temperatureCelsius: Double
-    let humidityPercent: Int
+    private let condition: WeatherBackgroundCondition
     let pressureHectopascals: Double?
-    let forecastDate: Date
 
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.ventusTheme) private var theme
     @State private var isAnimating = false
 
-    /// Creates the animation from a forecast at the selected (or current) hour.
     public init(forecast: SpotForecast, hour: String? = nil) {
         let selectedHour = hour ?? forecast.currentForecastHour
-        let weather = forecast.forecast
-        symbolNames = forecast.weatherSymbolNames(hour: selectedHour)
-        precipitationMillimeters = weather?.precipitation(hh: selectedHour) ?? weather?.precipitation1(hh: selectedHour) ?? 0
-        windSpeedKnots = weather?.windSpeed(hh: selectedHour) ?? 0
-        windDirectionDegrees = weather?.windDirection(hh: selectedHour)
-        windGustKnots = weather?.windGustsKnots(hh: selectedHour) ?? 0
-        cloudCoverPercent = weather?.cloudCoverTotal(hh: selectedHour) ?? 0
-        temperatureCelsius = weather?.temperatureReal(hh: selectedHour) ?? weather?.temperature(hh: selectedHour) ?? 0
-        humidityPercent = weather?.relativeHumidity(hh: selectedHour) ?? 0
-        pressureHectopascals = weather?.seaLevelPressure(hh: selectedHour)
-        forecastDate = forecast.forecastDate(hour: selectedHour) ?? Date()
+        condition = WeatherBackgroundCondition(forecast: forecast, hour: selectedHour)
+        pressureHectopascals = forecast.forecast?.seaLevelPressure(hh: selectedHour)
     }
 
-    private var isSunny: Bool { symbolNames.contains { $0.contains("sun") } }
-    private var isNight: Bool { symbolNames.contains { $0.contains("moon") } }
-    private var isCloudy: Bool { symbolNames.contains { $0.contains("cloud") } }
-    private var isWindy: Bool { symbolNames.contains { $0 == "wind" || $0.contains("tornado") } }
-    private var isRainy: Bool { symbolNames.contains { $0.contains("rain") || $0.contains("drizzle") } }
-    private var isSnowy: Bool { symbolNames.contains { $0.contains("snow") } }
-    private var isFoggy: Bool { symbolNames.contains { $0.contains("fog") } || (humidityPercent >= 95 && cloudCoverPercent >= 80) }
-    private var isHeavyRain: Bool { isRainy && precipitationMillimeters >= 8 }
-    private var showsRainbow: Bool { isSunny && precipitationMillimeters > 0 && !isSnowy }
-    private var isFreezing: Bool { temperatureCelsius <= 0 }
-    private var isHot: Bool { temperatureCelsius >= 30 }
+    private var symbolNames: [String] { condition.symbolNames }
+    private var precipitationMillimeters: Double { condition.precipitationMillimeters }
+    private var windSpeedKnots: Double { condition.windSpeedKnots }
+    private var windDirectionDegrees: Double? { condition.windDirectionDegrees }
+    private var windGustKnots: Double { condition.windGustKnots }
+    private var cloudCoverPercent: Int { condition.cloudCoverPercent }
+    private var forecastDate: Date { condition.forecastDate }
+    private var isSunny: Bool { condition.isSunny }
+    private var isNight: Bool { condition.isNight }
+    private var isCloudy: Bool { condition.isCloudy }
+    private var isWindy: Bool { condition.isWindy }
+    private var isRainy: Bool { condition.isRainy }
+    private var isSnowy: Bool { condition.isSnowy }
+    private var isFoggy: Bool { condition.isFoggy }
+    private var isHeavyRain: Bool { condition.isHeavyRain }
+    private var showsRainbow: Bool { condition.showsRainbow }
+    private var isFreezing: Bool { condition.isFreezing }
+    private var isHot: Bool { condition.isHot }
     private var usesPressurePulse: Bool { (pressureHectopascals ?? 1_013) < 995 || (pressureHectopascals ?? 1_013) > 1_030 }
     private var cloudParticleCount: Int { min(max(cloudCoverPercent / 25, 1), 4) }
     private var precipitationParticleCount: Int {
@@ -62,7 +51,6 @@ public struct AnimatedWeatherBackground: WeatherBackground {
         }
         return 0
     }
-    // Windguru directions describe where wind comes from. Decorative particles travel downwind.
     private var windTravelDirectionDegrees: Double { (windDirectionDegrees ?? 270) + 180 }
     private var windTravelVector: (x: CGFloat, y: CGFloat) {
         let radians = windTravelDirectionDegrees * .pi / 180
@@ -273,8 +261,6 @@ public struct AnimatedWeatherBackground: WeatherBackground {
         let symbolName: String
         switch index % 5 {
         case 3:
-            // `feather.fill` is not present in every SF Symbols catalog.
-            // Keep the foliage particle with the widely available leaf symbol.
             symbolName = "leaf.fill"
         case 4:
             symbolName = "sparkles"
@@ -303,7 +289,6 @@ public struct AnimatedWeatherBackground: WeatherBackground {
     @ViewBuilder
     private func precipitationParticle(index: Int, in size: CGSize, time: TimeInterval) -> some View {
         let column = CGFloat((index * 37) % 100) / 100
-        // A deterministic depth value gives foreground particles more size and speed.
         let depth = CGFloat((index * 53) % 100) / 100
         let speed = isSnowy ? 0.075 + Double(depth) * 0.09 : 0.16 + Double(depth) * 0.17
         let progress = (time * speed + Double(index) * 0.137).truncatingRemainder(dividingBy: 1)
@@ -312,7 +297,6 @@ public struct AnimatedWeatherBackground: WeatherBackground {
         let windStrength = CGFloat(windVelocity / 50)
         let windTravel = windStrength * (isSnowy ? 125 : 58) * CGFloat(progress)
         let windDriftX = windTravelVector.x * windTravel
-        // Gravity remains dominant while the precipitation is carried slightly downwind.
         let windDriftY = windTravelVector.y * windTravel * 0.20
         let rainTilt = atan2(Double(windDriftX), 150) * 180 / .pi
 

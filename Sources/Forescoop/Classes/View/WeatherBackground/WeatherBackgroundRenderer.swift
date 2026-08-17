@@ -8,12 +8,54 @@
 
 import SwiftUI
 
-/// A weather-background treatment that can be created from one forecast hour.
 public protocol WeatherBackground: View {
     init(forecast: SpotForecast, hour: String?)
 }
 
-/// The available visual renderers for a forecast background.
+/// The shared rain/fog/cloud/snow classification used by every weather
+/// background renderer (native, Metal, SpriteKit, Lottie), so each treatment
+/// reacts to the same forecast conditions instead of re-deriving its own
+/// thresholds from the SF Symbol names.
+struct WeatherBackgroundCondition: Equatable {
+    let symbolNames: [String]
+    let precipitationMillimeters: Double
+    let windSpeedKnots: Double
+    let windGustKnots: Double
+    let windDirectionDegrees: Double
+    let cloudCoverPercent: Int
+    let humidityPercent: Int
+    let temperatureCelsius: Double
+    let forecastDate: Date
+
+    init(forecast: SpotForecast, hour: String?) {
+        let selectedHour = hour ?? forecast.currentForecastHour
+        let weather = forecast.forecast
+        symbolNames = forecast.weatherSymbolNames(hour: selectedHour)
+        precipitationMillimeters = weather?.precipitation(hh: selectedHour) ?? weather?.precipitation1(hh: selectedHour) ?? 0
+        windSpeedKnots = weather?.windSpeed(hh: selectedHour) ?? 0
+        windGustKnots = weather?.windGustsKnots(hh: selectedHour) ?? 0
+        windDirectionDegrees = weather?.windDirection(hh: selectedHour) ?? 270
+        cloudCoverPercent = weather?.cloudCoverTotal(hh: selectedHour) ?? 0
+        humidityPercent = weather?.relativeHumidity(hh: selectedHour) ?? 0
+        temperatureCelsius = weather?.temperatureReal(hh: selectedHour) ?? weather?.temperature(hh: selectedHour) ?? 0
+        forecastDate = forecast.forecastDate(hour: selectedHour) ?? Date()
+    }
+
+    var isSunny: Bool { symbolNames.contains { $0.contains("sun") } }
+    var isNight: Bool { symbolNames.contains { $0.contains("moon") } }
+    var isCloudy: Bool { symbolNames.contains { $0.contains("cloud") } }
+    var isWindy: Bool { symbolNames.contains { $0 == "wind" || $0.contains("tornado") } }
+    var isRainy: Bool { symbolNames.contains { $0.contains("rain") || $0.contains("drizzle") } }
+    var isSnowy: Bool { symbolNames.contains { $0.contains("snow") } }
+    var isFoggy: Bool { symbolNames.contains { $0.contains("fog") } || (humidityPercent >= 95 && cloudCoverPercent >= 80) }
+    var hasPrecipitation: Bool { precipitationMillimeters > 0 }
+    var isHeavyRain: Bool { isRainy && precipitationMillimeters >= 8 }
+    var showsRainbow: Bool { isSunny && precipitationMillimeters > 0 && !isSnowy }
+    var isFreezing: Bool { temperatureCelsius <= 0 }
+    var isHot: Bool { temperatureCelsius >= 30 }
+    var windTravelDirectionDegrees: Double { windDirectionDegrees + 180 }
+}
+
 public enum WeatherBackgroundStyle: String, CaseIterable, Identifiable, Sendable {
     case none
     case animated
@@ -46,10 +88,6 @@ public enum WeatherBackgroundStyle: String, CaseIterable, Identifiable, Sendable
     }
 }
 
-/// Selects one of the interchangeable weather-background renderers.
-///
-/// The wrapper avoids storing a `WeatherBackground` existential, whose SwiftUI
-/// `Body` associated type prevents direct rendering.
 public struct WeatherBackgroundRenderer: View {
     private let style: WeatherBackgroundStyle
     private let forecast: SpotForecast
@@ -66,13 +104,9 @@ public struct WeatherBackgroundRenderer: View {
         self.forecast = forecast
         self.hour = hour
         let selectedHour = hour ?? forecast.currentForecastHour
-        let symbols = forecast.weatherSymbolNames(hour: selectedHour)
-        let hasClouds = symbols.contains { $0.contains("cloud") || $0.contains("fog") }
-        let precipitation = forecast.forecast?.precipitation(hh: selectedHour)
-            ?? forecast.forecast?.precipitation1(hh: selectedHour)
-            ?? 0
-        isNight = !forecast.isDaylight(at: forecast.forecastDate(hour: selectedHour) ?? Date())
-        showsStars = !hasClouds && precipitation <= 0
+        let condition = WeatherBackgroundCondition(forecast: forecast, hour: selectedHour)
+        isNight = !forecast.isDaylight(at: condition.forecastDate)
+        showsStars = !(condition.isCloudy || condition.isFoggy) && !condition.hasPrecipitation
     }
 
     public var body: some View {
@@ -95,8 +129,6 @@ public struct WeatherBackgroundRenderer: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipped()
         .overlay {
-            // Native rendering already paints its own stars; the other engines
-            // receive this layer so nighttime never presents daytime sun art.
             if style != .animated {
                 WeatherNightSkyOverlay(isVisible: isNight, showsStars: showsStars)
             }

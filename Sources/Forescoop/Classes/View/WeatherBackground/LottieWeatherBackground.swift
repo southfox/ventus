@@ -8,7 +8,6 @@
 
 import SwiftUI
 
-/// The bundled Lottie artwork collections available in Ventus.
 enum LottieWeatherTheme {
     case adrianaMandjarova
     case asadAwan
@@ -17,9 +16,6 @@ enum LottieWeatherTheme {
 #if canImport(Lottie) && !os(macOS)
 import Lottie
 
-/// A locally bundled, designer-authored weather animation.
-/// Missing animations safely fall back to the native SwiftUI background, so the
-/// app remains fully offline and usable.
 public struct LottieWeatherBackground: WeatherBackground {
     private let forecast: SpotForecast
     private let hour: String?
@@ -33,15 +29,16 @@ public struct LottieWeatherBackground: WeatherBackground {
     init(forecast: SpotForecast, hour: String? = nil, theme: LottieWeatherTheme) {
         self.forecast = forecast
         self.hour = hour
-        asset = Self.animationAsset(for: forecast, hour: hour, theme: theme)
-        showsRainbow = Self.showsRainbow(for: forecast, hour: hour)
+        let condition = WeatherBackgroundCondition(forecast: forecast, hour: hour)
+        asset = Self.animationAsset(for: condition, theme: theme)
+        showsRainbow = condition.showsRainbow
     }
 
     public var body: some View {
         if let asset, asset.isAvailable {
             LottieWeatherAnimationView(asset: asset)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .opacity(0.30)
+                .opacity(0.10)
                 .overlay { WeatherRainbowOverlay(isVisible: showsRainbow) }
                 .accessibilityHidden(true)
                 .allowsHitTesting(false)
@@ -51,75 +48,33 @@ public struct LottieWeatherBackground: WeatherBackground {
     }
 
     private static func animationAsset(
-        for forecast: SpotForecast,
-        hour: String?,
+        for condition: WeatherBackgroundCondition,
         theme: LottieWeatherTheme
     ) -> LottieWeatherAsset? {
-        let selectedHour = hour ?? forecast.currentForecastHour
-        let weather = forecast.forecast
-        let symbols = forecast.weatherSymbolNames(hour: selectedHour)
-        let precipitation = weather?.precipitation(hh: selectedHour)
-            ?? weather?.precipitation1(hh: selectedHour)
-            ?? 0
-        let windSpeed = weather?.windSpeed(hh: selectedHour) ?? 0
-        let gusts = weather?.windGustsKnots(hh: selectedHour) ?? 0
-        let cloudCover = weather?.cloudCoverTotal(hh: selectedHour) ?? 0
-
         switch theme {
         case .adrianaMandjarova:
-            return adrianaAsset(
-                symbols: symbols,
-                precipitation: precipitation,
-                windSpeed: windSpeed,
-                gusts: gusts,
-                cloudCover: cloudCover
-            )
+            return adrianaAsset(condition: condition)
         case .asadAwan:
-            return asadAsset(
-                symbols: symbols,
-                precipitation: precipitation,
-                windSpeed: windSpeed,
-                gusts: gusts,
-                cloudCover: cloudCover
-            )
+            return asadAsset(condition: condition)
         }
     }
 
-    private static func showsRainbow(for forecast: SpotForecast, hour: String?) -> Bool {
-        let selectedHour = hour ?? forecast.currentForecastHour
-        let weather = forecast.forecast
-        let symbols = forecast.weatherSymbolNames(hour: selectedHour)
-        let precipitation = weather?.precipitation(hh: selectedHour)
-            ?? weather?.precipitation1(hh: selectedHour)
-            ?? 0
-        return symbols.contains { $0.contains("sun") }
-            && precipitation > 0
-            && !symbols.contains(where: { $0.contains("snow") })
-    }
-
-    private static func adrianaAsset(
-        symbols: [String],
-        precipitation: Double,
-        windSpeed: Double,
-        gusts: Double,
-        cloudCover: Int
-    ) -> LottieWeatherAsset {
-        let isNight = symbols.contains { $0.contains("moon") || $0.contains("stars") }
+    private static func adrianaAsset(condition: WeatherBackgroundCondition) -> LottieWeatherAsset {
+        let isNight = condition.isNight
         let dayOrNight = isNight ? "Weather Night - " : "Weather Day - "
         let brokenClouds: LottieWeatherAsset = isNight
             ? .dotLottie("Weather Night - Broken clouds")
             : .dotLottie("Weather Day - broken clouds")
 
-        if symbols.contains(where: { $0.contains("snow") }) { return .dotLottie(dayOrNight + "snow") }
-        if precipitation >= 8 { return .dotLottie(dayOrNight + "thunderstorm") }
-        if precipitation > 0 { return .dotLottie(dayOrNight + "rain") }
-        if symbols.contains(where: { $0.contains("fog") }) {
+        if condition.isSnowy { return .dotLottie(dayOrNight + "snow") }
+        if condition.isHeavyRain { return .dotLottie(dayOrNight + "thunderstorm") }
+        if condition.isRainy { return .dotLottie(dayOrNight + "rain") }
+        if condition.isFoggy {
             return .dotLottie(dayOrNight + "mist")
         }
-        // The supplied set has no dedicated wind artwork; use moving broken clouds.
-        if max(windSpeed, gusts) >= 18 { return brokenClouds }
-        if cloudCover >= 80 { return brokenClouds }
-        if cloudCover > 0 {
+        if max(condition.windSpeedKnots, condition.windGustKnots) >= 18 { return brokenClouds }
+        if condition.cloudCoverPercent >= 80 { return brokenClouds }
+        if condition.cloudCoverPercent > 0 {
             return isNight
                 ? .dotLottie("Weather Night - Few clouds")
                 : .dotLottie("Weather Day - few clouds")
@@ -129,17 +84,11 @@ public struct LottieWeatherBackground: WeatherBackground {
             : .dotLottie("Weather Day - clear sky")
     }
 
-    private static func asadAsset(
-        symbols: [String],
-        precipitation: Double,
-        windSpeed: Double,
-        gusts: Double,
-        cloudCover: Int
-    ) -> LottieWeatherAsset {
-        if symbols.contains(where: { $0.contains("snow") }) { return .dotLottie("Snow Day") }
-        if precipitation >= 8 { return .dotLottie("Thunder Night") }
-        if precipitation > 0 { return .dotLottie("Rainy Day") }
-        if symbols.contains(where: { $0.contains("fog") }) || max(windSpeed, gusts) >= 18 || cloudCover > 0 {
+    private static func asadAsset(condition: WeatherBackgroundCondition) -> LottieWeatherAsset {
+        if condition.isSnowy { return .dotLottie("Snow Day") }
+        if condition.isHeavyRain { return .dotLottie("Thunder Night") }
+        if condition.isRainy { return .dotLottie("Rainy Day") }
+        if condition.isFoggy || max(condition.windSpeedKnots, condition.windGustKnots) >= 18 || condition.cloudCoverPercent > 0 {
             return .dotLottie("Cloudy Day")
         }
         return .dotLottie("Clear Day")
@@ -232,7 +181,6 @@ private struct LottieAssetPreview: View {
     .frame(height: 400)
 }
 #else
-/// Native fallback on platforms where the Lottie framework is unavailable.
 public struct LottieWeatherBackground: WeatherBackground {
     private let forecast: SpotForecast
     private let hour: String?

@@ -8,7 +8,6 @@
 
 import SwiftUI
 
-/// A lightweight shared rainbow treatment for sun-and-rain conditions.
 struct WeatherRainbowOverlay: View {
     let isVisible: Bool
 
@@ -17,7 +16,7 @@ struct WeatherRainbowOverlay: View {
     var body: some View {
         if isVisible {
             GeometryReader { proxy in
-                let diameter = max(proxy.size.width, proxy.size.height) * 0.68
+                let diameter = max(proxy.size.width, proxy.size.height) * 0.18
                 ZStack {
                     ForEach(Array(colors.enumerated()), id: \.offset) { index, color in
                         Circle()
@@ -30,7 +29,7 @@ struct WeatherRainbowOverlay: View {
                             )
                     }
                 }
-                .position(x: proxy.size.width * 0.72, y: proxy.size.height * 0.94)
+                .position(x: proxy.size.width, y: proxy.size.height)
                 .blendMode(.screen)
             }
             .allowsHitTesting(false)

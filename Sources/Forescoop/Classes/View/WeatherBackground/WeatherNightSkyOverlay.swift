@@ -5,9 +5,6 @@
 
 import SwiftUI
 
-/// A small celestial layer shared by renderers that do not provide their own
-/// night illustration. It is deliberately independent of the weather artwork
-/// so a rainy night can still show moonlight without ever falling back to sun.
 struct WeatherNightSkyOverlay: View {
     let isVisible: Bool
     let showsStars: Bool
