@@ -22,8 +22,16 @@ public struct ForecastWidgetProvider: TimelineProvider {
 
     public func getTimeline(in context: Context, completion: @escaping (Timeline<ForecastWidgetEntry>) -> Void) {
         let entry = currentEntry()
-        let nextUpdate = Calendar.current.date(byAdding: .hour, value: 1, to: entry.date) ?? entry.date.addingTimeInterval(3_600)
-        completion(Timeline(entries: [entry], policy: .after(nextUpdate)))
+        let nextHourDate = Self.nextHourBoundary(after: .now)
+        completion(Timeline(entries: [entry], policy: .after(nextHourDate)))
+    }
+
+    private static func nextHourBoundary(after date: Date) -> Date {
+        let calendar = Calendar.current
+        let startOfHour = calendar.date(bySetting: .minute, value: 0, of: date)
+            .flatMap { calendar.date(bySetting: .second, value: 0, of: $0) }
+            ?? date
+        return calendar.date(byAdding: .hour, value: 1, to: startOfHour) ?? date.addingTimeInterval(3_600)
     }
 
     private func currentEntry() -> ForecastWidgetEntry {
