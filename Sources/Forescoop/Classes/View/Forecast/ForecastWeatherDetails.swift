@@ -233,8 +233,7 @@ public struct ForecastWeatherDetails: View {
     private func precipitation(for source: Forecast?) -> String {
         let millimeters = source?.precipitation(hh: hour) ?? source?.precipitation1(hh: hour) ?? 0
         let converted = Precipitation(millimeters: millimeters).value(in: precipitationUnit)
-        let precision = precipitationUnit == .inches ? 2 : 1
-        return "\(converted.formatted(.number.precision(.fractionLength(precision)))) \(precipitationUnit.label)"
+        return "\(converted.formatted(.number.precision(.fractionLength(0)))) \(precipitationUnit.label)"
     }
 
     @ViewBuilder private var precipitationIndicator: some View {

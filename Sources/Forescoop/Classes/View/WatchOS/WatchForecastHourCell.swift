@@ -58,7 +58,7 @@ struct WatchForecastHourCell: View {
     }
 
     private func precipitation(_ value: Double?) -> String {
-        value.map { "\(Precipitation(millimeters: $0).value(in: precipitationUnit).formatted(.number.precision(.fractionLength(precipitationUnit == .inches ? 2 : 1))))\(precipitationUnit.label)" } ?? "—"
+        value.map { "\(Precipitation(millimeters: $0).value(in: precipitationUnit).formatted(.number.precision(.fractionLength(0))))\(precipitationUnit.label)" } ?? "—"
     }
 
     private func compactValue(_ value: String, symbol: String, label: String) -> some View {

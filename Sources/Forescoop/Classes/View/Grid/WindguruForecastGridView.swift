@@ -706,7 +706,7 @@ public struct WindguruForecastGridView: View {
     private func temperature(_ hour: String, source: SpotForecast? = nil) -> GridCell {
         guard let value = weather(for: source)?.temperatureReal(hh: hour) ?? weather(for: source)?.temperature(hh: hour) else { return .empty }
         let converted = Temperature(celsius: value).value(in: viewModel.temperatureUnit)
-        return GridCell(value: converted, text: number(converted, precision: 1), colorValue: value)
+        return GridCell(value: converted, text: number(converted), colorValue: value)
     }
 
     /// TMPE only (no fallback to TMP), alongside the "temperature" row above
@@ -714,7 +714,7 @@ public struct WindguruForecastGridView: View {
     private func temperatureReal(_ hour: String, source: SpotForecast? = nil) -> GridCell {
         guard let value = weather(for: source)?.temperatureReal(hh: hour) else { return .empty }
         let converted = Temperature(celsius: value).value(in: viewModel.temperatureUnit)
-        return GridCell(value: converted, text: number(converted, precision: 1), colorValue: value)
+        return GridCell(value: converted, text: number(converted), colorValue: value)
     }
 
     private func freezingLevel(_ hour: String, source: SpotForecast? = nil) -> GridCell {
@@ -754,7 +754,7 @@ public struct WindguruForecastGridView: View {
         let temperature = sourceWeather?.temperatureReal(hh: hour) ?? sourceWeather?.temperature(hh: hour)
         return GridCell(
             value: converted,
-            text: number(converted, precision: 1),
+            text: number(converted),
             colorValue: millimeters,
             isSnow: millimeters > 0 && (temperature ?? .infinity) <= 0,
             usesAccumulatedPrecipitation: accumulatedPrecipitation != nil

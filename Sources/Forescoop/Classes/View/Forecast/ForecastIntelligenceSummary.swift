@@ -161,8 +161,7 @@ private struct ForecastIntelligenceSnapshot: Hashable, Sendable {
 
     private static func precipitation(_ millimeters: Double, unit: PrecipitationUnit, locale: Locale) -> String {
         let value = Precipitation(millimeters: millimeters).value(in: unit)
-        let decimals = unit == .inches ? 2 : 1
-        return "\(value.formatted(.number.precision(.fractionLength(decimals)).locale(locale))) \(unit.label)"
+        return "\(value.formatted(.number.precision(.fractionLength(0)).locale(locale))) \(unit.label)"
     }
 }
 

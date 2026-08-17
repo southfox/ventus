@@ -200,7 +200,7 @@ public struct WatchForecastView: View {
     private func temperature(_ value: Double?) -> String { WatchForecastFormatting.temperature(value, unit: temperatureUnit) }
     private func wind(_ value: Double?) -> String { WatchForecastFormatting.wind(value, unit: windSpeedUnit) }
     private func precipitation(_ value: Double?) -> String {
-        value.map { "\(Precipitation(millimeters: $0).value(in: precipitationUnit).formatted(.number.precision(.fractionLength(precipitationUnit == .inches ? 2 : 1)))) \(precipitationUnit.label)" } ?? "—"
+        value.map { "\(Precipitation(millimeters: $0).value(in: precipitationUnit).formatted(.number.precision(.fractionLength(0)))) \(precipitationUnit.label)" } ?? "—"
     }
     private func percentage(_ value: Int?) -> String { value.map { "\($0)%" } ?? "—" }
     private func pressure(_ value: Double?) -> String {

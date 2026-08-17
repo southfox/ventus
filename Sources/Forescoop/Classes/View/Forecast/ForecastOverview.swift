@@ -154,29 +154,29 @@ public struct ForecastOverview: View {
     private func temperature(for source: SpotForecast) -> String {
         let hour = selectedHour ?? source.currentForecastHour
         guard let value = source.forecast?.temperatureReal(hh: hour) ?? source.forecast?.temperature(hh: hour) else { return "—" }
-        return "\(Temperature(celsius: value).value(in: temperatureUnit).forecastFormatted())\(temperatureUnit.label)"
+        return "\(Temperature(celsius: value).value(in: temperatureUnit).forecastFormatted(precision: 0))\(temperatureUnit.label)"
     }
 
     private var rawTemperature: String? {
         let hour = selectedHour ?? forecast.currentForecastHour
         guard let value = forecast.forecast?.temperature(hh: hour) else { return nil }
-        return "\(Temperature(celsius: value).value(in: temperatureUnit).forecastFormatted())\(temperatureUnit.label)"
+        return "\(Temperature(celsius: value).value(in: temperatureUnit).forecastFormatted(precision: 0))\(temperatureUnit.label)"
     }
 
     private var realTemperature: String? {
         let hour = selectedHour ?? forecast.currentForecastHour
         guard let value = forecast.forecast?.temperatureReal(hh: hour) else { return nil }
-        return "\(Temperature(celsius: value).value(in: temperatureUnit).forecastFormatted())\(temperatureUnit.label)"
+        return "\(Temperature(celsius: value).value(in: temperatureUnit).forecastFormatted(precision: 0))\(temperatureUnit.label)"
     }
 
     private var highTemperatureText: String? {
         guard let range = forecast.dailyTemperatureRange(hour: selectedHour) else { return nil }
-        return "\(Temperature(celsius: range.high).value(in: temperatureUnit).forecastFormatted())\(temperatureUnit.label)"
+        return "\(Temperature(celsius: range.high).value(in: temperatureUnit).forecastFormatted(precision: 0))\(temperatureUnit.label)"
     }
 
     private var lowTemperatureText: String? {
         guard let range = forecast.dailyTemperatureRange(hour: selectedHour) else { return nil }
-        return "\(Temperature(celsius: range.low).value(in: temperatureUnit).forecastFormatted())\(temperatureUnit.label)"
+        return "\(Temperature(celsius: range.low).value(in: temperatureUnit).forecastFormatted(precision: 0))\(temperatureUnit.label)"
     }
 
     private var supportsModelComparison: Bool { isModelComparisonEnabled && modelForecasts.count > 1 }

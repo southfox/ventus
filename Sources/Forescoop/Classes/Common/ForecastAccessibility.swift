@@ -17,7 +17,7 @@ enum ForecastAccessibility {
         var values = [forecast.locationDisplayName()]
         if let temperature { values.append("temperature \(Int(temperature.rounded())) degrees Celsius") }
         if let wind { values.append("wind \(Int(wind.rounded())) knots") }
-        if let rain { values.append("rain \(rain.formatted(.number.precision(.fractionLength(0...1)))) millimeters") }
+        if let rain { values.append("rain \(rain.formatted(.number.precision(.fractionLength(0)))) millimeters") }
         return values.joined(separator: ", ")
     }
 }

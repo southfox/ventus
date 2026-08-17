@@ -41,7 +41,7 @@ struct SavedMapLocationAnnotation: View {
                             Image(systemName: symbol)
                         }
                         if let temperature {
-                            Text("\(temperature.forecastFormatted())°C")
+                            Text("\(temperature.forecastFormatted(precision: 0))°C")
                                 .monospacedDigit()
                         }
                     }

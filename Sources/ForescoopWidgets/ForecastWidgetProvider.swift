@@ -158,8 +158,7 @@ public struct ForecastWidgetProvider: TimelineProvider {
 
     private func precipitationText(_ millimeters: Double, unit: PrecipitationUnit) -> String {
         let value = Precipitation(millimeters: millimeters).value(in: unit)
-        let precision = unit == .inches ? 2 : 1
-        return "\(value.formatted(.number.precision(.fractionLength(precision)))) \(unit.label)"
+        return "\(value.formatted(.number.precision(.fractionLength(0)))) \(unit.label)"
     }
 
     private func pressureText(_ hectopascals: Double, unit: PressureUnit) -> String {

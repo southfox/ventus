@@ -47,7 +47,7 @@ struct TVForecastWidgetCard: View {
 
     private var rain: String {
         let value = weather?.precipitation1(hh: hour) ?? weather?.precipitation(hh: hour) ?? 0
-        return "\(value.formatted(.number.precision(.fractionLength(0...1)))) mm"
+        return "\(value.formatted(.number.precision(.fractionLength(0)))) mm"
     }
 
     private func metric(_ title: LocalizedStringKey, value: String, symbol: String) -> some View {

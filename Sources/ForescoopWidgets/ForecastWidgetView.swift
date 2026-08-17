@@ -108,10 +108,6 @@ public struct ForecastWidgetView: View {
                     widgetMetric(entry.rain, symbol: "drop.fill")
                     widgetMetric(entry.cloudCover, symbol: "cloud.fill")
                 }
-                HStack(alignment: .bottom, spacing: 4) {
-                    widgetMetric(entry.humidity, symbol: "humidity")
-                    widgetMetric(entry.pressure, symbol: "gauge.medium")
-                }
             }
         }
     }
