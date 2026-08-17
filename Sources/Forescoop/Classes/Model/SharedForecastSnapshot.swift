@@ -61,6 +61,7 @@ public struct SharedForecastSnapshot: Codable, Sendable {
     public let highCelsius: Double
     public let low: String
     public let lowCelsius: Double
+    public let insight: String
     public let hourly: [Hour]
     public let daily: [Day]
 
@@ -84,6 +85,7 @@ public struct SharedForecastSnapshot: Codable, Sendable {
         highCelsius: Double,
         low: String,
         lowCelsius: Double,
+        insight: String,
         hourly: [Hour],
         daily: [Day]
     ) {
@@ -106,6 +108,7 @@ public struct SharedForecastSnapshot: Codable, Sendable {
         self.highCelsius = highCelsius
         self.low = low
         self.lowCelsius = lowCelsius
+        self.insight = insight
         self.hourly = hourly
         self.daily = daily
     }
@@ -147,6 +150,15 @@ public extension SharedForecastSnapshot {
             highCelsius: dailyRange?.high ?? temperature,
             low: today?.low ?? temperatureText(temperature, unit: units.temperatureUnit),
             lowCelsius: dailyRange?.low ?? temperature,
+            insight: ForecastIntelligenceText.summary(
+                forecast: forecast,
+                hour: hour,
+                temperatureUnit: units.temperatureUnit,
+                windSpeedUnit: units.windSpeedUnit,
+                precipitationUnit: units.precipitationUnit,
+                freezingLevelUnit: units.freezingLevelUnit,
+                pressureUnit: units.pressureUnit
+            ),
             hourly: hourly,
             daily: daily
         )

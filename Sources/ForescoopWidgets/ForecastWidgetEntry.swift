@@ -22,6 +22,7 @@ public struct ForecastWidgetEntry: TimelineEntry, Sendable {
     public let highCelsius: Double
     public let low: String
     public let lowCelsius: Double
+    public let insight: String
     public let hourly: [ForecastWidgetHour]
     public let daily: [ForecastWidgetDay]
 
@@ -45,6 +46,7 @@ public struct ForecastWidgetEntry: TimelineEntry, Sendable {
         highCelsius: 14,
         low: "6°",
         lowCelsius: 6,
+        insight: "Bariloche · Today, 2 PM: 12°C with 10 kt wind, real, altitude-corrected reading, 35% cloud cover, 58% humidity, pressure 1015 hPa.",
         hourly: ForecastWidgetHour.placeholder,
         daily: ForecastWidgetDay.placeholder
     )

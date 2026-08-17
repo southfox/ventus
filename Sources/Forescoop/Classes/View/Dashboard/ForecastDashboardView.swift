@@ -424,7 +424,6 @@ public struct ForecastDashboardView: View {
                     HStack(alignment: .top, spacing: 56) {
                         VStack(alignment: .leading, spacing: 28) {
                             ForecastOverview(forecast: forecast, selectedHour: selectedHour, temperatureUnit: $viewModel.temperatureUnit, coordinateLocationName: coordinateLocationName, modelForecasts: displayedModelForecasts, modelNamesByID: modelNamesByID, isModelComparisonEnabled: showsDashboardModelComparison, showsLocationHeader: showsLocationHeader, showsModelSummary: showsModelSummary, onSelectLocation: { activeSheet = .spotPicker }, onSelectModel: { activeSheet = .modelPicker }, onShowMap: { activeSheet = .forecastMap })
-                            ForecastIntelligenceSummary(forecast: forecast, hour: selectedHour, temperatureUnit: viewModel.temperatureUnit, windSpeedUnit: viewModel.windSpeedUnit, precipitationUnit: viewModel.precipitationUnit)
                         }
                         .frame(maxWidth: .infinity)
 
@@ -447,12 +446,14 @@ public struct ForecastDashboardView: View {
                             onSelectLocation: selectMapLocation
                         )
                     }
+
+                    ForecastIntelligenceSummary(forecast: forecast, hour: selectedHour, coordinateLocationName: coordinateLocationName, temperatureUnit: viewModel.temperatureUnit, windSpeedUnit: viewModel.windSpeedUnit, precipitationUnit: viewModel.precipitationUnit, freezingLevelUnit: viewModel.freezingLevelUnit, pressureUnit: viewModel.pressureUnit)
                 } else {
                     VStack(spacing: 24) {
                         ForecastOverview(forecast: forecast, selectedHour: selectedHour, temperatureUnit: $viewModel.temperatureUnit, coordinateLocationName: coordinateLocationName, modelForecasts: displayedModelForecasts, modelNamesByID: modelNamesByID, isModelComparisonEnabled: showsDashboardModelComparison, showsLocationHeader: showsLocationHeader, showsModelSummary: showsModelSummary, onSelectLocation: { activeSheet = .spotPicker }, onSelectModel: { activeSheet = .modelPicker }, onShowMap: { activeSheet = .forecastMap })
-                        ForecastIntelligenceSummary(forecast: forecast, hour: selectedHour, temperatureUnit: viewModel.temperatureUnit, windSpeedUnit: viewModel.windSpeedUnit, precipitationUnit: viewModel.precipitationUnit)
                         ForecastWindDetails(forecast: forecast, selectedHour: selectedHour, windSpeedUnit: $viewModel.windSpeedUnit, modelForecasts: displayedModelForecasts, modelNamesByID: modelNamesByID, isModelComparisonEnabled: showsDashboardModelComparison)
                         ForecastWeatherDetails(forecast: forecast, selectedHour: selectedHour, waveHeightUnit: $viewModel.waveHeightUnit, precipitationUnit: $viewModel.precipitationUnit, freezingLevelUnit: $viewModel.freezingLevelUnit, pressureUnit: $viewModel.pressureUnit, modelForecasts: displayedModelForecasts, modelNamesByID: modelNamesByID, isModelComparisonEnabled: showsDashboardModelComparison)
+                        ForecastIntelligenceSummary(forecast: forecast, hour: selectedHour, coordinateLocationName: coordinateLocationName, temperatureUnit: viewModel.temperatureUnit, windSpeedUnit: viewModel.windSpeedUnit, precipitationUnit: viewModel.precipitationUnit, freezingLevelUnit: viewModel.freezingLevelUnit, pressureUnit: viewModel.pressureUnit)
                     }
                 }
 

@@ -74,6 +74,15 @@ public struct ForecastWidgetProvider: TimelineProvider {
             highCelsius: dailyRange?.high ?? temperature,
             low: today?.low ?? temperatureText(temperature, unit: units.temperatureUnit),
             lowCelsius: dailyRange?.low ?? temperature,
+            insight: ForecastIntelligenceText.summary(
+                forecast: forecast,
+                hour: hour,
+                temperatureUnit: units.temperatureUnit,
+                windSpeedUnit: units.windSpeedUnit,
+                precipitationUnit: units.precipitationUnit,
+                freezingLevelUnit: units.freezingLevelUnit,
+                pressureUnit: units.pressureUnit
+            ),
             hourly: hourly,
             daily: daily
         )
@@ -100,6 +109,7 @@ public struct ForecastWidgetProvider: TimelineProvider {
             highCelsius: snapshot.highCelsius,
             low: snapshot.low,
             lowCelsius: snapshot.lowCelsius,
+            insight: snapshot.insight,
             hourly: snapshot.hourly.map { ForecastWidgetHour(label: $0.label, symbolName: $0.symbolName, temperature: $0.temperature) },
             daily: snapshot.daily.map {
                 ForecastWidgetDay(label: $0.label, symbolName: $0.symbolName, low: $0.low, high: $0.high, lowValue: $0.lowValue, highValue: $0.highValue)

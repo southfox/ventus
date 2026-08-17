@@ -155,8 +155,23 @@ public struct ForecastWidgetView: View {
             Text("Conditions")
                 .font(.headline)
             expandedConditions
+
+            Divider()
+            insightCard
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+    }
+
+    private var insightCard: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Label("Forecast insight", systemImage: "sparkles")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(theme.accentColor(for: colorScheme))
+            Text(entry.insight)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 
     private var expandedConditions: some View {
