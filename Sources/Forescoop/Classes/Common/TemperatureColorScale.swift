@@ -29,13 +29,11 @@ public enum TemperatureColorScale {
 
 public struct ThermalLabel: View {
     private let title: String
-    private let systemName: String
     private let celsius: Double
     private let spacing: CGFloat
 
-    public init(_ title: String, systemImage systemName: String, celsius: Double, spacing: CGFloat = 4) {
+    public init(_ title: String, celsius: Double, spacing: CGFloat = 4) {
         self.title = title
-        self.systemName = systemName
         self.celsius = celsius
         self.spacing = spacing
     }
@@ -43,10 +41,31 @@ public struct ThermalLabel: View {
     public var body: some View {
         let palette = TemperatureColorScale.palette(forCelsius: celsius)
         HStack(spacing: spacing) {
-            Image(systemName: systemName)
+            Image(systemName: symbolName)
                 .symbolRenderingMode(.palette)
                 .foregroundStyle(palette.primary, palette.secondary)
             Text(title)
         }
     }
+
+    private var symbolName: String {
+        switch celsius {
+        case ..<0: "thermometer.snowflake"
+        case ..<18: "thermometer.medium"
+        case ..<28: "thermometer.sun"
+        default: "thermometer.sun.fill"
+        }
+    }
 }
+
+#if DEBUG
+#Preview("ThermalLabel Preview") {
+    VStack(spacing: 12) {
+        ThermalLabel("Freezing", celsius: -5)
+        ThermalLabel("Mild", celsius: 12)
+        ThermalLabel("Warm", celsius: 22)
+        ThermalLabel("Hot", celsius: 32, spacing: 6)
+    }
+    .padding()
+}
+#endif

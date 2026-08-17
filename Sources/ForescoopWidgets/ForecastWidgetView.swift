@@ -94,10 +94,10 @@ public struct ForecastWidgetView: View {
                 Image(systemName: entry.symbolName)
                     .font(.title)
                     .widgetAccentable()
-                ThermalLabel(entry.temperature, systemImage: "thermometer.medium", celsius: entry.temperatureCelsius)
+                ThermalLabel(entry.temperature, celsius: entry.temperatureCelsius)
                     .font(.system(.title, design: .rounded).weight(.light))
                     .minimumScaleFactor(0.5)
-//                ThermalLabel(entry.rawTemperature, systemImage: "thermometer.medium", celsius: entry.rawTemperatureCelsius)
+//                ThermalLabel(entry.rawTemperature, celsius: entry.rawTemperatureCelsius)
 //                    .font(.system(.title, design: .rounded).weight(.light))
 //                    .minimumScaleFactor(0.5)
             }
@@ -195,12 +195,18 @@ public struct ForecastWidgetView: View {
                     .font(.headline)
                     .lineLimit(1)
                 HStack(spacing: 10) {
-                ThermalLabel(entry.temperature, systemImage: "thermometer.medium", celsius: entry.temperatureCelsius)
+                ThermalLabel(entry.temperature, celsius: entry.temperatureCelsius)
                     .font(.system(.title, design: .rounded).weight(.light))
                     .minimumScaleFactor(0.5)
 
-                    ThermalLabel(entry.low, systemImage: "thermometer.low", celsius: entry.lowCelsius)
-                    ThermalLabel(entry.high, systemImage: "thermometer.high", celsius: entry.highCelsius)
+                if previewFamily == .systemExtraLarge {
+                    ThermalLabel(entry.rawTemperature, celsius: entry.temperatureCelsius)
+                        .font(.system(.title, design: .rounded).weight(.light))
+                        .minimumScaleFactor(0.5)
+                }
+
+                    ThermalLabel(entry.low, celsius: entry.lowCelsius)
+                    ThermalLabel(entry.high, celsius: entry.highCelsius)
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)

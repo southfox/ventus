@@ -101,7 +101,7 @@ public struct ForecastOverview: View {
                         unitTitle: \.label
                     ) {
                         HStack {
-                            ThermalLabel(temperature, systemImage: "thermometer.medium", celsius: currentCelsius)
+                            ThermalLabel(temperature, celsius: currentCelsius)
                                 .font(.system(size: 44, weight: .semibold))
                                 .foregroundStyle(theme.accentColor)
                             if let rawTemperature {
@@ -125,8 +125,8 @@ public struct ForecastOverview: View {
 
                 if let range = forecast.dailyTemperatureRange(hour: selectedHour), let highTemperatureText, let lowTemperatureText {
                     HStack(spacing: 12) {
-                        ThermalLabel(lowTemperatureText, systemImage: "thermometer.low", celsius: range.low)
-                        ThermalLabel(highTemperatureText, systemImage: "thermometer.high", celsius: range.high)
+                        ThermalLabel(lowTemperatureText, celsius: range.low)
+                        ThermalLabel(highTemperatureText, celsius: range.high)
                     }
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
