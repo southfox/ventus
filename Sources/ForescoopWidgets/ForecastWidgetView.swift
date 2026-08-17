@@ -30,6 +30,7 @@ public struct ForecastWidgetView: View {
                     .widgetAccentable()
             case .accessoryInline:
                 Text("\(entry.temperature) · \(entry.wind)")
+                    .lineLimit(0)
             case .accessoryRectangular:
                 HStack {
                     Image(systemName: entry.symbolName).widgetAccentable()
@@ -93,11 +94,9 @@ public struct ForecastWidgetView: View {
                 Image(systemName: entry.symbolName)
                     .font(.title)
                     .widgetAccentable()
-                Text(entry.temperature)
-                    .font(.title.bold())
-                Text(entry.rawTemperature)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                Label(entry.temperature + "\n" + entry.rawTemperature, systemImage: "thermometer.medium")
+                    .font(.system(.title, design: .rounded).weight(.light))
+                    .minimumScaleFactor(0.5)
             }
             Spacer(minLength: 0)
             VStack(alignment: .leading, spacing: 4) {
@@ -105,10 +104,14 @@ public struct ForecastWidgetView: View {
                     widgetMetric(entry.wind, symbol: "wind")
                     widgetMetric(entry.gust, symbol: "wind.circle")
                 }
-                widgetMetric(entry.rain, symbol: "drop.fill")
-                widgetMetric(entry.cloudCover, symbol: "cloud.fill")
-                widgetMetric(entry.humidity, symbol: "humidity")
-                widgetMetric(entry.pressure, symbol: "gauge.medium")
+                HStack(alignment: .bottom, spacing: 4) {
+                    widgetMetric(entry.rain, symbol: "drop.fill")
+                    widgetMetric(entry.cloudCover, symbol: "cloud.fill")
+                }
+                HStack(alignment: .bottom, spacing: 4) {
+                    widgetMetric(entry.humidity, symbol: "humidity")
+                    widgetMetric(entry.pressure, symbol: "gauge.medium")
+                }
             }
         }
     }
@@ -191,17 +194,20 @@ public struct ForecastWidgetView: View {
 
     private var weatherHeader: some View {
         HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 0) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(entry.locationName)
                     .font(.headline)
                     .lineLimit(1)
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Text(entry.temperature)
-                        .font(.system(size: 48, weight: .light, design: .rounded))
-                    Text(entry.rawTemperature)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                Label(entry.temperature + " / " + entry.rawTemperature, systemImage: "thermometer.medium")
+                    .font(.system(.title, design: .rounded).weight(.light))
+                    .minimumScaleFactor(0.5)
+
+                HStack(spacing: 10) {
+                    Label(entry.low, systemImage: "thermometer.low")
+                    Label(entry.high, systemImage: "thermometer.high")
                 }
+                .font(.caption)
+                .foregroundStyle(.secondary)
             }
             Spacer()
             VStack(alignment: .trailing, spacing: 2) {
@@ -210,15 +216,12 @@ public struct ForecastWidgetView: View {
                     .widgetAccentable()
                 Text(entry.condition)
                     .font(.subheadline.weight(.medium))
-                Text("H:\(entry.high)  L:\(entry.low)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
         }
     }
 
     private func hourlyForecast(limit: Int) -> some View {
-        HStack(spacing: 0) {
+        HStack(alignment: .top, spacing: 0) {
             ForEach(Array(entry.hourly.prefix(limit))) { hour in
                 VStack(spacing: 5) {
                     Text(hour.label)
@@ -228,6 +231,7 @@ public struct ForecastWidgetView: View {
                     Image(systemName: hour.symbolName)
                         .font(.title3)
                         .widgetAccentable()
+                        .padding(.bottom, 1)
                     Text(hour.temperature)
                         .font(.caption.weight(.semibold))
                 }
@@ -359,3 +363,4 @@ private struct ForecastWidgetFontDesign: ViewModifier {
 
 #endif
 #endif
+

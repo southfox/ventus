@@ -67,8 +67,6 @@ public struct ForecastWidgetDay: Identifiable, Sendable {
     public let lowValue: Double
     public let highValue: Double
 
-    // A longer outlook can span into the following week, where abbreviated
-    // weekday labels repeat. Include the values so SwiftUI rows remain unique.
     public var id: String { "\(label)-\(lowValue)-\(highValue)" }
 
     public static let placeholder = [
