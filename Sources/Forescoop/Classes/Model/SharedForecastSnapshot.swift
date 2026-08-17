@@ -45,7 +45,9 @@ public struct SharedForecastSnapshot: Codable, Sendable {
     public let date: Date
     public let locationName: String
     public let temperature: String
+    public let temperatureCelsius: Double
     public let rawTemperature: String
+    public let rawTemperatureCelsius: Double
     public let wind: String
     public let gust: String
     public let windDirection: String
@@ -56,7 +58,9 @@ public struct SharedForecastSnapshot: Codable, Sendable {
     public let symbolName: String
     public let condition: String
     public let high: String
+    public let highCelsius: Double
     public let low: String
+    public let lowCelsius: Double
     public let hourly: [Hour]
     public let daily: [Day]
 
@@ -64,7 +68,9 @@ public struct SharedForecastSnapshot: Codable, Sendable {
         date: Date,
         locationName: String,
         temperature: String,
+        temperatureCelsius: Double,
         rawTemperature: String,
+        rawTemperatureCelsius: Double,
         wind: String,
         gust: String,
         windDirection: String,
@@ -75,14 +81,18 @@ public struct SharedForecastSnapshot: Codable, Sendable {
         symbolName: String,
         condition: String,
         high: String,
+        highCelsius: Double,
         low: String,
+        lowCelsius: Double,
         hourly: [Hour],
         daily: [Day]
     ) {
         self.date = date
         self.locationName = locationName
         self.temperature = temperature
+        self.temperatureCelsius = temperatureCelsius
         self.rawTemperature = rawTemperature
+        self.rawTemperatureCelsius = rawTemperatureCelsius
         self.wind = wind
         self.gust = gust
         self.windDirection = windDirection
@@ -93,7 +103,9 @@ public struct SharedForecastSnapshot: Codable, Sendable {
         self.symbolName = symbolName
         self.condition = condition
         self.high = high
+        self.highCelsius = highCelsius
         self.low = low
+        self.lowCelsius = lowCelsius
         self.hourly = hourly
         self.daily = daily
     }
@@ -113,12 +125,15 @@ public extension SharedForecastSnapshot {
         let hourly = hourlyForecast(for: forecast, currentHour: hour, unit: units.temperatureUnit)
         let daily = dailyForecast(for: forecast, unit: units.temperatureUnit)
         let today = daily.first
+        let dailyRange = forecast.dailyTemperatureRange(hour: hour)
 
         return SharedForecastSnapshot(
             date: .now,
             locationName: forecast.locationDisplayName(),
             temperature: "\(Temperature(celsius: temperature).value(in: units.temperatureUnit).formatted(.number.precision(.fractionLength(0))))\(units.temperatureUnit.label)",
+            temperatureCelsius: temperature,
             rawTemperature: rawTemperature.map { "\(Temperature(celsius: $0).value(in: units.temperatureUnit).formatted(.number.precision(.fractionLength(0))))\(units.temperatureUnit.label)" } ?? "—",
+            rawTemperatureCelsius: rawTemperature ?? temperature,
             wind: windText(wind, unit: units.windSpeedUnit),
             gust: windText(gust, unit: units.windSpeedUnit),
             windDirection: forecast.forecast?.windDirectionName(hh: hour) ?? "—",
@@ -129,7 +144,9 @@ public extension SharedForecastSnapshot {
             symbolName: forecast.weatherSymbolName(hour: hour),
             condition: conditionText(for: forecast, hour: hour),
             high: today?.high ?? temperatureText(temperature, unit: units.temperatureUnit),
+            highCelsius: dailyRange?.high ?? temperature,
             low: today?.low ?? temperatureText(temperature, unit: units.temperatureUnit),
+            lowCelsius: dailyRange?.low ?? temperature,
             hourly: hourly,
             daily: daily
         )

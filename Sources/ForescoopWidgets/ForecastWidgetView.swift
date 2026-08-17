@@ -94,17 +94,19 @@ public struct ForecastWidgetView: View {
                 Image(systemName: entry.symbolName)
                     .font(.title)
                     .widgetAccentable()
-                Label(entry.temperature + "\n" + entry.rawTemperature, systemImage: "thermometer.medium")
+                ThermalLabel(entry.temperature, systemImage: "thermometer.medium", celsius: entry.temperatureCelsius)
                     .font(.system(.title, design: .rounded).weight(.light))
                     .minimumScaleFactor(0.5)
+//                ThermalLabel(entry.rawTemperature, systemImage: "thermometer.medium", celsius: entry.rawTemperatureCelsius)
+//                    .font(.system(.title, design: .rounded).weight(.light))
+//                    .minimumScaleFactor(0.5)
             }
-            Spacer(minLength: 0)
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(alignment: .bottom, spacing: 4) {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(alignment: .bottom, spacing: 8) {
                     widgetMetric(entry.wind, symbol: "wind")
                     widgetMetric(entry.gust, symbol: "wind.circle")
                 }
-                HStack(alignment: .bottom, spacing: 4) {
+                HStack(alignment: .bottom, spacing: 8) {
                     widgetMetric(entry.rain, symbol: "drop.fill")
                     widgetMetric(entry.cloudCover, symbol: "cloud.fill")
                 }
@@ -143,8 +145,6 @@ public struct ForecastWidgetView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("10-Day Forecast")
                         .font(.headline)
-                    // Five compact rows across two columns use the iPad canvas
-                    // for a full ten-day outlook rather than leaving it sparse.
                     dailyForecast(limit: 10, columns: 2)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -194,13 +194,13 @@ public struct ForecastWidgetView: View {
                 Text(entry.locationName)
                     .font(.headline)
                     .lineLimit(1)
-                Label(entry.temperature + " / " + entry.rawTemperature, systemImage: "thermometer.medium")
+                HStack(spacing: 10) {
+                ThermalLabel(entry.temperature, systemImage: "thermometer.medium", celsius: entry.temperatureCelsius)
                     .font(.system(.title, design: .rounded).weight(.light))
                     .minimumScaleFactor(0.5)
 
-                HStack(spacing: 10) {
-                    Label(entry.low, systemImage: "thermometer.low")
-                    Label(entry.high, systemImage: "thermometer.high")
+                    ThermalLabel(entry.low, systemImage: "thermometer.low", celsius: entry.lowCelsius)
+                    ThermalLabel(entry.high, systemImage: "thermometer.high", celsius: entry.highCelsius)
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -224,12 +224,14 @@ public struct ForecastWidgetView: View {
                         .font(.caption2.weight(.medium))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
+                        .frame(height: 14)
                     Image(systemName: hour.symbolName)
                         .font(.title3)
                         .widgetAccentable()
-                        .padding(.bottom, 1)
+                        .frame(height: 22)
                     Text(hour.temperature)
                         .font(.caption.weight(.semibold))
+                        .frame(height: 14)
                 }
                 .frame(maxWidth: .infinity)
             }
@@ -275,18 +277,12 @@ public struct ForecastWidgetView: View {
             Text(day.low)
                 .font(compact ? .caption2 : .caption)
                 .foregroundStyle(.secondary)
-                .frame(width: 25, alignment: .trailing)
-            Capsule()
-                .fill(theme.accentColor(for: colorScheme).opacity(0.18))
-                .overlay(alignment: .leading) {
-                    Capsule()
-                        .fill(theme.accentColor(for: colorScheme))
-                        .frame(width: temperatureBarWidth(for: day, in: range, compact: compact))
-                }
+                .frame(width: 30, alignment: .trailing)
+            temperatureTrack(for: day, in: range)
                 .frame(height: 5)
             Text(day.high)
                 .font((compact ? Font.caption2 : .caption).weight(.semibold))
-                .frame(width: 25, alignment: .leading)
+                .frame(width: 30, alignment: .leading)
         }
     }
 
@@ -298,14 +294,41 @@ public struct ForecastWidgetView: View {
         return lower...upper
     }
 
-    private func temperatureBarWidth(
-        for day: ForecastWidgetDay,
-        in range: ClosedRange<Double>,
-        compact: Bool = false
-    ) -> CGFloat {
-        let span = max(range.upperBound - range.lowerBound, 1)
-        let fraction = max((day.highValue - day.lowValue) / span, 0.18)
-        return (compact ? 42 : 92) * fraction
+    private func temperatureTrack(for day: ForecastWidgetDay, in range: ClosedRange<Double>) -> some View {
+        GeometryReader { proxy in
+            let width = max(proxy.size.width, 1)
+            let span = max(range.upperBound - range.lowerBound, 1)
+            let lowFraction = min(max((day.lowValue - range.lowerBound) / span, 0), 1)
+            let highFraction = min(max((day.highValue - range.lowerBound) / span, 0), 1)
+            let segmentWidth = max(width * CGFloat(highFraction - lowFraction), 6)
+            let leading = min(max(width * CGFloat(lowFraction), 0), width - segmentWidth)
+
+            ZStack(alignment: .leading) {
+                Capsule()
+                    .fill(theme.accentColor(for: colorScheme).opacity(0.16))
+
+                temperatureGradient
+                    .mask(alignment: .leading) {
+                        Capsule()
+                            .frame(width: segmentWidth)
+                            .offset(x: leading)
+                    }
+            }
+        }
+    }
+
+    private var temperatureGradient: LinearGradient {
+        LinearGradient(
+            colors: [
+                Color(red: 0.36, green: 0.78, blue: 0.98),
+                Color(red: 0.42, green: 0.85, blue: 0.62),
+                .yellow,
+                .orange,
+                .red
+            ],
+            startPoint: .leading,
+            endPoint: .trailing
+        )
     }
 
     private func widgetMetric(_ value: String, symbol: String) -> some View {

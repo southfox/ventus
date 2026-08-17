@@ -9,7 +9,6 @@
 #if os(watchOS)
 import SwiftUI
 
-/// The compact watchOS forecast dashboard.
 public struct WatchForecastView: View {
     nonisolated(unsafe) private let forecastService: ForecastWindguruProtocol
     @Environment(\.scenePhase) private var scenePhase
@@ -144,7 +143,7 @@ public struct WatchForecastView: View {
 
                 HStack(spacing: 12) {
                     metric("Pressure", value: pressure(weather?.seaLevelPressure(hh: hour)), symbol: "gauge.medium")
-                    metric("Isotherm", value: freezingLevel(weather?.freezingLevelHeightInMeters(hh: hour)), symbol: "thermometer.medium")
+                    metric("Isotherm", value: freezingLevel(weather?.freezingLevelHeightInMeters(hh: hour)), symbol: "thermometer.medium", celsius: weather?.temperatureReal(hh: hour) ?? weather?.temperature(hh: hour))
                     metric("Waves", value: waveHeight(weather?.waveHeight(hh: hour)), symbol: "water.waves")
                 }
 
@@ -217,9 +216,21 @@ public struct WatchForecastView: View {
         selectedModelID = modelID
         selectedHour = forecast?.currentForecastHour
     }
-    private func metric(_ title: String, value: String, symbol: String) -> some View {
-        VStack(spacing: 2) { Image(systemName: symbol).font(.caption2); Text(value).font(.caption2.monospacedDigit()); Text(title).font(.system(size: 9)).foregroundStyle(.secondary) }
-            .frame(maxWidth: .infinity)
+    private func metric(_ title: String, value: String, symbol: String, celsius: Double? = nil) -> some View {
+        VStack(spacing: 2) {
+            if let celsius {
+                let palette = TemperatureColorScale.palette(forCelsius: celsius)
+                Image(systemName: symbol)
+                    .font(.caption2)
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(palette.primary, palette.secondary)
+            } else {
+                Image(systemName: symbol).font(.caption2)
+            }
+            Text(value).font(.caption2.monospacedDigit())
+            Text(title).font(.system(size: 9)).foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
     }
     private func hourTitle(_ forecast: SpotForecast, hour: String?) -> String {
         guard let hour, let date = forecast.forecastDate(hour: hour) else { return "Select hour" }

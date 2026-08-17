@@ -615,6 +615,7 @@ public struct WindguruForecastGridView: View {
     /// having different intrinsic widths.
     private func rowIcon(_ name: String) -> some View {
         Image(systemName: name)
+            .symbolRenderingMode(name.hasPrefix("thermometer") ? .multicolor : .monochrome)
             .frame(width: 16, alignment: .center)
     }
 

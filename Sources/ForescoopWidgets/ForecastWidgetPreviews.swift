@@ -6,7 +6,9 @@ extension ForecastWidgetEntry {
         date: .now,
         locationName: "Cerro Catedral",
         temperature: "19°C",
+        temperatureCelsius: 19,
         rawTemperature: "22°C",
+        rawTemperatureCelsius: 22,
         wind: "22 kt",
         gust: "31 kt",
         windDirection: "WNW",
@@ -17,7 +19,9 @@ extension ForecastWidgetEntry {
         symbolName: "cloud.rain.fill",
         condition: "Rain showers",
         high: "8°",
+        highCelsius: 8,
         low: "3°",
+        lowCelsius: 3,
         hourly: ForecastWidgetHour.placeholder,
         daily: ForecastWidgetDay.placeholder
     )

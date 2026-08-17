@@ -44,12 +44,15 @@ public struct ForecastWidgetProvider: TimelineProvider {
         let hourly = hourlyForecast(for: forecast, currentHour: hour, unit: units.temperatureUnit)
         let daily = dailyForecast(for: forecast, unit: units.temperatureUnit)
         let today = daily.first
+        let dailyRange = forecast.dailyTemperatureRange(hour: hour)
 
         return ForecastWidgetEntry(
             date: .now,
             locationName: forecast.locationDisplayName(),
             temperature: "\(Temperature(celsius: temperature).value(in: units.temperatureUnit).formatted(.number.precision(.fractionLength(0))))\(units.temperatureUnit.label)",
+            temperatureCelsius: temperature,
             rawTemperature: rawTemperature.map { "\(Temperature(celsius: $0).value(in: units.temperatureUnit).formatted(.number.precision(.fractionLength(0))))\(units.temperatureUnit.label)" } ?? "—",
+            rawTemperatureCelsius: rawTemperature ?? temperature,
             wind: windText(wind, unit: units.windSpeedUnit),
             gust: windText(gust, unit: units.windSpeedUnit),
             windDirection: forecast.forecast?.windDirectionName(hh: hour) ?? "—",
@@ -60,7 +63,9 @@ public struct ForecastWidgetProvider: TimelineProvider {
             symbolName: forecast.weatherSymbolName(hour: hour),
             condition: conditionText(for: forecast, hour: hour),
             high: today?.high ?? temperatureText(temperature, unit: units.temperatureUnit),
+            highCelsius: dailyRange?.high ?? temperature,
             low: today?.low ?? temperatureText(temperature, unit: units.temperatureUnit),
+            lowCelsius: dailyRange?.low ?? temperature,
             hourly: hourly,
             daily: daily
         )
@@ -71,7 +76,9 @@ public struct ForecastWidgetProvider: TimelineProvider {
             date: snapshot.date,
             locationName: snapshot.locationName,
             temperature: snapshot.temperature,
+            temperatureCelsius: snapshot.temperatureCelsius,
             rawTemperature: snapshot.rawTemperature,
+            rawTemperatureCelsius: snapshot.rawTemperatureCelsius,
             wind: snapshot.wind,
             gust: snapshot.gust,
             windDirection: snapshot.windDirection,
@@ -82,7 +89,9 @@ public struct ForecastWidgetProvider: TimelineProvider {
             symbolName: snapshot.symbolName,
             condition: snapshot.condition,
             high: snapshot.high,
+            highCelsius: snapshot.highCelsius,
             low: snapshot.low,
+            lowCelsius: snapshot.lowCelsius,
             hourly: snapshot.hourly.map { ForecastWidgetHour(label: $0.label, symbolName: $0.symbolName, temperature: $0.temperature) },
             daily: snapshot.daily.map {
                 ForecastWidgetDay(label: $0.label, symbolName: $0.symbolName, low: $0.low, high: $0.high, lowValue: $0.lowValue, highValue: $0.highValue)

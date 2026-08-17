@@ -1,8 +1,6 @@
 #if os(tvOS)
 import SwiftUI
 
-/// Apple TV has no WidgetKit surface. This focused card provides the same
-/// glanceable forecast information in the tvOS dashboard.
 struct TVForecastWidgetCard: View {
     let forecast: SpotForecast
     let hour: String?
@@ -20,7 +18,7 @@ struct TVForecastWidgetCard: View {
                 Text(forecast.locationDisplayName())
                     .font(.title2.weight(.semibold))
                 HStack(spacing: 24) {
-                    metric("Temperature", value: temperature, symbol: "thermometer.medium")
+                    metric("Temperature", value: temperature, symbol: "thermometer.medium", celsius: temperatureCelsius)
                     metric("Wind", value: wind, symbol: "wind")
                     metric("Rain", value: rain, symbol: "drop.fill")
                 }
@@ -36,9 +34,12 @@ struct TVForecastWidgetCard: View {
         .accessibilityIdentifier("tv.forecast.card")
     }
 
+    private var temperatureCelsius: Double {
+        weather?.temperatureReal(hh: hour) ?? weather?.temperature(hh: hour) ?? 0
+    }
+
     private var temperature: String {
-        let value = weather?.temperatureReal(hh: hour) ?? weather?.temperature(hh: hour) ?? 0
-        return "\(Int(value.rounded()))°C"
+        "\(Int(temperatureCelsius.rounded()))°C"
     }
 
     private var wind: String {
@@ -50,14 +51,21 @@ struct TVForecastWidgetCard: View {
         return "\(value.formatted(.number.precision(.fractionLength(0)))) mm"
     }
 
-    private func metric(_ title: LocalizedStringKey, value: String, symbol: String) -> some View {
+    private func metric(_ title: LocalizedStringKey, value: String, symbol: String, celsius: Double? = nil) -> some View {
         Label {
             VStack(alignment: .leading, spacing: 2) {
                 Text(value).font(.headline)
                 Text(title).font(.caption).foregroundStyle(.secondary)
             }
         } icon: {
-            Image(systemName: symbol).foregroundStyle(.tint)
+            if let celsius {
+                let palette = TemperatureColorScale.palette(forCelsius: celsius)
+                Image(systemName: symbol)
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(palette.primary, palette.secondary)
+            } else {
+                Image(systemName: symbol).foregroundStyle(.tint)
+            }
         }
     }
 }

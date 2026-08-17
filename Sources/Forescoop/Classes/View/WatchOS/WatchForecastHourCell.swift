@@ -6,7 +6,6 @@
 #if os(watchOS)
 import SwiftUI
 
-/// Shared compact forecast row for the watch hour selector.
 struct WatchForecastHourCell: View {
     let hour: String
     let forecast: SpotForecast
@@ -31,7 +30,7 @@ struct WatchForecastHourCell: View {
             .font(.caption)
 
             HStack(spacing: 7) {
-                compactValue(temperature(weather.temperatureReal(hh: hour) ?? weather.temperature(hh: hour)), symbol: "thermometer.medium", label: "Temperature")
+                compactValue(temperature(weather.temperatureReal(hh: hour) ?? weather.temperature(hh: hour)), symbol: "thermometer.medium", label: "Temperature", celsius: weather.temperatureReal(hh: hour) ?? weather.temperature(hh: hour))
                     .frame(maxWidth: .infinity, alignment: .leading)
                 compactValue(wind(weather.windSpeed(hh: hour)), symbol: "wind", label: "Wind")
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -61,9 +60,16 @@ struct WatchForecastHourCell: View {
         value.map { "\(Precipitation(millimeters: $0).value(in: precipitationUnit).formatted(.number.precision(.fractionLength(0))))\(precipitationUnit.label)" } ?? "—"
     }
 
-    private func compactValue(_ value: String, symbol: String, label: String) -> some View {
+    private func compactValue(_ value: String, symbol: String, label: String, celsius: Double? = nil) -> some View {
         HStack(spacing: 2) {
-            Image(systemName: symbol)
+            if let celsius {
+                let palette = TemperatureColorScale.palette(forCelsius: celsius)
+                Image(systemName: symbol)
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(palette.primary, palette.secondary)
+            } else {
+                Image(systemName: symbol)
+            }
             Text(value)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)

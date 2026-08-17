@@ -6,7 +6,9 @@ public struct ForecastWidgetEntry: TimelineEntry, Sendable {
     public let date: Date
     public let locationName: String
     public let temperature: String
+    public let temperatureCelsius: Double
     public let rawTemperature: String
+    public let rawTemperatureCelsius: Double
     public let wind: String
     public let gust: String
     public let windDirection: String
@@ -17,7 +19,9 @@ public struct ForecastWidgetEntry: TimelineEntry, Sendable {
     public let symbolName: String
     public let condition: String
     public let high: String
+    public let highCelsius: Double
     public let low: String
+    public let lowCelsius: Double
     public let hourly: [ForecastWidgetHour]
     public let daily: [ForecastWidgetDay]
 
@@ -25,7 +29,9 @@ public struct ForecastWidgetEntry: TimelineEntry, Sendable {
         date: .now,
         locationName: "Bariloche",
         temperature: "12°C",
+        temperatureCelsius: 12,
         rawTemperature: "11°C",
+        rawTemperatureCelsius: 11,
         wind: "10 kt",
         gust: "16 kt",
         windDirection: "W",
@@ -36,7 +42,9 @@ public struct ForecastWidgetEntry: TimelineEntry, Sendable {
         symbolName: "cloud.sun.fill",
         condition: "Partly cloudy",
         high: "14°",
+        highCelsius: 14,
         low: "6°",
+        lowCelsius: 6,
         hourly: ForecastWidgetHour.placeholder,
         daily: ForecastWidgetDay.placeholder
     )
