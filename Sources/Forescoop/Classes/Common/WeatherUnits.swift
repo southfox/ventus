@@ -158,8 +158,6 @@ public protocol ForecastPreferencesProviding {
     var forecastUnitPreferences: ForecastUnitPreferences { get }
 }
 
-/// Device defaults used when no Windguru account is signed in.
-/// They follow the device regional measurement system rather than app-specific values.
 public struct DeviceForecastPreferenceProvider: ForecastPreferencesProviding {
     private let locale: Locale
 
@@ -209,8 +207,6 @@ public enum DeviceForecastPreferences {
     }
 }
 
-/// Persists the units currently selected in the app so WidgetKit extensions
-/// render the same measurements as the dashboard.
 public enum VentusForecastUnitStore {
     private static let appGroupIdentifier = "group.org.forescoop.shared"
     private static let temperatureKey = "forecastUnit.temperature"

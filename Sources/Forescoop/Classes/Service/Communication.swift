@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct Response {
+struct Response: Sendable {
     /// The server's response to the URL request.
     let response: URLResponse?
     
@@ -34,14 +34,15 @@ struct Response {
 }
 
 struct Communication {
-    static func request(_ url: String, finish: @escaping (_ response: Response?) -> Void) {
+    static func request(_ url: String, finish: @escaping @Sendable (_ response: Response?) -> Void) {
         let task = URLSession.shared.dataTask(with: URL.init(string: url)!)
         { (data, response, error) in
             let r = Response(response: response, data: data, error: error)
-            finish(r)
+            DispatchQueue.main.async {
+                finish(r)
+            }
         }
         task.resume()
-        URLSession.shared.finishTasksAndInvalidate()
     }
     
 }

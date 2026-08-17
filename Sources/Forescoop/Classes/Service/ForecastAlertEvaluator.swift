@@ -8,8 +8,6 @@
 import Foundation
 
 enum ForecastAlertEvaluator {
-    /// The first upcoming forecast hour, within the alert's day range and
-    /// weekday filter, where every condition is satisfied.
     static func matchingHour(for alert: ForecastAlert, in spotForecast: SpotForecast) -> (hour: String, date: Date)? {
         guard alert.isActive, !alert.conditions.isEmpty, let forecast = spotForecast.forecast else { return nil }
 

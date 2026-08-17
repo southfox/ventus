@@ -12,10 +12,6 @@ public protocol WeatherBackground: View {
     init(forecast: SpotForecast, hour: String?)
 }
 
-/// The shared rain/fog/cloud/snow classification used by every weather
-/// background renderer (native, Metal, SpriteKit, Lottie), so each treatment
-/// reacts to the same forecast conditions instead of re-deriving its own
-/// thresholds from the SF Symbol names.
 struct WeatherBackgroundCondition: Equatable {
     let symbolNames: [String]
     let precipitationMillimeters: Double

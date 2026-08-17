@@ -5,7 +5,6 @@
 
 import SwiftUI
 
-/// Shared VoiceOver descriptions for the forecast surfaces used on every app.
 enum ForecastAccessibility {
     static func summary(for forecast: SpotForecast, hour: String? = nil) -> String {
         let selectedHour = hour ?? forecast.currentForecastHour
@@ -23,8 +22,6 @@ enum ForecastAccessibility {
 }
 
 extension View {
-    /// Keeps child controls individually reachable while giving the screen a
-    /// meaningful VoiceOver group name and a stable identifier for UI tests.
     func forecastAccessibilityContainer(_ label: String, hint: String, identifier: String) -> some View {
         accessibilityElement(children: .contain)
             .accessibilityLabel(label)

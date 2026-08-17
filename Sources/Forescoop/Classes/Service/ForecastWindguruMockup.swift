@@ -13,14 +13,10 @@ public class ForecastWindguruMockup: ForecastWindguruProtocol {
 
     let definition = Definition()
 
-    /// A synchronous, bundled forecast for SwiftUI previews. It never reaches
-    /// Windguru, the credential store, or the network.
     public var dashboardPreviewForecast: SpotForecast? {
         dashboardPreviewForecasts.first
     }
 
-    /// Separate forecast instances keep the model-comparison UI functional in
-    /// previews, just as it is with independently fetched provider models.
     public var dashboardPreviewForecasts: [SpotForecast] {
         [
             try? SpotForecast(map: previewForecastMap(modelID: "3", name: "GFS 13 km", windAdjustment: 0, temperatureAdjustment: 0)),
@@ -35,7 +31,6 @@ public class ForecastWindguruMockup: ForecastWindguruProtocol {
         dashboardPreviewForecast
     }
 
-    /// Keeps SwiftUI previews visibly representative of cold, snowy weather.
     private func snowForecastMap() -> [String: Any]? {
         guard var response = definition.json(jsonFile: "SpotForecast"),
               var forecasts = response["forecast"] as? [String: Any] else {
@@ -61,16 +56,12 @@ public class ForecastWindguruMockup: ForecastWindguruProtocol {
         return response
     }
 
-    /// Kept in code rather than loaded from a package resource because the
-    /// Xcode preview agent does not consistently mount SwiftPM resource bundles.
     private func previewForecastMap(
         modelID: String,
         name: String,
         windAdjustment: Double,
         temperatureAdjustment: Double
     ) -> [String: Any] {
-        // Keep ten complete model days for the iPad extra-large widget rather
-        // than truncating the bundled preview forecast at 72 hours.
         let hours = Array(0...239)
         func values(_ transform: (Int) -> Any) -> [String: Any] {
             Dictionary(uniqueKeysWithValues: hours.map { (String($0), transform($0)) })
@@ -80,9 +71,6 @@ public class ForecastWindguruMockup: ForecastWindguruProtocol {
             "initstamp": 1_786_000_000,
             "initdate": "2026-08-02 00:00:00",
             "model_name": name,
-            // Forecast's wind accessors expose `Double` values. Keep the
-            // inline preview map faithful to decoded API data so charts and
-            // detail views receive the same non-zero values as the grid.
             "WINDSPD": values { Double(8 + ($0 % 6)) + windAdjustment },
             "GUST": values { Double(13 + ($0 % 8)) + windAdjustment },
             "WINDDIR": values { Double(240 + ($0 % 5) * 12) },

@@ -1,8 +1,6 @@
 #if canImport(CoreSpotlight) && !os(tvOS) && !os(watchOS)
 import CoreSpotlight
 
-/// Makes a person's current forecast and saved locations discoverable through
-/// the system search UI on platforms that offer Core Spotlight.
 public enum ForescoopSpotlightIndexer {
     private static let domain = "org.forescoop.forecast"
 
@@ -11,8 +9,6 @@ public enum ForescoopSpotlightIndexer {
         items.append(contentsOf: savedLocations.map(locationItem))
 
         CSSearchableIndex.default().indexSearchableItems(items) { _ in
-            // Spotlight is supplementary; forecast presentation must never be
-            // blocked by an indexing failure.
         }
     }
 

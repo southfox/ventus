@@ -2,12 +2,6 @@
 //  ForecastAlertSweep.swift
 //  Forescoop
 //
-//  Platform-agnostic core used by every background-refresh mechanism
-//  (BGTaskScheduler on iOS/tvOS/visionOS, NSBackgroundActivityScheduler on
-//  macOS, WKApplicationRefreshBackgroundTask on watchOS): fetches a forecast
-//  for each spot referenced by an active, push-enabled alert and hands it to
-//  ForecastSevereWeatherNotifier for evaluation.
-//
 
 import Foundation
 

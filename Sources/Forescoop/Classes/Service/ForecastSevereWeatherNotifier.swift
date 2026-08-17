@@ -10,8 +10,6 @@ import Foundation
 import UserNotifications
 #endif
 
-/// Evaluates the selected location's nearest forecast hour and informs the
-/// user about weather conditions that merit immediate attention.
 @MainActor
 enum ForecastSevereWeatherNotifier {
 #if canImport(UserNotifications) && !os(tvOS)
@@ -30,8 +28,6 @@ enum ForecastSevereWeatherNotifier {
         let location = spotForecast.locationDisplayName()
         let alert: ForecastSevereWeatherAlert?
 
-        // Windguru reports precipitation in millimetres. Below freezing, a
-        // substantial amount is treated as a heavy-snow risk.
         if temperature <= 0, precipitation >= 8 {
             alert = ForecastSevereWeatherAlert(
                 kind: "heavy-snow",
@@ -70,10 +66,6 @@ enum ForecastSevereWeatherNotifier {
         return alert
     }
 
-    /// Evaluates the user's custom ForecastAlert definitions for this spot and
-    /// fires a push notification for each one whose conditions are met by an
-    /// upcoming forecast hour. Unlike `evaluate(_:)`, this never surfaces an
-    /// in-app banner — custom alerts are push-only.
     nonisolated static func evaluateCustomAlerts(_ spotForecast: SpotForecast) {
 #if canImport(UserNotifications) && !os(tvOS)
         guard ForecastSevereWeatherNotificationsStore.load(), let spotID = spotForecast.identifier else { return }
@@ -127,9 +119,6 @@ struct ForecastSevereWeatherAlert: Equatable {
     let hour: String
 }
 
-/// Persists whether the user has opted in to severe weather notifications.
-/// Defaults to enabled so the alert banner and local notification behave the
-/// same as before this preference existed.
 public enum ForecastSevereWeatherNotificationsStore {
     private static let key = "forecastSevereWeatherNotificationsEnabled"
 

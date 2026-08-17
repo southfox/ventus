@@ -12,11 +12,6 @@ import SwiftUI
 import MetalKit
 #endif
 
-/// Experimental GPU-rendered weather background.
-///
-/// This is intentionally separate from `AnimatedWeatherBackground` so the two
-/// visual treatments can be evaluated independently. It accepts the forecast,
-/// rather than individual weather values, just like the SwiftUI implementation.
 public struct MetalWeatherBackground: WeatherBackground {
     private let condition: MetalWeatherCondition
 

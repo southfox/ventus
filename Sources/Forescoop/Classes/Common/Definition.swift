@@ -74,7 +74,6 @@ public class Definition {
 
 private extension Definition {
 
-    /// SwiftPM generates this bundle when processing the target's resources.
     var fwkBundle: Bundle? {
         Bundle.module
     }
