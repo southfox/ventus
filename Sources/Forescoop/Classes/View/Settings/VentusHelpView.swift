@@ -8,8 +8,6 @@
 
 import SwiftUI
 
-/// An in-app guide to choosing locations, reading forecasts, and comparing
-/// models in Ventus. Its flow is informed by Windguru's introductory guide.
 public struct VentusHelpView: View {
     @Environment(\.dismiss) private var dismiss
     private let windguruHelpURL = URL(string: "https://www.windguru.cz/help.php?sec=intro")!
@@ -95,6 +93,17 @@ public struct VentusHelpView: View {
                     .padding(.vertical, 4)
                 } label: {
                     Label("Forecast essentials".localized, systemImage: "book")
+                }
+
+                HelpSection {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HelpFeature(symbol: "thermometer.variable.and.figure", title: "Real vs. raw temperature".localized, detail: "The headline temperature is the real, altitude-corrected reading (TMPE) whenever the model provides it, falling back to the raw model temperature (TMP) otherwise. Where both are shown side by side, the second value is always the unadjusted raw reading.".localized)
+                        HelpFeature(symbol: "thermometer.sun.fill", title: "Thermometer icon shape and color".localized, detail: "Each thermometer icon reflects its own value: below 0°C shows a snowflake thermometer, 0–18°C a plain thermometer, 18–28°C a sun thermometer, and 28°C and above a filled sun thermometer. Its color grades from icy blue through cyan, green, and yellow to orange and red as the reading rises.".localized)
+                        HelpFeature(symbol: "wind", title: "Wind icon follows the Beaufort scale".localized, detail: "The wind icon is chosen from the Beaufort force of whichever is stronger, sustained wind or gusts: wind through wind.circle.fill for breezes, tornado symbols for gales, tropical-storm symbols for storm force, and hurricane symbols at the top of the scale.".localized)
+                    }
+                    .padding(.vertical, 4)
+                } label: {
+                    Label("Reading the icons".localized, systemImage: "eye")
                 }
 
                 VStack(alignment: .leading, spacing: 10) {

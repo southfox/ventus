@@ -1582,35 +1582,6 @@
         }
       }
     },
-    "Clouds" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wolken"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nubes"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nuages"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nuvens"
-          }
-        }
-      }
-    },
     "Cloudy" : {
       "localizations" : {
         "de" : {
@@ -1891,64 +1862,6 @@
         }
       }
     },
-    "Current weather at your selected forecast location." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aktuelles Wetter an deinem ausgewählten Vorhersageort."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clima actual en tu ubicación de pronóstico seleccionada."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Météo actuelle à l'emplacement de prévision sélectionné."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clima atual na localização de previsão selecionada."
-          }
-        }
-      }
-    },
-    "Dark surfaces retain the theme palette and readable contrast." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dunkle Oberflächen behalten die Farbpalette des Themas und einen gut lesbaren Kontrast."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Las superficies oscuras conservan la paleta del tema y un contraste legible."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les surfaces sombres conservent la palette du thème et un contraste lisible."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "As superfícies escuras mantêm a paleta do tema e um contraste legível."
-          }
-        }
-      }
-    },
     "Days ahead" : {
       "localizations" : {
         "de" : {
@@ -2197,6 +2110,34 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cada spot exibe os modelos de previsão que o cobrem. A seleção disponível pode mudar ao escolher outro local ou entrar com um nível de conta diferente."
+          }
+        }
+      }
+    },
+    "Each thermometer icon reflects its own value: below 0°C shows a snowflake thermometer, 0–18°C a plain thermometer, 18–28°C a sun thermometer, and 28°C and above a filled sun thermometer. Its color grades from icy blue through cyan, green, and yellow to orange and red as the reading rises." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jedes Thermometersymbol richtet sich nach seinem eigenen Wert: unter 0 °C erscheint ein Thermometer mit Schneeflocke, bei 0–18 °C ein einfaches Thermometer, bei 18–28 °C ein Thermometer mit Sonne und ab 28 °C ein Thermometer mit ausgefüllter Sonne. Die Farbe reicht von Eisblau über Cyan, Grün und Gelb bis Orange und Rot, je höher der Wert steigt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada ícono de termómetro refleja su propio valor: por debajo de 0 °C muestra un termómetro con copo de nieve, entre 0 y 18 °C un termómetro simple, entre 18 y 28 °C un termómetro con sol, y a partir de 28 °C un termómetro con sol relleno. Su color va del azul helado al cian, verde y amarillo, hasta naranja y rojo a medida que sube la lectura."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chaque icône de thermomètre reflète sa propre valeur : en dessous de 0 °C, un thermomètre avec flocon de neige ; de 0 à 18 °C, un thermomètre simple ; de 18 à 28 °C, un thermomètre avec soleil ; et à partir de 28 °C, un thermomètre avec soleil plein. Sa couleur passe du bleu glacé au cyan, au vert et au jaune, puis à l'orange et au rouge à mesure que la valeur augmente."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada ícone de termômetro reflete seu próprio valor: abaixo de 0 °C mostra um termômetro com floco de neve, de 0 a 18 °C um termômetro simples, de 18 a 28 °C um termômetro com sol, e a partir de 28 °C um termômetro com sol preenchido. Sua cor varia do azul gelado ao ciano, verde e amarelo, até laranja e vermelho conforme a leitura sobe."
           }
         }
       }
@@ -2453,35 +2394,6 @@
         }
       }
     },
-    "Forecast dashboard" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vorhersage-Dashboard"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Panel de pronóstico"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tableau de bord des prévisions"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Painel de previsão"
-          }
-        }
-      }
-    },
     "Forecast Dashboard" : {
       "localizations" : {
         "de" : {
@@ -2646,35 +2558,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gráfico de previsão"
-          }
-        }
-      }
-    },
-    "Forecast grid" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vorhersagetabelle"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Grilla de pronóstico"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Grille de prévision"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Grade de previsão"
           }
         }
       }
@@ -3209,64 +3092,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rajadas"
-          }
-        }
-      }
-    },
-    "Gusts · low → strong" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Böen · schwach → stark"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ráfagas · baja → fuerte"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rafales · faibles → fortes"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rajadas · fraca → forte"
-          }
-        }
-      }
-    },
-    "H:%@  L:%@" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "H:%@  T:%@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Máx:%@  Mín:%@"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Max : %@  Min : %@"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Máx:%@  Mín:%@"
           }
         }
       }
@@ -4879,35 +4704,6 @@
         }
       }
     },
-    "Open Ventus for the full forecast." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Öffne Ventus für die vollständige Vorhersage."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abrí Ventus para ver el pronóstico completo."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ouvrez Ventus pour la prévision complète."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abra o Ventus para ver a previsão completa."
-          }
-        }
-      }
-    },
     "Open Windguru forecast model help" : {
       "localizations" : {
         "de" : {
@@ -5576,6 +5372,62 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ler e comparar"
+          }
+        }
+      }
+    },
+    "Reading the icons" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Symbole verstehen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cómo leer los íconos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comprendre les icônes"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Como ler os ícones"
+          }
+        }
+      }
+    },
+    "Real vs. raw temperature" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reale und rohe Temperatur"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperatura real y sin corregir"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Température réelle et brute"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperatura real e bruta"
           }
         }
       }
@@ -7126,6 +6978,34 @@
         }
       }
     },
+    "The headline temperature is the real, altitude-corrected reading (TMPE) whenever the model provides it, falling back to the raw model temperature (TMP) otherwise. Where both are shown side by side, the second value is always the unadjusted raw reading." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Haupttemperatur ist die reale, höhenkorrigierte Messung (TMPE), sofern das Modell sie liefert, andernfalls wird auf die rohe Modelltemperatur (TMP) zurückgegriffen. Werden beide Werte nebeneinander angezeigt, ist der zweite Wert immer die unkorrigierte Rohmessung."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La temperatura principal es la lectura real, corregida por altitud (TMPE) cuando el modelo la proporciona, y recurre a la temperatura bruta del modelo (TMP) en caso contrario. Cuando se muestran ambos valores uno junto al otro, el segundo siempre es la lectura bruta sin corregir."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La température principale est la valeur réelle, corrigée en fonction de l'altitude (TMPE), lorsque le modèle la fournit, avec un repli sur la température brute du modèle (TMP) sinon. Lorsque les deux valeurs sont affichées côte à côte, la seconde est toujours la valeur brute non corrigée."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A temperatura principal é a leitura real, corrigida pela altitude (TMPE), sempre que o modelo a fornece, recorrendo à temperatura bruta do modelo (TMP) caso contrário. Quando ambos os valores são exibidos lado a lado, o segundo é sempre a leitura bruta sem correção."
+          }
+        }
+      }
+    },
     "The selected animation is used as the forecast background on this device." : {
       "localizations" : {
         "de" : {
@@ -7150,6 +7030,34 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A animação selecionada é usada como plano de fundo da previsão neste dispositivo."
+          }
+        }
+      }
+    },
+    "The wind icon is chosen from the Beaufort force of whichever is stronger, sustained wind or gusts: wind through wind.circle.fill for breezes, tornado symbols for gales, tropical-storm symbols for storm force, and hurricane symbols at the top of the scale." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Windsymbol richtet sich nach der Beaufort-Stärke des jeweils stärkeren Werts, anhaltender Wind oder Böen: „wind“ bis „wind.circle.fill“ für Brisen, Tornado-Symbole für Sturmböen, Tropensturm-Symbole für Sturmstärke und Hurrikan-Symbole am oberen Ende der Skala."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El ícono de viento se elige según la fuerza de Beaufort del valor más alto entre el viento sostenido y las ráfagas: de «wind» a «wind.circle.fill» para brisas, símbolos de tornado para vendavales, símbolos de tormenta tropical para fuerza de tormenta, y símbolos de huracán en la parte superior de la escala."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'icône du vent est choisie selon la force de Beaufort la plus élevée entre le vent soutenu et les rafales : de « wind » à « wind.circle.fill » pour les brises, des symboles de tornade pour les coups de vent, des symboles de tempête tropicale pour la force de tempête, et des symboles d'ouragan au sommet de l'échelle."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O ícone de vento é escolhido pela força de Beaufort do valor mais forte entre o vento sustentado e as rajadas: de \"wind\" a \"wind.circle.fill\" para brisas, símbolos de tornado para ventanias, símbolos de tempestade tropical para força de tempestade, e símbolos de furacão no topo da escala."
           }
         }
       }
@@ -7182,35 +7090,6 @@
         }
       }
     },
-    "Theme font design keeps this text at its existing size." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Das Schriftdesign des Themas behält diesen Text in seiner aktuellen Größe bei."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El diseño de tipografía del tema mantiene este texto en su tamaño actual."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La typographie du thème conserve ce texte à sa taille actuelle."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O design de fonte do tema mantém este texto no tamanho atual."
-          }
-        }
-      }
-    },
     "Themes change colors and font design without changing text sizes. System Default follows the current device appearance." : {
       "localizations" : {
         "de" : {
@@ -7235,6 +7114,34 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Os temas mudam as cores e o design da fonte sem alterar o tamanho do texto. \"Padrão do sistema\" segue a aparência atual do dispositivo."
+          }
+        }
+      }
+    },
+    "Thermometer icon shape and color" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Form und Farbe des Thermometersymbols"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forma y color del ícono del termómetro"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forme et couleur de l'icône du thermomètre"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forma e cor do ícone do termômetro"
           }
         }
       }
@@ -7487,35 +7394,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Até o dia"
-          }
-        }
-      }
-    },
-    "Updated" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aktualisiert"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Actualizado"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mis à jour"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Atualizado"
           }
         }
       }
@@ -8668,6 +8546,34 @@
         }
       }
     },
+    "Wind icon follows the Beaufort scale" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Windsymbol folgt der Beaufort-Skala"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El ícono de viento sigue la escala de Beaufort"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'icône du vent suit l'échelle de Beaufort"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O ícone de vento segue a escala Beaufort"
+          }
+        }
+      }
+    },
     "Wind ratings" : {
       "localizations" : {
         "de" : {
@@ -8776,35 +8682,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Unidade de velocidade do vento"
-          }
-        }
-      }
-    },
-    "Wind, gust, cloud cover, humidity, pressure, temperature and precipitation forecast graph" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vorhersagediagramm für Wind, Böen, Bewölkung, Luftfeuchtigkeit, Luftdruck, Temperatur und Niederschlag"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gráfico de pronóstico de viento, ráfagas, nubosidad, humedad, presión, temperatura y precipitación"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Graphique de prévision du vent, des rafales, de la couverture nuageuse, de l'humidité, de la pression, de la température et des précipitations"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gráfico de previsão de vento, rajadas, cobertura de nuvens, umidade, pressão, temperatura e precipitação"
           }
         }
       }
