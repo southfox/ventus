@@ -13,6 +13,8 @@ public struct ForecastWindDetails: View {
     public let forecast: SpotForecast
     public let selectedHour: String?
     @Binding public var windSpeedUnit: WindSpeedUnit
+    @Binding public var windDirectionDisplayMode: WindDirectionDisplayMode
+    @Binding public var temperatureUnit: TemperatureUnit
     public let modelForecasts: [SpotForecast]
     public let modelNamesByID: [String: String]
     public let isModelComparisonEnabled: Bool
@@ -21,6 +23,8 @@ public struct ForecastWindDetails: View {
         forecast: SpotForecast,
         selectedHour: String?,
         windSpeedUnit: Binding<WindSpeedUnit>,
+        windDirectionDisplayMode: Binding<WindDirectionDisplayMode>,
+        temperatureUnit: Binding<TemperatureUnit>,
         modelForecasts: [SpotForecast] = [],
         modelNamesByID: [String: String] = [:],
         isModelComparisonEnabled: Bool = false
@@ -28,6 +32,8 @@ public struct ForecastWindDetails: View {
         self.forecast = forecast
         self.selectedHour = selectedHour
         _windSpeedUnit = windSpeedUnit
+        _windDirectionDisplayMode = windDirectionDisplayMode
+        _temperatureUnit = temperatureUnit
         self.modelForecasts = modelForecasts
         self.modelNamesByID = modelNamesByID
         self.isModelComparisonEnabled = isModelComparisonEnabled
@@ -67,11 +73,12 @@ public struct ForecastWindDetails: View {
 
             LabeledContent {
                 if let direction = weather?.windDirection(hh: hour) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "arrow.down")
-                            .rotationEffect(.degrees(direction))
-                        Text(weather?.windDirectionName(hh: hour) ?? "—")
+                    Button {
+                        windDirectionDisplayMode = windDirectionDisplayMode.next
+                    } label: {
+                        windDirectionView(direction)
                     }
+                    .buttonStyle(.plain)
                 } else {
                     Text("—")
                 }
@@ -79,7 +86,24 @@ public struct ForecastWindDetails: View {
                 Label("Wind direction", systemImage: "location.north.line")
             }
             ForecastModelSourceRows(forecasts: modelForecasts, modelNamesByID: modelNamesByID, isEnabled: isModelComparisonEnabled) {
-                $0.forecast?.windDirectionName(hh: hour) ?? "—"
+                $0.forecast?.windDirection(hh: hour).map(windDirectionText) ?? "—"
+            }
+
+            if let windChill = weather?.windChill(hh: hour) {
+                ForecastUnitSelector(
+                    "Temperature unit",
+                    selection: $temperatureUnit,
+                    unitTitle: \.label
+                ) {
+                    LabeledContent { Text(windChillText(windChill)) } label: {
+                        Label("Wind chill", systemImage: "thermometer.snowflake")
+                            .foregroundStyle(theme.accentColor)
+                    }
+                }
+                .accessibilityLabel("Wind chill")
+                ForecastModelSourceRows(forecasts: modelForecasts, modelNamesByID: modelNamesByID, isEnabled: isModelComparisonEnabled) {
+                    $0.forecast?.windChill(hh: hour).map(windChillText) ?? "—"
+                }
             }
         }
         .font(.body)
@@ -93,6 +117,24 @@ public struct ForecastWindDetails: View {
         guard let knots, let value = Knots(knots).value(in: windSpeedUnit) else { return "—" }
         return "\(value.forecastFormatted()) \(windSpeedUnit.label)"
     }
+
+    @ViewBuilder private func windDirectionView(_ direction: Double) -> some View {
+        switch windDirectionDisplayMode {
+        case .arrow:
+            Image(systemName: "arrow.down")
+                .rotationEffect(.degrees(direction))
+        case .degrees:
+            Text(windDirectionText(direction))
+        }
+    }
+
+    private func windDirectionText(_ direction: Double) -> String {
+        "\(Int(direction.rounded()))°"
+    }
+
+    private func windChillText(_ celsius: Double) -> String {
+        "\(Temperature(celsius: celsius).value(in: temperatureUnit).forecastFormatted(precision: 0))\(temperatureUnit.label)"
+    }
 }
 
 #Preview("Wind details") {
@@ -100,7 +142,9 @@ public struct ForecastWindDetails: View {
         ForecastWindDetails(
             forecast: forecast,
             selectedHour: "29",
-            windSpeedUnit: .constant(.knots)
+            windSpeedUnit: .constant(.knots),
+            windDirectionDisplayMode: .constant(.arrow),
+            temperatureUnit: .constant(.celsius)
         )
         .padding()
     } else {

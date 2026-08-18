@@ -12,6 +12,7 @@ extension ForecastWidgetEntry {
         wind: "22 kt",
         gust: "31 kt",
         windDirection: "WNW",
+        windDirectionDegrees: 292.5,
         rain: "1.8 mm",
         humidity: "82%",
         cloudCover: "94%",

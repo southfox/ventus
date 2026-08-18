@@ -104,11 +104,16 @@ public extension Forecast {
         weathers?[TypeOfWeather.WINDSPD.rawValue]?.orderedKeys ?? []
     }
 
-    var cadenceDescription: String {
+    var stepIntervalHours: Int {
         let offsets = availableHours.compactMap(Int.init).sorted()
-        guard offsets.count > 1 else { return "One forecast time" }
+        guard offsets.count > 1 else { return 1 }
         let intervals = zip(offsets.dropFirst(), offsets).map { $0 - $1 }
-        let interval = intervals.reduce(0, greatestCommonDivisor)
+        return intervals.reduce(0, greatestCommonDivisor)
+    }
+
+    var cadenceDescription: String {
+        guard availableHours.count > 1 else { return "One forecast time" }
+        let interval = stepIntervalHours
         return interval == 1 ? "Hourly" : "Every \(interval) hours"
     }
 
@@ -189,6 +194,15 @@ public extension Forecast {
     /// FLHGT: Freezing Level height in meters (0 degree isoterm)
     func freezingLevelHeightInMeters(hh: String?) -> Double? {
         weathers?[TypeOfWeather.FLHGT.rawValue]?.value(hh: hh)
+    }
+
+    func windChill(hh: String?) -> Double? {
+        guard let celsius = temperature(hh: hh) ?? temperatureReal(hh: hh),
+              let windSpeedKnots = windSpeed(hh: hh) else { return nil }
+        let kmh = windSpeedKnots * 1.852
+        guard celsius <= 10, kmh > 4.8 else { return nil }
+        let windFactor = pow(kmh, 0.16)
+        return 13.12 + 0.6215 * celsius - 11.37 * windFactor + 0.3965 * celsius * windFactor
     }
 
     /// APCP:  Precip. (mm/3h)

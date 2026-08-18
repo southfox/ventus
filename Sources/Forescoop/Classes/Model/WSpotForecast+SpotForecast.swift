@@ -59,7 +59,10 @@ public extension SpotForecast {
             "lat": spot.lat,
             "lon": spot.lon,
             "alt": spot.alt,
+            "tz": spot.tzid as Any,
             "gmt_hour_offset": spot.utc_offset,
+            "sunrise": spot.sunrise as Any,
+            "sunset": spot.sunset as Any,
             "models": [spot.id_model],
             "forecast": [String(spot.id_model): model]
         ])

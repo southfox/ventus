@@ -263,7 +263,8 @@ public struct ForecastWeatherDetails: View {
     }
     private func pressure(for source: Forecast?) -> String {
         guard let value = source?.seaLevelPressure(hh: hour) else { return "—" }
-        return "\(AtmosphericPressure(hectopascals: value).value(in: pressureUnit).forecastFormatted()) \(pressureUnit.label)"
+        let precision = pressureUnit == .inchesOfMercury ? 2 : 0
+        return "\(AtmosphericPressure(hectopascals: value).value(in: pressureUnit).forecastFormatted(precision: precision)) \(pressureUnit.label)"
     }
     private func waveHeightText(_ height: Double) -> String {
         "\(WaveHeight(meters: height).value(in: waveHeightUnit).formatted(.number.precision(.fractionLength(1)))) \(waveHeightUnit.label)"

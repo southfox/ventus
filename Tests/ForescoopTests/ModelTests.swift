@@ -250,7 +250,7 @@ class ModelTests: XCTestCase {
         XCTAssertEqual(forecast?.gmtHourOffset, -3)
         XCTAssertEqual(forecast?.initializationDate, DateTime("2023-06-07 18:00:00", gmtHourOffset: forecast?.gmtHourOffset ?? 0)?.asDate)
         let referenceDate = Date(timeIntervalSince1970: 1_689_811_200) // 2023-07-21 12:00 UTC
-        let expectedForecastDate = Calendar.current.date(byAdding: .hour, value: 27, to: Calendar.current.startOfDay(for: referenceDate))
+        let expectedForecastDate = Date(timeIntervalSince1970: TimeInterval(forecast?.initializationStamp ?? 0) + 27 * 3_600)
         XCTAssertEqual(spotForecast?.forecastDate(hour: "27", relativeTo: referenceDate), expectedForecastDate)
         XCTAssertEqual(forecast?.modelName, "GFS 13 km")
 

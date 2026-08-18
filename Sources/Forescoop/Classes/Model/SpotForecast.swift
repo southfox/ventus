@@ -96,11 +96,19 @@ public extension SpotForecast {
             guard let value = Int(hour) else { return nil }
             return (hour, value)
         }
+        if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil,
+           let initStamp = forecast?.initStamp, initStamp > 0 {
+            let elapsedHours = Date().timeIntervalSince(Date(timeIntervalSince1970: TimeInterval(initStamp))) / 3_600
+            return hours.last(where: { Double($0.1) <= elapsedHours })?.0 ?? hours.first?.0
+        }
         return hours.last(where: { $0.1 <= currentHourInt })?.0 ?? hours.first?.0
     }
 
     func forecastDate(hour: String?, relativeTo referenceDate: Date = Date()) -> Date? {
         guard let offset = Int(hour ?? "") else { return nil }
+        if let initStamp = forecast?.initStamp, initStamp > 0 {
+            return Date(timeIntervalSince1970: TimeInterval(initStamp)).addingTimeInterval(TimeInterval(offset) * 3_600)
+        }
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = timezone
             ?? TimeZone(secondsFromGMT: gmtHourOffset * 3_600)

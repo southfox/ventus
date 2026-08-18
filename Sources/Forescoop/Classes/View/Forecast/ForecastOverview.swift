@@ -100,17 +100,9 @@ public struct ForecastOverview: View {
                         selection: $temperatureUnit,
                         unitTitle: \.label
                     ) {
-                        HStack {
-                            if let realTemperature {
-                                ThermalLabel(realTemperature, celsius: currentCelsius)
-                                    .font(.system(size: 44, weight: .semibold))
-                                    .foregroundStyle(theme.accentColor)
-                            } else {
-                                ThermalLabel(temperature, celsius: currentCelsius)
-                                    .font(.system(size: 44, weight: .semibold))
-                                    .foregroundStyle(theme.accentColor)
-                            }
-                        }
+                        ThermalLabel(temperature, celsius: currentCelsius)
+                            .font(.system(size: 44, weight: .semibold))
+                            .foregroundStyle(theme.accentColor)
                     }
                     .accessibilityLabel("Temperature")
 
@@ -121,6 +113,13 @@ public struct ForecastOverview: View {
                         .labelStyle(.iconOnly)
                         .foregroundStyle(theme.accentColor)
                     }
+                }
+
+                if let realTemperature {
+                    Label(realTemperature, systemImage: "thermometer.variable.and.figure")
+                        .font(.title3.weight(.medium))
+                        .foregroundStyle(theme.accentColor)
+                        .accessibilityLabel("Real temperature")
                 }
 
                 if let range = forecast.dailyTemperatureRange(hour: selectedHour), let highTemperatureText, let lowTemperatureText {
@@ -147,9 +146,12 @@ public struct ForecastOverview: View {
         }
     }
 
+    /// TMP only — deliberately not falling back to TMPE, so this headline
+    /// stays visually distinct from the "Real temperature" line below it
+    /// whenever the model actually reports both (matches the grid).
     private var currentCelsius: Double {
         let hour = selectedHour ?? forecast.currentForecastHour
-        return forecast.forecast?.temperatureReal(hh: hour) ?? forecast.forecast?.temperature(hh: hour) ?? 0
+        return forecast.forecast?.temperature(hh: hour) ?? forecast.forecast?.temperatureReal(hh: hour) ?? 0
     }
 
     private var temperature: String {
@@ -158,7 +160,7 @@ public struct ForecastOverview: View {
 
     private func temperature(for source: SpotForecast) -> String {
         let hour = selectedHour ?? source.currentForecastHour
-        guard let value = source.forecast?.temperatureReal(hh: hour) ?? source.forecast?.temperature(hh: hour) else { return "—" }
+        guard let value = source.forecast?.temperature(hh: hour) ?? source.forecast?.temperatureReal(hh: hour) else { return "—" }
         return "\(Temperature(celsius: value).value(in: temperatureUnit).forecastFormatted(precision: 0))\(temperatureUnit.label)"
     }
 

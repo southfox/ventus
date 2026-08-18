@@ -216,7 +216,7 @@ public struct ForecastWidgetView: View {
         ) {
             expandedMetric("Wind", value: entry.wind, symbol: "wind")
             expandedMetric("Gusts", value: entry.gust, symbol: "wind.circle")
-            expandedMetric("Direction", value: entry.windDirection, symbol: "location.north.line")
+            expandedDirectionMetric("Direction", degrees: entry.windDirectionDegrees)
             expandedMetric("Rain", value: entry.rain, symbol: "drop.fill")
             expandedMetric("Humidity", value: entry.humidity, symbol: "humidity")
             expandedMetric("Clouds", value: entry.cloudCover, symbol: "cloud.fill")
@@ -231,6 +231,24 @@ public struct ForecastWidgetView: View {
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
             Text(value)
+                .font(.subheadline.weight(.semibold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+        }
+    }
+
+    private func expandedDirectionMetric(_ title: LocalizedStringKey, degrees: Double) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Label {
+                Text(title)
+            } icon: {
+                Image(systemName: "arrow.down")
+                    .rotationEffect(.degrees(degrees))
+            }
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+            .lineLimit(1)
+            Text("\(Int(degrees.rounded()))°")
                 .font(.subheadline.weight(.semibold))
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)

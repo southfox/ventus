@@ -8,8 +8,13 @@
 
 import Foundation
 
-extension Double {
+public extension Double {
     func forecastFormatted(precision: Int = 1) -> String {
-        formatted(.number.precision(.fractionLength(precision)))
+        let scale = pow(10.0, Double(precision))
+        var rounded = (self * scale).rounded() / scale
+        if rounded == 0, self != 0 {
+            rounded = (self < 0 ? -1.0 : 1.0) / scale
+        }
+        return rounded.formatted(.number.precision(.fractionLength(precision)))
     }
 }

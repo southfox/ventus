@@ -41,7 +41,8 @@ public struct ForecastDashboardView: View {
     @State private var selectedSpotID: String
     @StateObject private var account: WindguruAccount
     @StateObject private var viewModel: ForecastDashboardViewModel
-    @State private var showsWindDirectionArrow = false
+    @State private var windDirectionDisplayMode: WindDirectionDisplayMode = .arrow
+    @State private var gridHourStep = GridHourStepStore.load()
     @State private var activeSheet: DashboardSheet?
     @State private var content: ForecastViewMode
     @State private var weatherBackgroundStyle: WeatherBackgroundStyle
@@ -347,6 +348,7 @@ public struct ForecastDashboardView: View {
                     forecastViewMode: $content,
                     theme: $theme,
                     appLanguage: $appLanguage,
+                    gridHourStep: $gridHourStep,
                     forecastService: forecastService,
                     account: account
                 )
@@ -428,7 +430,7 @@ public struct ForecastDashboardView: View {
                         .frame(maxWidth: .infinity)
 
                         VStack(alignment: .leading, spacing: 28) {
-                            ForecastWindDetails(forecast: forecast, selectedHour: selectedHour, windSpeedUnit: $viewModel.windSpeedUnit, modelForecasts: displayedModelForecasts, modelNamesByID: modelNamesByID, isModelComparisonEnabled: showsDashboardModelComparison)
+                            ForecastWindDetails(forecast: forecast, selectedHour: selectedHour, windSpeedUnit: $viewModel.windSpeedUnit, windDirectionDisplayMode: $windDirectionDisplayMode, temperatureUnit: $viewModel.temperatureUnit, modelForecasts: displayedModelForecasts, modelNamesByID: modelNamesByID, isModelComparisonEnabled: showsDashboardModelComparison)
                             ForecastWeatherDetails(forecast: forecast, selectedHour: selectedHour, waveHeightUnit: $viewModel.waveHeightUnit, precipitationUnit: $viewModel.precipitationUnit, freezingLevelUnit: $viewModel.freezingLevelUnit, pressureUnit: $viewModel.pressureUnit, modelForecasts: displayedModelForecasts, modelNamesByID: modelNamesByID, isModelComparisonEnabled: showsDashboardModelComparison)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -451,7 +453,7 @@ public struct ForecastDashboardView: View {
                 } else {
                     VStack(spacing: 24) {
                         ForecastOverview(forecast: forecast, selectedHour: selectedHour, temperatureUnit: $viewModel.temperatureUnit, coordinateLocationName: coordinateLocationName, modelForecasts: displayedModelForecasts, modelNamesByID: modelNamesByID, isModelComparisonEnabled: showsDashboardModelComparison, showsLocationHeader: showsLocationHeader, showsModelSummary: showsModelSummary, onSelectLocation: { activeSheet = .spotPicker }, onSelectModel: { activeSheet = .modelPicker }, onShowMap: { activeSheet = .forecastMap })
-                        ForecastWindDetails(forecast: forecast, selectedHour: selectedHour, windSpeedUnit: $viewModel.windSpeedUnit, modelForecasts: displayedModelForecasts, modelNamesByID: modelNamesByID, isModelComparisonEnabled: showsDashboardModelComparison)
+                        ForecastWindDetails(forecast: forecast, selectedHour: selectedHour, windSpeedUnit: $viewModel.windSpeedUnit, windDirectionDisplayMode: $windDirectionDisplayMode, temperatureUnit: $viewModel.temperatureUnit, modelForecasts: displayedModelForecasts, modelNamesByID: modelNamesByID, isModelComparisonEnabled: showsDashboardModelComparison)
                         ForecastWeatherDetails(forecast: forecast, selectedHour: selectedHour, waveHeightUnit: $viewModel.waveHeightUnit, precipitationUnit: $viewModel.precipitationUnit, freezingLevelUnit: $viewModel.freezingLevelUnit, pressureUnit: $viewModel.pressureUnit, modelForecasts: displayedModelForecasts, modelNamesByID: modelNamesByID, isModelComparisonEnabled: showsDashboardModelComparison)
                         ForecastIntelligenceSummary(forecast: forecast, hour: selectedHour, coordinateLocationName: coordinateLocationName, temperatureUnit: viewModel.temperatureUnit, windSpeedUnit: viewModel.windSpeedUnit, precipitationUnit: viewModel.precipitationUnit, freezingLevelUnit: viewModel.freezingLevelUnit, pressureUnit: viewModel.pressureUnit)
                     }
@@ -506,7 +508,8 @@ public struct ForecastDashboardView: View {
             viewModel: viewModel,
             availableModelIDs: availableModelIDs,
             selectedModelIDs: selectedForecastModelIDs,
-            showsWindDirectionArrow: $showsWindDirectionArrow,
+            windDirectionDisplayMode: $windDirectionDisplayMode,
+            gridHourStep: $gridHourStep,
             onSelectLocation: { activeSheet = .spotPicker },
             onToggleModel: { modelID in
                 toggleGridModel(

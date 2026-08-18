@@ -132,7 +132,7 @@ public struct WatchForecastView: View {
                 HStack(spacing: 12) {
                     metric("Wind", value: wind(weather?.windSpeed(hh: hour)), symbol: "wind")
                     metric("Gusts", value: wind(weather?.windGustsKnots(hh: hour)), symbol: "wind.circle")
-                    metric("Direction", value: weather?.windDirectionName(hh: hour) ?? "—", symbol: "location.north.line")
+                    directionMetric("Direction", degrees: weather?.windDirection(hh: hour))
                 }
                 
                 HStack(spacing: 12) {
@@ -232,6 +232,18 @@ public struct WatchForecastView: View {
         }
         .frame(maxWidth: .infinity)
     }
+
+    private func directionMetric(_ title: String, degrees: Double?) -> some View {
+        VStack(spacing: 2) {
+            Image(systemName: "arrow.down")
+                .font(.caption2)
+                .rotationEffect(.degrees(degrees ?? 0))
+            Text(degrees.map { "\(Int($0.rounded()))°" } ?? "—").font(.caption2.monospacedDigit())
+            Text(title).font(.system(size: 9)).foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
     private func hourTitle(_ forecast: SpotForecast, hour: String?) -> String {
         guard let hour, let date = forecast.forecastDate(hour: hour) else { return "Select hour" }
         return WatchForecastFormatting.hour(date)

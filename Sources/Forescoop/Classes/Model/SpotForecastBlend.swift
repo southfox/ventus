@@ -9,7 +9,6 @@
 import Foundation
 
 public extension SpotForecast {
-    /// Creates an equal-weight local blend of individual Windguru model forecasts.
     static func blended(_ forecasts: [SpotForecast]) throws -> SpotForecast? {
         guard let base = forecasts.first,
               forecasts.count > 1,
@@ -18,12 +17,23 @@ public extension SpotForecast {
         }
 
         let sources = forecasts.compactMap(\.forecast)
-        // Models can use different run times and cadences. Use every hour
-        // provided by any selected model; for a particular hour, only the
-        // models that actually publish data for it contribute to the average.
-        // This keeps hourly forecasts visible instead of reducing a mix to the
-        // sparsest model's cadence.
-        let availableHours = Set(sources.flatMap(\.availableHours))
+        let weights = sources.map(fineTuneWeight(for:))
+
+        guard let baseInitStamp = base.forecast?.initStamp, baseInitStamp > 0 else {
+            return forecasts.first
+        }
+        // sourceHourMaps[i]: canonical (base-relative) hour -> that source's own native hour key
+        let sourceHourMaps: [[String: String]] = sources.map { source in
+            guard source.initStamp > 0 else { return [:] }
+            let initStampDelta = TimeInterval(source.initStamp - baseInitStamp)
+            return source.availableHours.reduce(into: [String: String]()) { map, nativeHour in
+                guard let offset = Int(nativeHour) else { return }
+                let canonicalOffset = ((initStampDelta + TimeInterval(offset) * 3_600) / 3_600).rounded()
+                map[String(Int(canonicalOffset))] = nativeHour
+            }
+        }
+
+        let availableHours = Set(sourceHourMaps.flatMap(\.keys))
         guard !availableHours.isEmpty else { return base }
 
         let weatherKeys = Set(sources.flatMap { $0.weathers.map { Array($0.keys) } ?? [] })
@@ -31,11 +41,20 @@ public extension SpotForecast {
         for key in weatherKeys where key != TypeOfWeather.WINDIRNAME.rawValue {
             var valuesByHour = [String: Any]()
             for hour in availableHours {
-                let values = sources.compactMap { numericValue($0.weathers?[key]?.info[hour]) }
+                var values = [Double]()
+                var weightedSum = 0.0
+                var weightTotal = 0.0
+                for (index, source) in sources.enumerated() {
+                    guard let nativeHour = sourceHourMaps[index][hour],
+                          let value = numericValue(source.weathers?[key]?.info[nativeHour]) else { continue }
+                    values.append(value)
+                    weightedSum += value * weights[index]
+                    weightTotal += weights[index]
+                }
                 guard !values.isEmpty else { continue }
                 let average = circularDirectionWeatherKeys.contains(key)
                     ? circularMean(values)
-                    : values.reduce(0, +) / Double(values.count)
+                    : weightTotal > 0 ? weightedSum / weightTotal : values.reduce(0, +) / Double(values.count)
                 valuesByHour[hour] = integerWeatherKeys.contains(key)
                     ? Int(average.rounded())
                     : average
@@ -95,6 +114,25 @@ private let circularDirectionWeatherKeys: Set<String> = [
     TypeOfWeather.WVDIR.rawValue,
     TypeOfWeather.DIRPW.rawValue
 ]
+
+private let fineTuneWeightsByModelName: [(matches: [String], weight: Double)] = [
+    (["zephyr-hd", "zephyr_hd", "zephyrhd", "zephyr"], 0.397),
+    (["ifs-hres", "ifs_hres", "ifshres", "ifs"], 0.126),
+    (["gfs"], 0.213),
+    (["wrf"], 0.094),
+    (["icon"], 0.091),
+    (["gdps"], 0.079)
+]
+
+private let fineTuneFallbackWeight = fineTuneWeightsByModelName.map(\.weight).reduce(0, +) / Double(fineTuneWeightsByModelName.count)
+
+private func fineTuneWeight(for forecast: Forecast) -> Double {
+    guard let name = forecast.modelName?.lowercased() else { return fineTuneFallbackWeight }
+    for entry in fineTuneWeightsByModelName where entry.matches.contains(where: name.contains) {
+        return entry.weight
+    }
+    return fineTuneFallbackWeight
+}
 
 private func circularMean(_ degrees: [Double]) -> Double {
     let radians = degrees.map { $0 * .pi / 180 }

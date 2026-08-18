@@ -18,6 +18,7 @@ public struct SettingsView: View {
     @Binding private var appLanguage: AppLanguage
     @State private var notificationsEnabled = ForecastSevereWeatherNotificationsStore.load()
 #if !os(watchOS)
+    @Binding private var gridHourStep: Int
     private let forecastService: ForecastWindguruProtocol
     private let account: WindguruAccount
 #endif
@@ -28,6 +29,7 @@ public struct SettingsView: View {
         forecastViewMode: Binding<ForecastViewMode>,
         theme: Binding<VentusTheme>,
         appLanguage: Binding<AppLanguage>,
+        gridHourStep: Binding<Int>,
         forecastService: ForecastWindguruProtocol,
         account: WindguruAccount
     ) {
@@ -35,6 +37,7 @@ public struct SettingsView: View {
         _forecastViewMode = forecastViewMode
         _theme = theme
         _appLanguage = appLanguage
+        _gridHourStep = gridHourStep
         self.forecastService = forecastService
         self.account = account
     }
@@ -68,6 +71,30 @@ public struct SettingsView: View {
                 } footer: {
                     Text("Choose the default presentation for forecasts on this device.".localized)
                 }
+
+#if !os(watchOS)
+                Section {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(gridHourStep == 1 ? "Hourly".localized : "Every %lld hours".localized(formatArguments: [gridHourStep]))
+                            .foregroundStyle(.secondary)
+                        Slider(
+                            value: Binding(get: { Double(gridHourStep) }, set: { gridHourStep = Int($0.rounded()) }),
+                            in: Double(GridHourStepStore.range.lowerBound)...Double(GridHourStepStore.range.upperBound),
+                            step: 1
+                        ) {
+                            Text("Grid hour step".localized)
+                        } minimumValueLabel: {
+                            Text("1")
+                        } maximumValueLabel: {
+                            Text("6")
+                        }
+                    }
+                } header: {
+                    Text("Forecast grid".localized)
+                } footer: {
+                    Text("How many hours apart the grid's columns are.".localized)
+                }
+#endif
 
                 Section {
                     Picker("Weather background", selection: $weatherBackgroundStyle) {
@@ -148,6 +175,11 @@ public struct SettingsView: View {
         .onChange(of: notificationsEnabled) { _, isEnabled in
             ForecastSevereWeatherNotificationsStore.save(isEnabled)
         }
+#if !os(watchOS)
+        .onChange(of: gridHourStep) { _, step in
+            GridHourStepStore.save(step)
+        }
+#endif
         .forecastAccessibilityContainer(
             "Settings",
             hint: "Choose appearance, forecast layout, and weather animation preferences.",
@@ -172,6 +204,7 @@ public struct SettingsView: View {
         forecastViewMode: .constant(.dashboard),
         theme: .constant(.system),
         appLanguage: .constant(.system),
+        gridHourStep: .constant(1),
         forecastService: ForecastWindguruMockup(),
         account: WindguruAccount()
     )

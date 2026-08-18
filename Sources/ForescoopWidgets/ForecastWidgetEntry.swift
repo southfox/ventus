@@ -13,6 +13,7 @@ public struct ForecastWidgetEntry: TimelineEntry, Sendable {
     public let wind: String
     public let gust: String
     public let windDirection: String
+    public let windDirectionDegrees: Double
     public let rain: String
     public let humidity: String
     public let cloudCover: String
@@ -38,6 +39,7 @@ public struct ForecastWidgetEntry: TimelineEntry, Sendable {
         wind: "10 kt",
         gust: "16 kt",
         windDirection: "W",
+        windDirectionDegrees: 270,
         rain: "0 mm",
         humidity: "58%",
         cloudCover: "35%",
@@ -64,6 +66,7 @@ public struct ForecastWidgetEntry: TimelineEntry, Sendable {
         wind: "—",
         gust: "—",
         windDirection: "—",
+        windDirectionDegrees: 0,
         rain: "—",
         humidity: "—",
         cloudCover: "—",

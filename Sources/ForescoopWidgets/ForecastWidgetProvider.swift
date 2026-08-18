@@ -100,13 +100,14 @@ public struct ForecastWidgetProvider: TimelineProvider, Sendable {
         return ForecastWidgetEntry(
             date: .now,
             locationName: forecast.locationDisplayName(coordinateLocationName: coordinateLocationName),
-            temperature: "\(Temperature(celsius: temperature).value(in: units.temperatureUnit).formatted(.number.precision(.fractionLength(0))))\(units.temperatureUnit.label)",
+            temperature: "\(Temperature(celsius: temperature).value(in: units.temperatureUnit).forecastFormatted(precision: 0))\(units.temperatureUnit.label)",
             temperatureCelsius: temperature,
-            rawTemperature: rawTemperature.map { "\(Temperature(celsius: $0).value(in: units.temperatureUnit).formatted(.number.precision(.fractionLength(0))))\(units.temperatureUnit.label)" } ?? "—",
+            rawTemperature: rawTemperature.map { "\(Temperature(celsius: $0).value(in: units.temperatureUnit).forecastFormatted(precision: 0))\(units.temperatureUnit.label)" } ?? "—",
             rawTemperatureCelsius: rawTemperature ?? temperature,
             wind: windText(wind, unit: units.windSpeedUnit),
             gust: windText(gust, unit: units.windSpeedUnit),
             windDirection: forecast.forecast?.windDirectionName(hh: hour) ?? "—",
+            windDirectionDegrees: forecast.forecast?.windDirection(hh: hour) ?? 0,
             rain: precipitationText(rain, unit: units.precipitationUnit),
             humidity: "\(humidity)%",
             cloudCover: "\(cloudCover)%",
@@ -143,6 +144,7 @@ public struct ForecastWidgetProvider: TimelineProvider, Sendable {
             wind: snapshot.wind,
             gust: snapshot.gust,
             windDirection: snapshot.windDirection,
+            windDirectionDegrees: snapshot.windDirectionDegrees,
             rain: snapshot.rain,
             humidity: snapshot.humidity,
             cloudCover: snapshot.cloudCover,
@@ -220,7 +222,7 @@ public struct ForecastWidgetProvider: TimelineProvider, Sendable {
 
     private func temperatureText(_ celsius: Double, unit: TemperatureUnit, converted: Bool = false) -> String {
         let value = converted ? celsius : Temperature(celsius: celsius).value(in: unit)
-        return "\(value.formatted(.number.precision(.fractionLength(0))))°"
+        return "\(value.forecastFormatted(precision: 0))°"
     }
 
     private func windText(_ knots: Double, unit: WindSpeedUnit) -> String {
