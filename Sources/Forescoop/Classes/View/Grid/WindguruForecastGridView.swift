@@ -704,14 +704,16 @@ public struct WindguruForecastGridView: View {
         return GridCell(value: direction, text: windDirectionText(direction), isDirection: showsWindDirectionArrow)
     }
 
+    /// TMP only:  the raw model reading, deliberately not falling back to
+    /// TMPE, so this row stays visually distinct from "Real temperature"
+    /// below whenever the model actually reports both.
     private func temperature(_ hour: String, source: SpotForecast? = nil) -> GridCell {
-        guard let value = weather(for: source)?.temperatureReal(hh: hour) ?? weather(for: source)?.temperature(hh: hour) else { return .empty }
+        guard let value = weather(for: source)?.temperature(hh: hour) else { return .empty }
         let converted = Temperature(celsius: value).value(in: viewModel.temperatureUnit)
         return GridCell(value: converted, text: number(converted), colorValue: value)
     }
 
-    /// TMPE only (no fallback to TMP), alongside the "temperature" row above
-    /// which already prefers TMPE but silently falls back to TMP.
+    /// TMPE only (no fallback to TMP): altitude-corrected reading.
     private func temperatureReal(_ hour: String, source: SpotForecast? = nil) -> GridCell {
         guard let value = weather(for: source)?.temperatureReal(hh: hour) else { return .empty }
         let converted = Temperature(celsius: value).value(in: viewModel.temperatureUnit)

@@ -146,28 +146,35 @@ public extension SpotForecast {
         weatherSymbolNames(hour: hour).first ?? "sun.max.fill"
     }
 
+    static let strongWindBeaufortThreshold = 6
+
+    private func skyObscuringCloudCover(hh hour: String?) -> Int {
+        let low = forecast?.cloudCoverLow(hh: hour) ?? 0
+        let mid = forecast?.cloudCoverMid(hh: hour) ?? 0
+        let high = forecast?.cloudCoverHigh(hh: hour) ?? 0
+        guard low > 0 || mid > 0 || high > 0 else {
+            return forecast?.cloudCoverTotal(hh: hour) ?? 0
+        }
+        return Int(max(Double(low), Double(mid) * 0.7, Double(high) * 0.35))
+    }
+
     func weatherSymbolNames(hour: String?) -> [String] {
         let precipitation = forecast?.precipitation(hh: hour)
             ?? forecast?.precipitation1(hh: hour)
             ?? 0
         let modelTemperature = forecast?.temperature(hh: hour) ?? forecast?.temperatureReal(hh: hour) ?? 0
-        let cloudCover = forecast?.cloudCoverTotal(hh: hour) ?? 0
+        let cloudCover = skyObscuringCloudCover(hh: hour)
         let humidity = forecast?.relativeHumidity(hh: hour) ?? 0
         let windSpeed = forecast?.windSpeed(hh: hour) ?? 0
         let windGusts = forecast?.windGustsKnots(hh: hour) ?? 0
         let isNight = !isDaylight(at: forecastDate(hour: hour) ?? Date())
         var symbols: [String] = []
 
-        let beaufort = max(Knots(windSpeed).bft ?? 0, Knots(windGusts).bft ?? 0)
-        if let windSymbol = SpotForecast.windSymbolName(forBeaufort: beaufort) {
-            symbols.append(windSymbol)
-        }
-        
         if humidity >= 95 && cloudCover >= 80 {
             symbols.append("cloud.fog")
-        } else if cloudCover >= 70 {
+        } else if cloudCover >= 80 {
             symbols.append("cloud.fill")
-        } else if cloudCover >= 30 {
+        } else if cloudCover >= 50 {
             symbols.append("cloud")
         } else if cloudCover > 0 {
             symbols.append(isNight ? "cloud.moon.fill" : "cloud.sun.fill")
@@ -183,6 +190,12 @@ public extension SpotForecast {
             symbols.append("cloud.drizzle")
         } else if precipitation > 0 {
             symbols.append("cloud.rain.fill")
+        }
+
+        let beaufort = max(Knots(windSpeed).bft ?? 0, Knots(windGusts).bft ?? 0)
+        if beaufort >= SpotForecast.strongWindBeaufortThreshold,
+           let windSymbol = SpotForecast.windSymbolName(forBeaufort: beaufort) {
+            symbols.insert(windSymbol, at: 0)
         }
 
         return symbols

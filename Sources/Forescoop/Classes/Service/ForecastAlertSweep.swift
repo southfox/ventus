@@ -43,11 +43,12 @@ public enum ForecastAlertSweep {
         password: String?
     ) async -> SpotForecast? {
         do {
-            if isProUser, let username, !username.isEmpty, let password {
-                guard let proForecast = try await service.wforecast(bySpotId: spotID, model: modelID, username: username, password: password) else { return nil }
-                return try SpotForecast.from(coordinateForecast: proForecast)
-            }
-            return try await service.forecast(bySpotId: spotID, model: modelID)
+            return try await service.bestForecast(
+                bySpotId: spotID,
+                model: modelID,
+                username: isProUser ? username : nil,
+                password: isProUser ? password : nil
+            )
         } catch {
             return nil
         }

@@ -11,19 +11,21 @@ import Forescoop
 import SwiftUI
 import WidgetKit
 
-public struct ForecastWidgetProvider: TimelineProvider {
+public struct ForecastWidgetProvider: TimelineProvider, Sendable {
     public init() {}
 
     public func placeholder(in context: Context) -> ForecastWidgetEntry { .placeholder }
 
-    public func getSnapshot(in context: Context, completion: @escaping (ForecastWidgetEntry) -> Void) {
-        completion(currentEntry())
+    public func getSnapshot(in context: Context, completion: @escaping @Sendable (ForecastWidgetEntry) -> Void) {
+        Task { completion(await currentEntry()) }
     }
 
-    public func getTimeline(in context: Context, completion: @escaping (Timeline<ForecastWidgetEntry>) -> Void) {
-        let entry = currentEntry()
-        let nextHourDate = Self.nextHourBoundary(after: .now)
-        completion(Timeline(entries: [entry], policy: .after(nextHourDate)))
+    public func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<ForecastWidgetEntry>) -> Void) {
+        Task {
+            let entry = await currentEntry()
+            let nextHourDate = Self.nextHourBoundary(after: .now)
+            completion(Timeline(entries: [entry], policy: .after(nextHourDate)))
+        }
     }
 
     private static func nextHourBoundary(after date: Date) -> Date {
@@ -34,11 +36,52 @@ public struct ForecastWidgetProvider: TimelineProvider {
         return calendar.date(byAdding: .hour, value: 1, to: startOfHour) ?? date.addingTimeInterval(3_600)
     }
 
-    private func currentEntry() -> ForecastWidgetEntry {
+    private func currentEntry() async -> ForecastWidgetEntry {
+        if let liveEntry = await fetchLiveEntry() {
+            return liveEntry
+        }
         if let snapshot = SharedForecastSnapshotStore.load() {
             return entry(from: snapshot)
         }
-        guard let forecast = ForecastWindguruMockup().dashboardPreviewForecast else { return .placeholder }
+        return .needsUpdate
+    }
+
+    private func fetchLiveEntry() async -> ForecastWidgetEntry? {
+        let spotID = SelectedWindguruSpotStore.load()
+        let username = WindguruCredentialStore.activeUsername()
+        let isProUser = WindguruCredentialStore.activeProUser()
+        let password = username.flatMap(WindguruCredentialStore.password(for:))
+
+        return await withTimeout(seconds: 12) {
+            let service = ForecastWindguruService()
+            do {
+                guard let forecast = try await service.bestForecast(
+                    bySpotId: spotID,
+                    model: nil,
+                    username: isProUser ? username : nil,
+                    password: isProUser ? password : nil
+                ), !forecast.availableForecastHours.isEmpty else { return nil }
+                return self.entry(from: forecast, coordinateLocationName: nil)
+            } catch {
+                return nil
+            }
+        }
+    }
+
+    private func withTimeout<T: Sendable>(seconds: TimeInterval, operation: @escaping @Sendable () async -> T?) async -> T? {
+        await withTaskGroup(of: T?.self) { group in
+            group.addTask { await operation() }
+            group.addTask {
+                try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+                return nil
+            }
+            let result = await group.next() ?? nil
+            group.cancelAll()
+            return result ?? nil
+        }
+    }
+
+    private func entry(from forecast: SpotForecast, coordinateLocationName: String?) -> ForecastWidgetEntry {
         let hour = forecast.currentForecastHour
         let units = VentusForecastUnitStore.load()
         let temperature = forecast.forecast?.temperatureReal(hh: hour) ?? forecast.forecast?.temperature(hh: hour) ?? 0
@@ -56,7 +99,7 @@ public struct ForecastWidgetProvider: TimelineProvider {
 
         return ForecastWidgetEntry(
             date: .now,
-            locationName: forecast.locationDisplayName(),
+            locationName: forecast.locationDisplayName(coordinateLocationName: coordinateLocationName),
             temperature: "\(Temperature(celsius: temperature).value(in: units.temperatureUnit).formatted(.number.precision(.fractionLength(0))))\(units.temperatureUnit.label)",
             temperatureCelsius: temperature,
             rawTemperature: rawTemperature.map { "\(Temperature(celsius: $0).value(in: units.temperatureUnit).formatted(.number.precision(.fractionLength(0))))\(units.temperatureUnit.label)" } ?? "—",
@@ -84,7 +127,8 @@ public struct ForecastWidgetProvider: TimelineProvider {
                 pressureUnit: units.pressureUnit
             ),
             hourly: hourly,
-            daily: daily
+            daily: daily,
+            errorMessage: nil
         )
     }
 
@@ -113,7 +157,8 @@ public struct ForecastWidgetProvider: TimelineProvider {
             hourly: snapshot.hourly.map { ForecastWidgetHour(label: $0.label, symbolName: $0.symbolName, temperature: $0.temperature) },
             daily: snapshot.daily.map {
                 ForecastWidgetDay(label: $0.label, symbolName: $0.symbolName, low: $0.low, high: $0.high, lowValue: $0.lowValue, highValue: $0.highValue)
-            }
+            },
+            errorMessage: nil
         )
     }
 

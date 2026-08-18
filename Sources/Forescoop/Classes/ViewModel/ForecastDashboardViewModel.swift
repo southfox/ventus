@@ -61,7 +61,7 @@ public final class ForecastDashboardViewModel: ObservableObject {
         precipitationUnit = unitPreferences.precipitationUnit
         freezingLevelUnit = unitPreferences.freezingLevelUnit
         profileLoader = { try await forecastService.login(withUsername: $0, password: $1) }
-        forecastLoader = { try await forecastService.forecast(bySpotId: $0, model: $1) }
+        forecastLoader = { try await forecastService.bestForecast(bySpotId: $0, model: $1) }
         proSpotForecastLoader = { spotID, modelID, username, password in
             guard let forecast = try await forecastService.wforecast(
                 bySpotId: spotID,

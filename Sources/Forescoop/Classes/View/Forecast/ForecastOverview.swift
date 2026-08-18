@@ -101,12 +101,12 @@ public struct ForecastOverview: View {
                         unitTitle: \.label
                     ) {
                         HStack {
-                            ThermalLabel(temperature, celsius: currentCelsius)
-                                .font(.system(size: 44, weight: .semibold))
-                                .foregroundStyle(theme.accentColor)
-                            if let rawTemperature {
-                                Text("/")
-                                Label(rawTemperature, systemImage: "")
+                            if let realTemperature {
+                                ThermalLabel(realTemperature, celsius: currentCelsius)
+                                    .font(.system(size: 44, weight: .semibold))
+                                    .foregroundStyle(theme.accentColor)
+                            } else {
+                                ThermalLabel(temperature, celsius: currentCelsius)
                                     .font(.system(size: 44, weight: .semibold))
                                     .foregroundStyle(theme.accentColor)
                             }
@@ -159,12 +159,6 @@ public struct ForecastOverview: View {
     private func temperature(for source: SpotForecast) -> String {
         let hour = selectedHour ?? source.currentForecastHour
         guard let value = source.forecast?.temperatureReal(hh: hour) ?? source.forecast?.temperature(hh: hour) else { return "—" }
-        return "\(Temperature(celsius: value).value(in: temperatureUnit).forecastFormatted(precision: 0))\(temperatureUnit.label)"
-    }
-
-    private var rawTemperature: String? {
-        let hour = selectedHour ?? forecast.currentForecastHour
-        guard let value = forecast.forecast?.temperature(hh: hour) else { return nil }
         return "\(Temperature(celsius: value).value(in: temperatureUnit).forecastFormatted(precision: 0))\(temperatureUnit.label)"
     }
 

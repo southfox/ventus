@@ -30,3 +30,19 @@ public protocol ForecastWindguruProtocol {
     func regions(byCountryId countryId: String?) async throws -> Regions?
     func login(withUsername username: String?, password: String?) async throws -> User?
 }
+
+public extension ForecastWindguruProtocol {
+    func bestForecast(
+        bySpotId spotId: String,
+        model modelId: String? = nil,
+        username: String? = nil,
+        password: String? = nil
+    ) async throws -> SpotForecast? {
+        if let wForecast = try? await wforecast(bySpotId: spotId, model: modelId, username: username, password: password),
+           let converted = try? SpotForecast.from(coordinateForecast: wForecast),
+           !converted.availableForecastHours.isEmpty {
+            return converted
+        }
+        return try await forecast(bySpotId: spotId, model: modelId)
+    }
+}

@@ -24,8 +24,16 @@ extension ForecastWidgetEntry {
         lowCelsius: 3,
         insight: "Cerro Catedral · Today, 3 PM: 19°C with 22 kt wind, real, altitude-corrected reading, gusting to 31 kt, 94% cloud cover, 82% humidity, 1.8 mm of rain, pressure 1002 hPa.",
         hourly: ForecastWidgetHour.placeholder,
-        daily: ForecastWidgetDay.placeholder
+        daily: ForecastWidgetDay.placeholder,
+        errorMessage: nil
     )
+}
+
+#Preview("Needs update") {
+    ForecastWidgetView(entry: .needsUpdate, theme: .ocean, previewFamily: .systemMedium)
+        .frame(width: 338, height: 158)
+        .padding()
+        .background(.blue.gradient)
 }
 
 #Preview("Small widget") {

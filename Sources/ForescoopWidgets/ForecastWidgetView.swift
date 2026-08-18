@@ -22,60 +22,98 @@ public struct ForecastWidgetView: View {
 
     @ViewBuilder public var body: some View {
         Group {
-#if os(watchOS) || os(iOS)
-            switch displayedFamily {
-            case .accessoryCircular:
-                Image(systemName: entry.symbolName)
-                    .font(.title2)
-                    .widgetAccentable()
-            case .accessoryInline:
-                Text("\(entry.temperature) · \(entry.wind)")
-                    .lineLimit(0)
-            case .accessoryRectangular:
-                HStack {
-                    Image(systemName: entry.symbolName).widgetAccentable()
-                    VStack(alignment: .leading) {
-                        Text(entry.locationName).lineLimit(1)
-                        Text("\(entry.temperature) · \(entry.wind)").font(.caption)
-                    }
-                }
-            case .systemSmall:
-                smallWidgetContent
-            case .systemMedium:
-                mediumWidgetContent
-            case .systemLarge:
-                largeWidgetContent
-            case .systemExtraLarge:
-                extraLargeWidgetContent
-            default:
-                mediumWidgetContent
+            if let errorMessage = entry.errorMessage {
+                errorContent(errorMessage)
+            } else {
+                normalContent
             }
-#elseif os(macOS)
-            switch displayedFamily {
-            case .systemSmall:
-                smallWidgetContent
-            case .systemMedium:
-                mediumWidgetContent
-            case .systemLarge:
-                largeWidgetContent
-            default:
-                mediumWidgetContent
-            }
-#else
-            mediumWidgetContent
-#endif
         }
         .foregroundStyle(theme.primaryTextColor(for: colorScheme))
         .tint(theme.accentColor(for: colorScheme))
         .containerBackground(for: .widget) { widgetBackground }
         .modifier(ForecastWidgetFontDesign(design: theme.fontDesign))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(entry.locationName). Temperature \(entry.temperature). Wind \(entry.wind), gusts \(entry.gust), from \(entry.windDirection). Rain \(entry.rain). Humidity \(entry.humidity). Cloud cover \(entry.cloudCover). Pressure \(entry.pressure).")
+        .accessibilityLabel(entry.errorMessage ?? "\(entry.locationName). Temperature \(entry.temperature). Wind \(entry.wind), gusts \(entry.gust), from \(entry.windDirection). Rain \(entry.rain). Humidity \(entry.humidity). Cloud cover \(entry.cloudCover). Pressure \(entry.pressure).")
         .accessibilityHint("Open Ventus for the full forecast.")
         .accessibilityIdentifier("forecast.widget")
     }
 
     private var displayedFamily: WidgetFamily { previewFamily ?? family }
+
+    @ViewBuilder private var normalContent: some View {
+#if os(watchOS) || os(iOS)
+        switch displayedFamily {
+        case .accessoryCircular:
+            Image(systemName: entry.symbolName)
+                .font(.title2)
+                .widgetAccentable()
+        case .accessoryInline:
+            Text("\(entry.temperature) · \(entry.wind)")
+                .lineLimit(0)
+        case .accessoryRectangular:
+            HStack {
+                Image(systemName: entry.symbolName).widgetAccentable()
+                VStack(alignment: .leading) {
+                    Text(entry.locationName).lineLimit(1)
+                    Text("\(entry.temperature) · \(entry.wind)").font(.caption)
+                }
+            }
+        case .systemSmall:
+            smallWidgetContent
+        case .systemMedium:
+            mediumWidgetContent
+        case .systemLarge:
+            largeWidgetContent
+        case .systemExtraLarge:
+            extraLargeWidgetContent
+        default:
+            mediumWidgetContent
+        }
+#elseif os(macOS)
+        switch displayedFamily {
+        case .systemSmall:
+            smallWidgetContent
+        case .systemMedium:
+            mediumWidgetContent
+        case .systemLarge:
+            largeWidgetContent
+        default:
+            mediumWidgetContent
+        }
+#else
+        mediumWidgetContent
+#endif
+    }
+
+    @ViewBuilder private func errorContent(_ message: String) -> some View {
+        switch displayedFamily {
+#if os(watchOS) || os(iOS)
+        case .accessoryCircular:
+            Image(systemName: "exclamationmark.circle")
+                .font(.title2)
+                .widgetAccentable()
+        case .accessoryInline:
+            Text(message).lineLimit(1)
+        case .accessoryRectangular:
+            HStack(spacing: 6) {
+                Image(systemName: "exclamationmark.circle").widgetAccentable()
+                Text(message).font(.caption2).lineLimit(2)
+            }
+#endif
+        default:
+            VStack(spacing: 8) {
+                Image(systemName: "exclamationmark.circle")
+                    .font(.title2)
+                    .widgetAccentable()
+                Text(message)
+                    .font(.subheadline)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding()
+        }
+    }
 
     @ViewBuilder private var widgetBackground: some View {
         if theme.usesMaterial {
@@ -97,9 +135,6 @@ public struct ForecastWidgetView: View {
                 ThermalLabel(entry.temperature, celsius: entry.temperatureCelsius)
                     .font(.system(.title, design: .rounded).weight(.light))
                     .minimumScaleFactor(0.5)
-//                ThermalLabel(entry.rawTemperature, celsius: entry.rawTemperatureCelsius)
-//                    .font(.system(.title, design: .rounded).weight(.light))
-//                    .minimumScaleFactor(0.5)
             }
             VStack(alignment: .leading, spacing: 8) {
                 HStack(alignment: .bottom, spacing: 8) {
@@ -130,8 +165,7 @@ public struct ForecastWidgetView: View {
         }
     }
 
-    /// The iPad-only extra-large canvas has room for both the near-term
-    /// outlook and the multi-day forecast at a comfortably readable size.
+    /// iPad only.
     private var extraLargeWidgetContent: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .top, spacing: 24) {

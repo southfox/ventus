@@ -168,7 +168,7 @@ public struct WatchForecastView: View {
     @MainActor private func loadForecast() async {
         do {
             errorMessage = nil
-            forecast = try await forecastService.forecast(bySpotId: selectedSpotID, model: nil)
+            forecast = try await forecastService.bestForecast(bySpotId: selectedSpotID, model: nil)
             selectedHour = forecast?.currentForecastHour
             selectedModelID = forecast?.model
             if let forecast {

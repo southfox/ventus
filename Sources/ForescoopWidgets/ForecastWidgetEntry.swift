@@ -1,4 +1,5 @@
 #if canImport(WidgetKit) && !os(tvOS)
+import Forescoop
 import SwiftUI
 import WidgetKit
 
@@ -25,6 +26,7 @@ public struct ForecastWidgetEntry: TimelineEntry, Sendable {
     public let insight: String
     public let hourly: [ForecastWidgetHour]
     public let daily: [ForecastWidgetDay]
+    public let errorMessage: String?
 
     public static let placeholder = ForecastWidgetEntry(
         date: .now,
@@ -48,7 +50,34 @@ public struct ForecastWidgetEntry: TimelineEntry, Sendable {
         lowCelsius: 6,
         insight: "Bariloche · Today, 2 PM: 12°C with 10 kt wind, real, altitude-corrected reading, 35% cloud cover, 58% humidity, pressure 1015 hPa.",
         hourly: ForecastWidgetHour.placeholder,
-        daily: ForecastWidgetDay.placeholder
+        daily: ForecastWidgetDay.placeholder,
+        errorMessage: nil
+    )
+
+    public static let needsUpdate = ForecastWidgetEntry(
+        date: .now,
+        locationName: "—",
+        temperature: "—",
+        temperatureCelsius: 0,
+        rawTemperature: "—",
+        rawTemperatureCelsius: 0,
+        wind: "—",
+        gust: "—",
+        windDirection: "—",
+        rain: "—",
+        humidity: "—",
+        cloudCover: "—",
+        pressure: "—",
+        symbolName: "exclamationmark.circle",
+        condition: "—",
+        high: "—",
+        highCelsius: 0,
+        low: "—",
+        lowCelsius: 0,
+        insight: "",
+        hourly: [],
+        daily: [],
+        errorMessage: "Open Ventus to update the forecast".localized
     )
 }
 
