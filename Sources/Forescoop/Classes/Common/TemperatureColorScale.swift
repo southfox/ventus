@@ -58,6 +58,28 @@ public struct ThermalLabel: View {
     }
 }
 
+public struct RealTemperatureLabel: View {
+    private let title: String
+    private let celsius: Double
+    private let spacing: CGFloat
+
+    public init(_ title: String, celsius: Double, spacing: CGFloat = 4) {
+        self.title = title
+        self.celsius = celsius
+        self.spacing = spacing
+    }
+
+    public var body: some View {
+        let palette = TemperatureColorScale.palette(forCelsius: celsius)
+        HStack(spacing: spacing) {
+            Image(systemName: "thermometer.variable.and.figure")
+                .symbolRenderingMode(.palette)
+                .foregroundStyle(palette.primary, palette.secondary)
+            Text(title)
+        }
+    }
+}
+
 #if DEBUG
 #Preview("ThermalLabel Preview") {
     VStack(spacing: 12) {
@@ -65,6 +87,7 @@ public struct ThermalLabel: View {
         ThermalLabel("Mild", celsius: 12)
         ThermalLabel("Warm", celsius: 22)
         ThermalLabel("Hot", celsius: 32, spacing: 6)
+        RealTemperatureLabel("Real feel", celsius: 8)
     }
     .padding()
 }

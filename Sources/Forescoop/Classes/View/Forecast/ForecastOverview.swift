@@ -116,7 +116,7 @@ public struct ForecastOverview: View {
                 }
 
                 if let realTemperature {
-                    Label(realTemperature, systemImage: "thermometer.variable.and.figure")
+                    RealTemperatureLabel(realTemperature, celsius: realTemperatureCelsius)
                         .font(.title3.weight(.medium))
                         .foregroundStyle(theme.accentColor)
                         .accessibilityLabel("Real temperature")
@@ -168,6 +168,11 @@ public struct ForecastOverview: View {
         let hour = selectedHour ?? forecast.currentForecastHour
         guard let value = forecast.forecast?.temperatureReal(hh: hour) else { return nil }
         return "\(Temperature(celsius: value).value(in: temperatureUnit).forecastFormatted(precision: 0))\(temperatureUnit.label)"
+    }
+
+    private var realTemperatureCelsius: Double {
+        let hour = selectedHour ?? forecast.currentForecastHour
+        return forecast.forecast?.temperatureReal(hh: hour) ?? 0
     }
 
     private var highTemperatureText: String? {

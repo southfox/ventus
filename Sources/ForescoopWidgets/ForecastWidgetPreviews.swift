@@ -9,6 +9,8 @@ extension ForecastWidgetEntry {
         temperatureCelsius: 19,
         rawTemperature: "22°C",
         rawTemperatureCelsius: 22,
+        realTemperature: "19°C",
+        realTemperatureCelsius: 19,
         wind: "22 kt",
         gust: "31 kt",
         windDirection: "WNW",

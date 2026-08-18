@@ -10,6 +10,8 @@ public struct ForecastWidgetEntry: TimelineEntry, Sendable {
     public let temperatureCelsius: Double
     public let rawTemperature: String
     public let rawTemperatureCelsius: Double
+    public let realTemperature: String
+    public let realTemperatureCelsius: Double
     public let wind: String
     public let gust: String
     public let windDirection: String
@@ -36,6 +38,8 @@ public struct ForecastWidgetEntry: TimelineEntry, Sendable {
         temperatureCelsius: 12,
         rawTemperature: "11°C",
         rawTemperatureCelsius: 11,
+        realTemperature: "12°C",
+        realTemperatureCelsius: 12,
         wind: "10 kt",
         gust: "16 kt",
         windDirection: "W",
@@ -63,6 +67,8 @@ public struct ForecastWidgetEntry: TimelineEntry, Sendable {
         temperatureCelsius: 0,
         rawTemperature: "—",
         rawTemperatureCelsius: 0,
+        realTemperature: "—",
+        realTemperatureCelsius: 0,
         wind: "—",
         gust: "—",
         windDirection: "—",

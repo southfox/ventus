@@ -54,7 +54,9 @@ public struct ForecastWidgetView: View {
             HStack {
                 Image(systemName: entry.symbolName).widgetAccentable()
                 VStack(alignment: .leading) {
-                    Text(entry.locationName).lineLimit(1)
+                    Text(entry.locationName)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
                     Text("\(entry.temperature) · \(entry.wind)").font(.caption)
                 }
             }
@@ -125,9 +127,10 @@ public struct ForecastWidgetView: View {
 
     private var smallWidgetContent: some View {
         VStack(alignment: .leading, spacing: 7) {
-            Text(entry.locationName)
+            Text(nameOnly(entry.locationName))
                 .font(.headline)
                 .lineLimit(1)
+                .minimumScaleFactor(0.6)
             HStack(spacing: 8) {
                 Image(systemName: entry.symbolName)
                     .font(.title)
@@ -137,10 +140,7 @@ public struct ForecastWidgetView: View {
                     .minimumScaleFactor(0.5)
             }
             VStack(alignment: .leading, spacing: 8) {
-                HStack(alignment: .bottom, spacing: 8) {
-                    widgetMetric(entry.wind, symbol: "wind")
-                    widgetMetric(entry.gust, symbol: "wind.circle")
-                }
+                widgetMetric(windAndGustText(entry.wind, entry.gust), symbol: "wind")
                 HStack(alignment: .bottom, spacing: 8) {
                     widgetMetric(entry.rain, symbol: "drop.fill")
                     widgetMetric(entry.cloudCover, symbol: "cloud.fill")
@@ -161,7 +161,7 @@ public struct ForecastWidgetView: View {
             weatherHeader
             hourlyForecast(limit: 6)
             Divider()
-            dailyForecast(limit: 4)
+            dailyForecast(limit: 5)
         }
     }
 
@@ -261,19 +261,20 @@ public struct ForecastWidgetView: View {
                 Text(entry.locationName)
                     .font(.headline)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.6)
                 HStack(spacing: 10) {
                 ThermalLabel(entry.temperature, celsius: entry.temperatureCelsius)
                     .font(.system(.title, design: .rounded).weight(.light))
                     .minimumScaleFactor(0.5)
 
-                if previewFamily == .systemExtraLarge {
-                    ThermalLabel(entry.rawTemperature, celsius: entry.temperatureCelsius)
-                        .font(.system(.title, design: .rounded).weight(.light))
-                        .minimumScaleFactor(0.5)
-                }
-
-                    ThermalLabel(entry.low, celsius: entry.lowCelsius)
-                    ThermalLabel(entry.high, celsius: entry.highCelsius)
+                    if displayedFamily == .systemLarge || displayedFamily == .systemExtraLarge {
+                        RealTemperatureLabel(entry.realTemperature, celsius: entry.realTemperatureCelsius)
+                            .font(.system(.title, design: .rounded).weight(.light))
+                            .minimumScaleFactor(0.5)
+                    } else {
+                        ThermalLabel(entry.low, celsius: entry.lowCelsius)
+                        ThermalLabel(entry.high, celsius: entry.highCelsius)
+                    }
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -283,8 +284,7 @@ public struct ForecastWidgetView: View {
                 Image(systemName: entry.symbolName)
                     .font(.title)
                     .widgetAccentable()
-                Text(entry.condition)
-                    .font(.subheadline.weight(.medium))
+                widgetMetric(windAndGustText(entry.wind, entry.gust), symbol: "wind")
             }
         }
     }
@@ -404,11 +404,24 @@ public struct ForecastWidgetView: View {
         )
     }
 
+    private func nameOnly(_ locationName: String) -> String {
+        guard let range = locationName.range(of: " #") else { return locationName }
+        return String(locationName[..<range.lowerBound])
+    }
+
     private func widgetMetric(_ value: String, symbol: String) -> some View {
         Label(value, systemImage: symbol)
             .font(.caption.weight(.medium))
             .lineLimit(1)
             .minimumScaleFactor(0.75)
+    }
+
+    private func windAndGustText(_ wind: String, _ gust: String) -> String {
+        let windValue = wind.split(separator: " ").first.map(String.init) ?? wind
+        let gustParts = gust.split(separator: " ")
+        let gustValue = gustParts.first.map(String.init) ?? gust
+        let unit = gustParts.dropFirst().joined(separator: " ")
+        return unit.isEmpty ? "\(windValue) / \(gustValue)" : "\(windValue) / \(gustValue) \(unit)"
     }
 }
 

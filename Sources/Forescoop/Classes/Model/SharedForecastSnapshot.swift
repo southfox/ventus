@@ -48,6 +48,8 @@ public struct SharedForecastSnapshot: Codable, Sendable {
     public let temperatureCelsius: Double
     public let rawTemperature: String
     public let rawTemperatureCelsius: Double
+    public let realTemperature: String
+    public let realTemperatureCelsius: Double
     public let wind: String
     public let gust: String
     public let windDirection: String
@@ -73,6 +75,8 @@ public struct SharedForecastSnapshot: Codable, Sendable {
         temperatureCelsius: Double,
         rawTemperature: String,
         rawTemperatureCelsius: Double,
+        realTemperature: String,
+        realTemperatureCelsius: Double,
         wind: String,
         gust: String,
         windDirection: String,
@@ -97,6 +101,8 @@ public struct SharedForecastSnapshot: Codable, Sendable {
         self.temperatureCelsius = temperatureCelsius
         self.rawTemperature = rawTemperature
         self.rawTemperatureCelsius = rawTemperatureCelsius
+        self.realTemperature = realTemperature
+        self.realTemperatureCelsius = realTemperatureCelsius
         self.wind = wind
         self.gust = gust
         self.windDirection = windDirection
@@ -120,8 +126,9 @@ public struct SharedForecastSnapshot: Codable, Sendable {
 public extension SharedForecastSnapshot {
     static func make(from forecast: SpotForecast, units: ForecastUnitPreferences) -> SharedForecastSnapshot {
         let hour = forecast.currentForecastHour
-        let temperature = forecast.forecast?.temperatureReal(hh: hour) ?? forecast.forecast?.temperature(hh: hour) ?? 0
+        let temperature = forecast.forecast?.temperature(hh: hour) ?? forecast.forecast?.temperatureReal(hh: hour) ?? 0
         let rawTemperature = forecast.forecast?.temperature(hh: hour)
+        let realTemperature = forecast.forecast?.temperatureReal(hh: hour)
         let wind = forecast.forecast?.windSpeed(hh: hour) ?? 0
         let gust = forecast.forecast?.windGustsKnots(hh: hour) ?? 0
         let rain = forecast.forecast?.precipitation1(hh: hour) ?? forecast.forecast?.precipitation(hh: hour) ?? 0
@@ -140,6 +147,8 @@ public extension SharedForecastSnapshot {
             temperatureCelsius: temperature,
             rawTemperature: rawTemperature.map { "\(Temperature(celsius: $0).value(in: units.temperatureUnit).forecastFormatted(precision: 0))\(units.temperatureUnit.label)" } ?? "—",
             rawTemperatureCelsius: rawTemperature ?? temperature,
+            realTemperature: realTemperature.map { "\(Temperature(celsius: $0).value(in: units.temperatureUnit).forecastFormatted(precision: 0))\(units.temperatureUnit.label)" } ?? "—",
+            realTemperatureCelsius: realTemperature ?? temperature,
             wind: windText(wind, unit: units.windSpeedUnit),
             gust: windText(gust, unit: units.windSpeedUnit),
             windDirection: forecast.forecast?.windDirectionName(hh: hour) ?? "—",

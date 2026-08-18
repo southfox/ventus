@@ -84,8 +84,9 @@ public struct ForecastWidgetProvider: TimelineProvider, Sendable {
     private func entry(from forecast: SpotForecast, coordinateLocationName: String?) -> ForecastWidgetEntry {
         let hour = forecast.currentForecastHour
         let units = VentusForecastUnitStore.load()
-        let temperature = forecast.forecast?.temperatureReal(hh: hour) ?? forecast.forecast?.temperature(hh: hour) ?? 0
+        let temperature = forecast.forecast?.temperature(hh: hour) ?? forecast.forecast?.temperatureReal(hh: hour) ?? 0
         let rawTemperature = forecast.forecast?.temperature(hh: hour)
+        let realTemperature = forecast.forecast?.temperatureReal(hh: hour)
         let wind = forecast.forecast?.windSpeed(hh: hour) ?? 0
         let gust = forecast.forecast?.windGustsKnots(hh: hour) ?? 0
         let rain = forecast.forecast?.precipitation1(hh: hour) ?? forecast.forecast?.precipitation(hh: hour) ?? 0
@@ -104,6 +105,8 @@ public struct ForecastWidgetProvider: TimelineProvider, Sendable {
             temperatureCelsius: temperature,
             rawTemperature: rawTemperature.map { "\(Temperature(celsius: $0).value(in: units.temperatureUnit).forecastFormatted(precision: 0))\(units.temperatureUnit.label)" } ?? "—",
             rawTemperatureCelsius: rawTemperature ?? temperature,
+            realTemperature: realTemperature.map { "\(Temperature(celsius: $0).value(in: units.temperatureUnit).forecastFormatted(precision: 0))\(units.temperatureUnit.label)" } ?? "—",
+            realTemperatureCelsius: realTemperature ?? temperature,
             wind: windText(wind, unit: units.windSpeedUnit),
             gust: windText(gust, unit: units.windSpeedUnit),
             windDirection: forecast.forecast?.windDirectionName(hh: hour) ?? "—",
@@ -141,6 +144,8 @@ public struct ForecastWidgetProvider: TimelineProvider, Sendable {
             temperatureCelsius: snapshot.temperatureCelsius,
             rawTemperature: snapshot.rawTemperature,
             rawTemperatureCelsius: snapshot.rawTemperatureCelsius,
+            realTemperature: snapshot.realTemperature,
+            realTemperatureCelsius: snapshot.realTemperatureCelsius,
             wind: snapshot.wind,
             gust: snapshot.gust,
             windDirection: snapshot.windDirection,
