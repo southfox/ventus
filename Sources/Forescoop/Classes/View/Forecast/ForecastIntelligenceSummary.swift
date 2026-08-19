@@ -1,3 +1,11 @@
+//
+//  ForecastIntelligenceSummary.swift
+//  Forescoop package
+//
+//  Created by Javier Fuchs on 08/01/26.
+//  Copyright © 2026 Mobile Patagonia. All rights reserved.
+//
+
 #if !os(watchOS)
 import SwiftUI
 
@@ -84,9 +92,10 @@ public struct ForecastIntelligenceSummary: View {
         defer { isGenerating = false }
 
         do {
+            let detail = ForecastInsightDetail.deviceDefault
             let session = LanguageModelSession(
                 model: SystemLanguageModel.default,
-                instructions: "You are a precise weather forecaster. Write one helpful sentence, under 40 words, that naturally weaves together as many of the supplied forecast facts as make sense together. Use only the supplied facts. Do not invent safety advice or facts. \(snapshot.languageInstruction)"
+                instructions: "You are a precise weather forecaster. Using only the supplied forecast facts: current conditions, the wind, temperature, and precipitation outlook, and the multi-day breakdown. Write a helpful analysis of what's happening now and how conditions will change over the next hours and days. Clearly call out anything severe: strong wind, heavy rain or snow, or unusually cold or hot temperatures. Stay under \(detail.maxWords) words. Use only the supplied facts. Do not invent safety advice or facts. \(snapshot.languageInstruction)"
             )
             let response = try await session.respond(to: snapshot.prompt)
             let generated = response.content.trimmingCharacters(in: .whitespacesAndNewlines)

@@ -420,9 +420,9 @@ public struct ForecastWidgetView: View {
     }
 
     private func hourlyForecast(limit: Int) -> some View {
-        HStack(alignment: .top, spacing: 0) {
+        HStack(alignment: .top, spacing: isInAppPreview ? 15 : 1) {
             ForEach(Array(entry.hourly.prefix(limit))) { hour in
-                VStack(spacing: isInAppPreview ? 5 : 10) {
+                VStack(spacing: 5) {
                     Text(hour.label)
                         .font(.caption2.weight(.medium))
                         .foregroundStyle(.secondary)
