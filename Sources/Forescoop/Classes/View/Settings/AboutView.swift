@@ -9,7 +9,6 @@
 import Foundation
 import SwiftUI
 
-/// Product and acknowledgement information for Ventus.
 public struct AboutView: View {
     @Environment(\.dismiss) private var dismiss
 
@@ -133,16 +132,20 @@ public struct AboutView: View {
     }
 
     private var versionDescription: String {
+        versionDescription(from: Bundle.main.infoDictionary)
+            ?? versionDescription(from: packageInfoDictionary)
+            ?? "0.1.0"
+    }
+
+    private var packageInfoDictionary: [String: Any]? {
         guard let metadataURL = Bundle.module.url(forResource: "VentusPackageInfo", withExtension: "plist"),
-              let metadataData = try? Data(contentsOf: metadataURL),
-              let metadata = try? PropertyListSerialization.propertyList(
-                  from: metadataData,
-                  format: nil
-              ) as? [String: Any],
-              let version = metadata["CFBundleShortVersionString"] as? String else {
-            return "0.1.0"
-        }
-        let build = metadata["CFBundleVersion"] as? String
+              let metadataData = try? Data(contentsOf: metadataURL) else { return nil }
+        return try? PropertyListSerialization.propertyList(from: metadataData, format: nil) as? [String: Any]
+    }
+
+    private func versionDescription(from metadata: [String: Any]?) -> String? {
+        guard let version = metadata?["CFBundleShortVersionString"] as? String else { return nil }
+        let build = metadata?["CFBundleVersion"] as? String
         guard let build, build != version else { return version }
         return "\(version) (\(build))"
     }
