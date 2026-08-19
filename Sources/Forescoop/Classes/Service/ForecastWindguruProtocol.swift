@@ -38,6 +38,11 @@ public extension ForecastWindguruProtocol {
         username: String? = nil,
         password: String? = nil
     ) async throws -> SpotForecast? {
+        if let plainForecast = try? await forecast(bySpotId: spotId, model: modelId),
+           !plainForecast.availableForecastHours.isEmpty,
+           plainForecast.hasRealTemperatureData {
+            return plainForecast
+        }
         if let wForecast = try? await wforecast(bySpotId: spotId, model: modelId, username: username, password: password),
            let converted = try? SpotForecast.from(coordinateForecast: wForecast),
            !converted.availableForecastHours.isEmpty {

@@ -138,15 +138,7 @@ public struct WindguruForecastGridView: View {
     }
 
     private var hours: [String] {
-        let allHours = forecast.availableForecastHours
-        guard let currentHour = forecast.currentForecastHour,
-              let anchorIndex = allHours.firstIndex(of: currentHour) else {
-            return allHours
-        }
-        let step = max(gridHourStep, 1)
-        return allHours.enumerated()
-            .filter { ($0.offset - anchorIndex).isMultiple(of: step) }
-            .map(\.element)
+        forecast.steppedForecastHours(anchorHour: forecast.currentForecastHour, step: gridHourStep)
     }
 
     private var weather: Forecast? { forecast.forecast }

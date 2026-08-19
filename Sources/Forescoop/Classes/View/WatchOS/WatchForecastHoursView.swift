@@ -9,7 +9,6 @@
 #if os(watchOS)
 import SwiftUI
 
-/// A compact hour picker for the watch dashboard.
 struct WatchForecastHoursView: View {
     let forecast: SpotForecast?
     @Binding var selectedHour: String?
@@ -22,7 +21,7 @@ struct WatchForecastHoursView: View {
     var body: some View {
         List {
             if let forecast, let weather = forecast.forecast {
-                ForEach(forecast.availableForecastHours, id: \.self) { hour in
+                ForEach(forecast.steppedForecastHours(anchorHour: forecast.currentForecastHour, step: GridHourStepStore.load()), id: \.self) { hour in
                     Button {
                         selectedHour = hour
                         onHourSelected()

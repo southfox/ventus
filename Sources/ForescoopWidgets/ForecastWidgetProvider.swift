@@ -171,14 +171,14 @@ public struct ForecastWidgetProvider: TimelineProvider, Sendable {
 
     private func hourlyForecast(for forecast: SpotForecast, currentHour: String?, unit: TemperatureUnit) -> [ForecastWidgetHour] {
         let currentOffset = Int(currentHour ?? "") ?? 0
-        return forecast.availableForecastHours
+        return forecast.steppedForecastHours(anchorHour: currentHour, step: GridHourStepStore.load())
             .compactMap { hour -> (hour: String, offset: Int)? in Int(hour).map { (hour, $0) } }
             .filter { $0.offset >= currentOffset }
             .sorted { $0.offset < $1.offset }
             .prefix(10)
             .map { item in
                 let date = forecast.forecastDate(hour: item.hour) ?? .now
-                let label = item.hour == currentHour ? "Now" : date.formatted(.dateTime.hour(.defaultDigits(amPM: .abbreviated)))
+                let label = item.hour == currentHour ? "Now".localized : date.formatted(.dateTime.hour(.defaultDigits(amPM: .abbreviated)))
                 let temperature = forecast.forecast?.temperatureReal(hh: item.hour) ?? forecast.forecast?.temperature(hh: item.hour) ?? 0
                 return ForecastWidgetHour(
                     label: label,

@@ -210,8 +210,8 @@ public struct ForecastWidgetView: View {
 
     private var expandedConditions: some View {
         LazyVGrid(
-            columns: Array(repeating: GridItem(.flexible(), alignment: .leading), count: 4),
-            alignment: .leading,
+            columns: Array(repeating: GridItem(.flexible(), alignment: .trailing), count: 4),
+            alignment: .trailing,
             spacing: 12
         ) {
             expandedMetric("Wind", value: entry.wind, symbol: "wind")
@@ -224,25 +224,35 @@ public struct ForecastWidgetView: View {
         }
     }
 
+    private func expandedMetricIcon(_ symbol: String) -> some View {
+        Image(systemName: symbol)
+            .frame(width: 14, alignment: .center)
+    }
+
     private func expandedMetric(_ title: LocalizedStringKey, value: String, symbol: String) -> some View {
-        VStack(alignment: .leading, spacing: 3) {
-            Label(title, systemImage: symbol)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
+        HStack(alignment: .bottom, spacing: 3) {
+            Label {
+                Text(title) + Text(": ")
+            } icon: {
+                expandedMetricIcon(symbol)
+            }
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+            .lineLimit(1)
             Text(value)
                 .font(.subheadline.weight(.semibold))
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
         }
+        .frame(maxWidth: .infinity, alignment: .trailing)
     }
 
     private func expandedDirectionMetric(_ title: LocalizedStringKey, degrees: Double) -> some View {
-        VStack(alignment: .leading, spacing: 3) {
+        HStack(alignment: .top, spacing: 4) {
             Label {
                 Text(title)
             } icon: {
-                Image(systemName: "arrow.down")
+                expandedMetricIcon("arrow.down")
                     .rotationEffect(.degrees(degrees))
             }
             .font(.caption2)
@@ -253,6 +263,7 @@ public struct ForecastWidgetView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
         }
+        .frame(maxWidth: .infinity, alignment: .trailing)
     }
 
     private var weatherHeader: some View {
@@ -279,13 +290,37 @@ public struct ForecastWidgetView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
             }
-            Spacer()
-            VStack(alignment: .trailing, spacing: 2) {
-                Image(systemName: entry.symbolName)
-                    .font(.title)
-                    .widgetAccentable()
-                widgetMetric(windAndGustText(entry.wind, entry.gust), symbol: "wind")
+            if displayedFamily != .systemSmall {
+                Spacer()
+                windGustsMetric
             }
+        }
+    }
+
+    private var windGustsMetric: some View {
+        HStack(alignment: .center, spacing: 6) {
+            Image(systemName: "wind")
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .frame(width: 16, alignment: .center)
+            VStack(alignment: .leading, spacing: 2) {
+                windGustsLine("Wind", value: entry.wind)
+                windGustsLine("Gusts", value: entry.gust)
+            }
+        }
+    }
+
+    private func windGustsLine(_ title: LocalizedStringKey, value: String) -> some View {
+        HStack(spacing: 4) {
+            Text(title)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            Spacer()
+                .frame(maxWidth: 1)
+            Text(value)
+                .font(.subheadline.weight(.semibold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
         }
     }
 

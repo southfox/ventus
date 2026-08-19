@@ -8,7 +8,6 @@
 
 import SwiftUI
 
-/// Device settings that are available regardless of Windguru account status.
 public struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
@@ -82,7 +81,7 @@ public struct SettingsView: View {
                             in: Double(GridHourStepStore.range.lowerBound)...Double(GridHourStepStore.range.upperBound),
                             step: 1
                         ) {
-                            Text("Grid hour step".localized)
+                            Text("Forecast hour step".localized)
                         } minimumValueLabel: {
                             Text("1")
                         } maximumValueLabel: {
@@ -90,9 +89,9 @@ public struct SettingsView: View {
                         }
                     }
                 } header: {
-                    Text("Forecast grid".localized)
+                    Text("Forecast hours".localized)
                 } footer: {
-                    Text("How many hours apart the grid's columns are.".localized)
+                    Text("How many hours apart forecast columns and hour pickers are, across the app and other devices.".localized)
                 }
 #endif
 

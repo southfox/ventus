@@ -20,13 +20,11 @@ public struct ForecastHourSelector: View {
     }
 
     private var hours: [String] {
-        forecast.availableForecastHours
+        forecast.steppedForecastHours(anchorHour: currentHour, step: GridHourStepStore.load())
     }
 
     private var currentHour: String? {
-        let now = Date()
-        return hours.last(where: { (forecast.forecastDate(hour: $0) ?? .distantFuture) <= now })
-            ?? hours.first
+        forecast.currentForecastHour
     }
 
     private var selection: String? {

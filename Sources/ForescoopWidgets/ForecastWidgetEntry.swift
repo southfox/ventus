@@ -98,7 +98,7 @@ public struct ForecastWidgetHour: Identifiable, Sendable {
     public var id: String { label }
 
     public static let placeholder = [
-        ForecastWidgetHour(label: "Now", symbolName: "cloud.sun.fill", temperature: "12°"),
+        ForecastWidgetHour(label: "Now".localized, symbolName: "cloud.sun.fill", temperature: "12°"),
         ForecastWidgetHour(label: "2 PM", symbolName: "cloud.sun.fill", temperature: "13°"),
         ForecastWidgetHour(label: "3 PM", symbolName: "cloud.fill", temperature: "13°"),
         ForecastWidgetHour(label: "4 PM", symbolName: "cloud.rain.fill", temperature: "11°"),

@@ -91,6 +91,10 @@ public extension SpotForecast {
         forecast?.availableHours ?? []
     }
 
+    var hasRealTemperatureData: Bool {
+        availableForecastHours.contains { forecast?.temperatureReal(hh: $0) != nil }
+    }
+
     var currentForecastHour: String? {
         let hours = availableForecastHours.compactMap { hour -> (String, Int)? in
             guard let value = Int(hour) else { return nil }
@@ -102,6 +106,16 @@ public extension SpotForecast {
             return hours.last(where: { Double($0.1) <= elapsedHours })?.0 ?? hours.first?.0
         }
         return hours.last(where: { $0.1 <= currentHourInt })?.0 ?? hours.first?.0
+    }
+
+    func steppedForecastHours(anchorHour: String?, step: Int) -> [String] {
+        let allHours = availableForecastHours
+        guard step > 1, let anchorHour, let anchorIndex = allHours.firstIndex(of: anchorHour) else {
+            return allHours
+        }
+        return allHours.enumerated()
+            .filter { ($0.offset - anchorIndex).isMultiple(of: step) }
+            .map(\.element)
     }
 
     func forecastDate(hour: String?, relativeTo referenceDate: Date = Date()) -> Date? {
