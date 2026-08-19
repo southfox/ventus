@@ -56,6 +56,19 @@ public class ForecastWindguruMockup: ForecastWindguruProtocol {
         return response
     }
 
+    private static let previewInitStamp: Int = {
+        let calendar = Calendar(identifier: .gregorian)
+        let startOfToday = calendar.startOfDay(for: Date())
+        return Int(startOfToday.addingTimeInterval(-6 * 3_600).timeIntervalSince1970)
+    }()
+
+    private static let previewInitDate: String = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        formatter.timeZone = TimeZone(secondsFromGMT: -3 * 3_600)
+        return formatter.string(from: Date(timeIntervalSince1970: TimeInterval(previewInitStamp)))
+    }()
+
     private func previewForecastMap(
         modelID: String,
         name: String,
@@ -68,8 +81,8 @@ public class ForecastWindguruMockup: ForecastWindguruProtocol {
         }
 
         let model: [String: Any] = [
-            "initstamp": 1_786_000_000,
-            "initdate": "2026-08-02 00:00:00",
+            "initstamp": Self.previewInitStamp,
+            "initdate": Self.previewInitDate,
             "model_name": name,
             "WINDSPD": values { Double(8 + ($0 % 6)) + windAdjustment },
             "GUST": values { Double(13 + ($0 % 8)) + windAdjustment },

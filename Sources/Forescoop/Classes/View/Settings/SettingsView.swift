@@ -15,6 +15,7 @@ public struct SettingsView: View {
     @Binding private var forecastViewMode: ForecastViewMode
     @Binding private var theme: VentusTheme
     @Binding private var appLanguage: AppLanguage
+    @Binding private var appAppearanceMode: AppAppearanceMode
     @State private var notificationsEnabled = ForecastSevereWeatherNotificationsStore.load()
 #if !os(watchOS)
     @Binding private var gridHourStep: Int
@@ -28,6 +29,7 @@ public struct SettingsView: View {
         forecastViewMode: Binding<ForecastViewMode>,
         theme: Binding<VentusTheme>,
         appLanguage: Binding<AppLanguage>,
+        appAppearanceMode: Binding<AppAppearanceMode>,
         gridHourStep: Binding<Int>,
         forecastService: ForecastWindguruProtocol,
         account: WindguruAccount
@@ -36,6 +38,7 @@ public struct SettingsView: View {
         _forecastViewMode = forecastViewMode
         _theme = theme
         _appLanguage = appLanguage
+        _appAppearanceMode = appAppearanceMode
         _gridHourStep = gridHourStep
         self.forecastService = forecastService
         self.account = account
@@ -45,12 +48,14 @@ public struct SettingsView: View {
         weatherBackgroundStyle: Binding<WeatherBackgroundStyle>,
         forecastViewMode: Binding<ForecastViewMode>,
         theme: Binding<VentusTheme>,
-        appLanguage: Binding<AppLanguage>
+        appLanguage: Binding<AppLanguage>,
+        appAppearanceMode: Binding<AppAppearanceMode>
     ) {
         _weatherBackgroundStyle = weatherBackgroundStyle
         _forecastViewMode = forecastViewMode
         _theme = theme
         _appLanguage = appLanguage
+        _appAppearanceMode = appAppearanceMode
     }
 #endif
 
@@ -107,6 +112,20 @@ public struct SettingsView: View {
                     Text("Animations")
                 } footer: {
                     Text("The selected animation is used as the forecast background on this device.")
+                }
+
+                Section {
+                    Picker("Appearance", selection: $appAppearanceMode) {
+                        ForEach(AppAppearanceMode.allCases) { mode in
+                            Label(mode.title, systemImage: mode.systemImage)
+                                .tag(mode)
+                        }
+                    }
+                    .pickerStyle(.inline)
+                } header: {
+                    Text("Display")
+                } footer: {
+                    Text("System follows this device's Light or Dark appearance setting.")
                 }
 
                 Section {
@@ -171,6 +190,9 @@ public struct SettingsView: View {
         .onChange(of: appLanguage) { _, appLanguage in
             AppLanguageStore.save(appLanguage)
         }
+        .onChange(of: appAppearanceMode) { _, mode in
+            AppAppearanceModeStore.save(mode)
+        }
         .onChange(of: notificationsEnabled) { _, isEnabled in
             ForecastSevereWeatherNotificationsStore.save(isEnabled)
         }
@@ -193,7 +215,8 @@ public struct SettingsView: View {
         weatherBackgroundStyle: .constant(.lottieAdriana),
         forecastViewMode: .constant(.dashboard),
         theme: .constant(.system),
-        appLanguage: .constant(.system)
+        appLanguage: .constant(.system),
+        appAppearanceMode: .constant(.system)
     )
 }
 #else
@@ -203,6 +226,7 @@ public struct SettingsView: View {
         forecastViewMode: .constant(.dashboard),
         theme: .constant(.system),
         appLanguage: .constant(.system),
+        appAppearanceMode: .constant(.system),
         gridHourStep: .constant(1),
         forecastService: ForecastWindguruMockup(),
         account: WindguruAccount()

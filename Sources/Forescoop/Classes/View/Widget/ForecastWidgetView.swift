@@ -219,7 +219,7 @@ public struct ForecastWidgetView: View {
                     Label("10-Day Forecast", systemImage: "calendar")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(theme.accentColor(for: colorScheme))
-                    dailyForecast(limit: 10, columns: 2)
+                    dailyForecast(limit: 10, columns: isInAppPreview ? 1 : 2)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -422,7 +422,7 @@ public struct ForecastWidgetView: View {
     private func hourlyForecast(limit: Int) -> some View {
         HStack(alignment: .top, spacing: 0) {
             ForEach(Array(entry.hourly.prefix(limit))) { hour in
-                VStack(spacing: 5) {
+                VStack(spacing: isInAppPreview ? 5 : 10) {
                     Text(hour.label)
                         .font(.caption2.weight(.medium))
                         .foregroundStyle(.secondary)
