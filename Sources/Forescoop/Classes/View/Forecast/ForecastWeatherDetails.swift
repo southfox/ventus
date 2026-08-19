@@ -208,11 +208,13 @@ public struct ForecastWeatherDetails: View {
             HStack(spacing: 8) {
                 ProgressView(value: Double(min(max(value ?? 0, 0), 100)), total: 100)
                     .tint(.cyan)
-                    .frame(width: 120)
+                    .frame(minWidth: 40, idealWidth: 120, maxWidth: 120)
                 Text(percent(value)).monospacedDigit().frame(minWidth: 40, alignment: .trailing)
             }
         } label: {
             Label("Relative humidity", systemImage: "humidity")
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
         }
     }
 

@@ -25,7 +25,6 @@ public struct ForecastDashboardView: View {
         case weatherBackgroundSettings
         case help
         case about
-        case widgetPreview
 
         var id: String { rawValue }
     }
@@ -45,6 +44,7 @@ public struct ForecastDashboardView: View {
     @State private var windDirectionDisplayMode: WindDirectionDisplayMode = .arrow
     @State private var gridHourStep = GridHourStepStore.load()
     @State private var activeSheet: DashboardSheet?
+    @State private var showsWidgetPreview = false
     @State private var content: ForecastViewMode
     @State private var weatherBackgroundStyle: WeatherBackgroundStyle
     @State private var theme: VentusTheme
@@ -139,7 +139,7 @@ public struct ForecastDashboardView: View {
             onShowWorkspace: { content = .workspace },
             onShowGraph: { content = .graph },
             onShowSettings: { activeSheet = .weatherBackgroundSettings },
-            onShowWidgetPreview: { activeSheet = .widgetPreview },
+            onShowWidgetPreview: { showsWidgetPreview = true },
             onShowHelp: { activeSheet = .help },
             onShowAbout: { activeSheet = .about },
             onShowAccount: { activeSheet = .login },
@@ -365,9 +365,15 @@ public struct ForecastDashboardView: View {
             .sheet(isPresented: sheetBinding(.about)) {
                 aboutSheet
             }
-            .sheet(isPresented: sheetBinding(.widgetPreview)) {
+            .navigationDestination(isPresented: $showsWidgetPreview) {
                 if let forecast {
-                    WidgetPreviewScreen(forecast: forecast, coordinateLocationName: coordinateLocationName, theme: theme)
+                    WidgetPreviewScreen(
+                        forecast: forecast,
+                        coordinateLocationName: coordinateLocationName,
+                        theme: theme,
+                        onSelectLocation: { activeSheet = .spotPicker },
+                        onShowMap: { activeSheet = .forecastMap }
+                    )
                 }
             }
 #if !os(tvOS)

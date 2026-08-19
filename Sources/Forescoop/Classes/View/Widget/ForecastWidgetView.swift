@@ -14,17 +14,27 @@ public struct ForecastWidgetView: View {
     public let entry: ForecastWidgetEntry
     @Environment(\.widgetFamily) private var family
     @Environment(\.colorScheme) private var colorScheme
+#if os(iOS)
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+#endif
     private let theme: VentusTheme
     private let previewFamily: WidgetFamily?
+    private let onSelectLocation: () -> Void
+    private let onShowMap: () -> Void
 
     public init(
         entry: ForecastWidgetEntry,
         theme: VentusTheme = VentusThemeStore.load(),
-        previewFamily: WidgetFamily? = nil
+        previewFamily: WidgetFamily? = nil,
+        onSelectLocation: @escaping () -> Void = {},
+        onShowMap: @escaping () -> Void = {}
     ) {
         self.entry = entry
         self.theme = theme
         self.previewFamily = previewFamily
+        self.onSelectLocation = onSelectLocation
+        self.onShowMap = onShowMap
     }
 
     @ViewBuilder public var body: some View {
@@ -46,6 +56,8 @@ public struct ForecastWidgetView: View {
     }
 
     private var displayedFamily: WidgetFamily { previewFamily ?? family }
+
+    public var isInAppPreview: Bool { previewFamily != nil }
 
     @ViewBuilder private var normalContent: some View {
 #if os(watchOS) || os(iOS)
@@ -172,37 +184,94 @@ public struct ForecastWidgetView: View {
         }
     }
 
-    /// The real Home Screen widget gallery only offers this size on iPad
-    /// and Mac; elsewhere it's reachable only via `previewFamily`, e.g. the
-    /// in-app "Widget" preview screen.
-    private var extraLargeWidgetContent: some View {
+    /// iPhone in portrait doesn't have the width for the two-column layout
+    /// below, so every section stacks one after another instead.
+    private var stacksExtraLargeSections: Bool {
+#if os(iOS)
+        horizontalSizeClass == .compact && verticalSizeClass == .regular
+#else
+        false
+#endif
+    }
+
+    @ViewBuilder private var extraLargeWidgetContent: some View {
+        if stacksExtraLargeSections {
+            extraLargeStackedContent
+        } else {
+            extraLargeColumnContent
+        }
+    }
+
+    private var extraLargeColumnContent: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .top, spacing: 24) {
                 VStack(alignment: .leading, spacing: 16) {
                     weatherHeader
-                    Divider()
+                    if isInAppPreview {
+                        Divider()
+                    }
                     hourlyForecast(limit: 10)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("10-Day Forecast")
-                        .font(.headline)
+
+                    Label("10-Day Forecast", systemImage: "calendar")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(theme.accentColor(for: colorScheme))
                     dailyForecast(limit: 10, columns: 2)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
+            if isInAppPreview {
+                Divider()
+            }
+            
+            Label("Conditions", systemImage: "list.bullet.rectangle")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(theme.accentColor(for: colorScheme))
 
-            Spacer(minLength: 0)
-            Divider()
-            Text("Conditions")
-                .font(.headline)
-            expandedConditions
-
-            Divider()
+            expandedConditions(compact: false)
+            if isInAppPreview {
+                Divider()
+            }
             insightCard
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+    }
+
+    private var extraLargeStackedContent: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            weatherHeader
+            Divider()
+            ScrollView(.horizontal, showsIndicators: false) {
+                hourlyForecast(limit: 10)
+            }
+
+            if isInAppPreview {
+                Divider()
+            }
+            Label("10-Day Forecast", systemImage: "calendar")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(theme.accentColor(for: colorScheme))
+            dailyForecast(limit: 10)
+
+            if isInAppPreview {
+                Divider()
+            }
+            Label("Conditions", systemImage: "list.bullet.rectangle")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(theme.accentColor(for: colorScheme))
+
+            expandedConditions(compact: true)
+
+            if isInAppPreview {
+                Divider()
+            }
+            insightCard
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     private var insightCard: some View {
@@ -217,11 +286,11 @@ public struct ForecastWidgetView: View {
         }
     }
 
-    private var expandedConditions: some View {
+    private func expandedConditions(compact: Bool) -> some View {
         LazyVGrid(
-            columns: Array(repeating: GridItem(.flexible(), alignment: .trailing), count: 4),
+            columns: Array(repeating: GridItem(.flexible(), alignment: .trailing), count: compact ? 2 : 4),
             alignment: .trailing,
-            spacing: 12
+            spacing: isInAppPreview ? 12 : 4
         ) {
             expandedMetric("Wind", value: entry.wind, symbol: "wind")
             expandedMetric("Gusts", value: entry.gust, symbol: "wind.circle")
@@ -278,10 +347,26 @@ public struct ForecastWidgetView: View {
     private var weatherHeader: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 4) {
+#if !os(watchOS)
+                if isInAppPreview {
+                    ForecastLocationHeader(
+                        locationName: entry.locationName,
+                        onSelectLocation: onSelectLocation,
+                        onShowMap: onShowMap
+                    )
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                } else {
+                    Label(entry.locationName, systemImage: "mappin.and.ellipse")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(theme.accentColor(for: colorScheme))
+                }
+#else
                 Text(entry.locationName)
                     .font(.headline)
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
+#endif
                 HStack(spacing: 10) {
                     ThermalLabel(entry.temperature, celsius: entry.temperatureCelsius)
                         .font(.system(.title3, design: .rounded).weight(.light))
@@ -402,6 +487,7 @@ public struct ForecastWidgetView: View {
                 .font((compact ? Font.caption2 : .caption).weight(.semibold))
                 .frame(width: 30, alignment: .leading)
         }
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     private var temperatureRange: ClosedRange<Double> {
