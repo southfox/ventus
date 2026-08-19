@@ -53,7 +53,7 @@ public final class ForecastDashboardViewModel: ObservableObject {
         preferencesProvider: any ForecastPreferencesProviding = DeviceForecastPreferenceProvider()
     ) {
         self.preferencesProvider = preferencesProvider
-        let unitPreferences = preferencesProvider.forecastUnitPreferences
+        let unitPreferences = VentusForecastUnitStore.load(fallback: preferencesProvider.forecastUnitPreferences)
         temperatureUnit = unitPreferences.temperatureUnit
         windSpeedUnit = unitPreferences.windSpeedUnit
         waveHeightUnit = unitPreferences.waveHeightUnit
@@ -115,6 +115,16 @@ public final class ForecastDashboardViewModel: ObservableObject {
         freezingLevelUnit = preferences.freezingLevelUnit
     }
 
+    public func applyPersistedUnitPreferences() {
+        let preferences = VentusForecastUnitStore.load(fallback: preferencesProvider.forecastUnitPreferences)
+        temperatureUnit = preferences.temperatureUnit
+        windSpeedUnit = preferences.windSpeedUnit
+        waveHeightUnit = preferences.waveHeightUnit
+        pressureUnit = preferences.pressureUnit
+        precipitationUnit = preferences.precipitationUnit
+        freezingLevelUnit = preferences.freezingLevelUnit
+    }
+
     private func persistWidgetUnits() {
         VentusForecastUnitStore.save(
             ForecastUnitPreferences(
@@ -126,6 +136,7 @@ public final class ForecastDashboardViewModel: ObservableObject {
                 freezingLevelUnit: freezingLevelUnit
             )
         )
+        persistWidgetSnapshot()
     }
 
     private func persistWidgetSnapshot() {

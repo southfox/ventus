@@ -687,7 +687,7 @@ public struct ForecastDashboardView: View {
         guard !account.username.isEmpty,
               let password = account.password,
               let user = await viewModel.loadUserProfile(username: account.username, password: password) else {
-            applyDevicePreferences()
+            viewModel.applyPersistedUnitPreferences()
             return
         }
         applyUserPreferences(user)
