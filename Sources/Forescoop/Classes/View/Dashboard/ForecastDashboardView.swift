@@ -286,7 +286,7 @@ public struct ForecastDashboardView: View {
                     onFavoriteSelected: { spot in
                         guard let spotID = spot.identifier else { return }
                         activeSheet = nil
-                        Task { await loadForecast(spotId: spotID, persistSelection: false) }
+                        Task { await loadForecast(spotId: spotID) }
                     },
                     onCoordinateSelected: { coordinate, locationName in
                         activeSheet = nil
@@ -338,7 +338,7 @@ public struct ForecastDashboardView: View {
                     onSpotSelected: { spot in
                         guard let spotID = spot.identifier else { return }
                         activeSheet = nil
-                        Task { await loadForecast(spotId: spotID, persistSelection: false) }
+                        Task { await loadForecast(spotId: spotID) }
                     }
                 )
             }
