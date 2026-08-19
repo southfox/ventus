@@ -13,6 +13,7 @@ struct DashboardAccountMenu: View {
     let isShowingGrid: Bool
     let isShowingWorkspace: Bool
     let isShowingGraph: Bool
+    let showsWorkspaceOption: Bool
     let isLoggedIn: Bool
     let onShowDashboard: () -> Void
     let onShowGrid: () -> Void
@@ -33,7 +34,7 @@ struct DashboardAccountMenu: View {
             if !isShowingGrid {
                 Button("Forecast Grid", systemImage: "tablecells", action: onShowGrid)
             }
-            if !isShowingWorkspace {
+            if showsWorkspaceOption, !isShowingWorkspace {
                 Button("Grid and Dashboard", systemImage: "rectangle.split.2x1", action: onShowWorkspace)
             }
             if !isShowingGraph {
@@ -70,6 +71,7 @@ struct DashboardAccountMenu: View {
         isShowingGrid: false,
         isShowingWorkspace: false,
         isShowingGraph: false,
+        showsWorkspaceOption: true,
         isLoggedIn: true,
         onShowDashboard: {},
         onShowGrid: {},

@@ -36,6 +36,21 @@ public enum ForecastViewMode: String, CaseIterable, Identifiable, Sendable {
         case .graph: "chart.xyaxis.line"
         }
     }
+
+    public var isAvailable: Bool {
+        guard self == .workspace else { return true }
+#if os(watchOS)
+        return false
+#elseif os(iOS)
+        return UIDevice.current.userInterfaceIdiom != .phone
+#else
+        return true
+#endif
+    }
+
+    public static var availableCases: [ForecastViewMode] {
+        allCases.filter(\.isAvailable)
+    }
 }
 
 public enum ForecastViewModeStore {
@@ -46,7 +61,8 @@ public enum ForecastViewModeStore {
         let value = (try? context.fetch(FetchDescriptor<VentusPreferenceRecord>()))?
             .first(where: { $0.key == key })?
             .value
-        return value.flatMap(ForecastViewMode.init(rawValue:)) ?? defaultMode
+        let saved = value.flatMap(ForecastViewMode.init(rawValue:))
+        return saved?.isAvailable == true ? saved! : defaultMode
     }
 
     private static var defaultMode: ForecastViewMode {

@@ -59,7 +59,7 @@ public struct SettingsView: View {
             Form {
                 Section {
                     Picker("Forecast view", selection: $forecastViewMode) {
-                        ForEach(ForecastViewMode.allCases) { mode in
+                        ForEach(ForecastViewMode.availableCases) { mode in
                             Label(mode.title, systemImage: mode.systemImage)
                                 .tag(mode)
                         }

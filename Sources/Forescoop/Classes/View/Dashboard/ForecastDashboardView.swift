@@ -130,6 +130,7 @@ public struct ForecastDashboardView: View {
             isShowingGrid: content == .grid,
             isShowingWorkspace: content == .workspace,
             isShowingGraph: content == .graph,
+            showsWorkspaceOption: ForecastViewMode.workspace.isAvailable,
             isLoggedIn: !account.username.isEmpty,
             onShowDashboard: { content = .dashboard },
             onShowGrid: { content = .grid },
