@@ -36,7 +36,13 @@ public struct ForecastWidgetProvider: TimelineProvider, Sendable {
         return calendar.date(byAdding: .hour, value: 1, to: startOfHour) ?? date.addingTimeInterval(3_600)
     }
 
+    private static let snapshotFreshnessWindow: TimeInterval = 3 * 3_600
+
     private func currentEntry() async -> ForecastWidgetEntry {
+        if let snapshot = SharedForecastSnapshotStore.load(),
+           Date().timeIntervalSince(snapshot.date) < Self.snapshotFreshnessWindow {
+            return entry(from: snapshot)
+        }
         if let liveEntry = await fetchLiveEntry() {
             return liveEntry
         }
@@ -193,7 +199,8 @@ public struct ForecastWidgetProvider: TimelineProvider, Sendable {
         let grouped = Dictionary(grouping: forecast.availableForecastHours) { hour in
             calendar.startOfDay(for: forecast.forecastDate(hour: hour) ?? .now)
         }
-        let dates = grouped.keys.sorted().prefix(10)
+        let today = calendar.startOfDay(for: .now)
+        let dates = grouped.keys.filter { $0 >= today }.sorted().prefix(10)
         return dates.compactMap { date in
             guard let hours = grouped[date] else { return nil }
             let temperatures = hours.compactMap { hour in

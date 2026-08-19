@@ -21,7 +21,7 @@ struct WatchForecastHoursView: View {
     var body: some View {
         List {
             if let forecast, let weather = forecast.forecast {
-                ForEach(forecast.steppedForecastHours(anchorHour: forecast.currentForecastHour, step: GridHourStepStore.load()), id: \.self) { hour in
+                ForEach(forecast.steppedForecastHours(anchorHour: forecast.currentForecastHour, step: GridHourStepStore.load(), includingPast: false), id: \.self) { hour in
                     Button {
                         selectedHour = hour
                         onHourSelected()

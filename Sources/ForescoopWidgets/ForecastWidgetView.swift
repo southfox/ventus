@@ -136,7 +136,7 @@ public struct ForecastWidgetView: View {
                     .font(.title)
                     .widgetAccentable()
                 ThermalLabel(entry.temperature, celsius: entry.temperatureCelsius)
-                    .font(.system(.title, design: .rounded).weight(.light))
+                    .font(.system(.title3, design: .rounded).weight(.light))
                     .minimumScaleFactor(0.5)
             }
             VStack(alignment: .leading, spacing: 8) {
@@ -274,25 +274,26 @@ public struct ForecastWidgetView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
                 HStack(spacing: 10) {
-                ThermalLabel(entry.temperature, celsius: entry.temperatureCelsius)
-                    .font(.system(.title, design: .rounded).weight(.light))
-                    .minimumScaleFactor(0.5)
+                    ThermalLabel(entry.temperature, celsius: entry.temperatureCelsius)
+                        .font(.system(.title3, design: .rounded).weight(.light))
+                        .minimumScaleFactor(0.5)
 
                     if displayedFamily == .systemLarge || displayedFamily == .systemExtraLarge {
                         RealTemperatureLabel(entry.realTemperature, celsius: entry.realTemperatureCelsius)
-                            .font(.system(.title, design: .rounded).weight(.light))
+                            .font(.system(.title3, design: .rounded).weight(.light))
                             .minimumScaleFactor(0.5)
                     } else {
                         ThermalLabel(entry.low, celsius: entry.lowCelsius)
                         ThermalLabel(entry.high, celsius: entry.highCelsius)
                     }
+
+                    if displayedFamily != .systemSmall {
+                        Spacer()
+                        windGustsMetric
+                    }
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            }
-            if displayedFamily != .systemSmall {
-                Spacer()
-                windGustsMetric
             }
         }
     }

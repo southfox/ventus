@@ -20,7 +20,7 @@ public struct ForecastHourSelector: View {
     }
 
     private var hours: [String] {
-        forecast.steppedForecastHours(anchorHour: currentHour, step: GridHourStepStore.load())
+        forecast.steppedForecastHours(anchorHour: currentHour, step: GridHourStepStore.load(), includingPast: false)
     }
 
     private var currentHour: String? {

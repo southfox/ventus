@@ -201,7 +201,8 @@ public extension SharedForecastSnapshot {
         let grouped = Dictionary(grouping: forecast.availableForecastHours) { hour in
             calendar.startOfDay(for: forecast.forecastDate(hour: hour) ?? .now)
         }
-        let dates = grouped.keys.sorted().prefix(10)
+        let today = calendar.startOfDay(for: .now)
+        let dates = grouped.keys.filter { $0 >= today }.sorted().prefix(10)
         return dates.compactMap { date in
             guard let hours = grouped[date] else { return nil }
             let temperatures = hours.compactMap { hour in

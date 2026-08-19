@@ -108,8 +108,11 @@ public extension SpotForecast {
         return hours.last(where: { $0.1 <= currentHourInt })?.0 ?? hours.first?.0
     }
 
-    func steppedForecastHours(anchorHour: String?, step: Int) -> [String] {
-        let allHours = availableForecastHours
+    func steppedForecastHours(anchorHour: String?, step: Int, includingPast: Bool = true) -> [String] {
+        var allHours = availableForecastHours
+        if !includingPast, let anchorHour, let anchorOffset = Int(anchorHour) {
+            allHours = allHours.filter { (Int($0) ?? 0) >= anchorOffset }
+        }
         guard step > 1, let anchorHour, let anchorIndex = allHours.firstIndex(of: anchorHour) else {
             return allHours
         }
@@ -192,26 +195,29 @@ public extension SpotForecast {
         let isNight = !isDaylight(at: forecastDate(hour: hour) ?? Date())
         var symbols: [String] = []
 
-        if humidity >= 95 && cloudCover >= 80 {
-            symbols.append("cloud.fog")
-        } else if cloudCover >= 80 {
-            symbols.append("cloud.fill")
-        } else if cloudCover >= 50 {
-            symbols.append("cloud")
-        } else if cloudCover > 0 {
-            symbols.append(isNight ? "cloud.moon.fill" : "cloud.sun.fill")
-        } else {
-            symbols.append(isNight ? "moon.stars.fill" : modelTemperature >= 30 ? "sun.haze" : "sun.max.fill")
-        }
+        let oktas = Int((Double(cloudCover) / 100 * 8).rounded())
+        let isSnow = precipitation > 0 && modelTemperature <= 0
+        let isHeavyRain = precipitation > 0 && !isSnow && precipitation >= 8
+        let isLightRain = precipitation > 0 && !isSnow && !isHeavyRain
 
-        if precipitation > 0 && modelTemperature <= 0 {
+        if isSnow {
             symbols.append("snowflake")
-        } else if precipitation >= 8 {
+        } else if isHeavyRain {
             symbols.append("cloud.heavyrain")
-        } else if precipitation > 0 && precipitation < 2 {
-            symbols.append("cloud.drizzle")
-        } else if precipitation > 0 {
-            symbols.append("cloud.rain.fill")
+        } else if isLightRain, oktas <= 2 {
+            symbols.append(isNight ? "cloud.moon.rain.fill" : "cloud.sun.rain.fill")
+        } else if isLightRain {
+            symbols.append(precipitation < 2 ? "cloud.drizzle" : "cloud.rain.fill")
+        } else if humidity >= 95 && cloudCover >= 80 {
+            symbols.append("cloud.fog")
+        } else if oktas <= 2 {
+            symbols.append(isNight ? "moon.stars.fill" : modelTemperature >= 30 ? "sun.haze" : "sun.max.fill")
+        } else if oktas <= 4 {
+            symbols.append(isNight ? "cloud.moon.fill" : "cloud.sun.fill")
+        } else if oktas <= 7 {
+            symbols.append("cloud")
+        } else {
+            symbols.append("cloud.fill")
         }
 
         let beaufort = max(Knots(windSpeed).bft ?? 0, Knots(windGusts).bft ?? 0)
