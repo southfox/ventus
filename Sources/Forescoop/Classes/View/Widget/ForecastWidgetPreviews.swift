@@ -1,4 +1,12 @@
-#if DEBUG && canImport(WidgetKit) && !os(tvOS) && !os(watchOS)
+//
+//  ForecastWidgetPreviews.swift
+//  Forescoop package
+//
+//  Created by Javier Fuchs on 08/19/26.
+//  Copyright © 2026 Mobile Patagonia. All rights reserved.
+//
+
+#if DEBUG && canImport(WidgetKit) && !os(watchOS)
 import SwiftUI
 
 extension ForecastWidgetEntry {

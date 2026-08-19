@@ -25,6 +25,7 @@ public struct ForecastDashboardView: View {
         case weatherBackgroundSettings
         case help
         case about
+        case widgetPreview
 
         var id: String { rawValue }
     }
@@ -131,12 +132,14 @@ public struct ForecastDashboardView: View {
             isShowingWorkspace: content == .workspace,
             isShowingGraph: content == .graph,
             showsWorkspaceOption: ForecastViewMode.workspace.isAvailable,
+            showsWidgetPreview: forecast != nil,
             isLoggedIn: !account.username.isEmpty,
             onShowDashboard: { content = .dashboard },
             onShowGrid: { content = .grid },
             onShowWorkspace: { content = .workspace },
             onShowGraph: { content = .graph },
             onShowSettings: { activeSheet = .weatherBackgroundSettings },
+            onShowWidgetPreview: { activeSheet = .widgetPreview },
             onShowHelp: { activeSheet = .help },
             onShowAbout: { activeSheet = .about },
             onShowAccount: { activeSheet = .login },
@@ -361,6 +364,11 @@ public struct ForecastDashboardView: View {
             }
             .sheet(isPresented: sheetBinding(.about)) {
                 aboutSheet
+            }
+            .sheet(isPresented: sheetBinding(.widgetPreview)) {
+                if let forecast {
+                    WidgetPreviewScreen(forecast: forecast, coordinateLocationName: coordinateLocationName, theme: theme)
+                }
             }
 #if !os(tvOS)
             .sheet(isPresented: sheetBinding(.forecastMap)) {

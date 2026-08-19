@@ -1,5 +1,12 @@
-#if canImport(WidgetKit) && !os(tvOS)
-import Forescoop
+//
+//  ForecastWidgetView.swift
+//  Forescoop package
+//
+//  Created by Javier Fuchs on 08/19/26.
+//  Copyright © 2026 Mobile Patagonia. All rights reserved.
+//
+
+#if canImport(WidgetKit)
 import SwiftUI
 import WidgetKit
 
@@ -71,7 +78,7 @@ public struct ForecastWidgetView: View {
         default:
             mediumWidgetContent
         }
-#elseif os(macOS)
+#else
         switch displayedFamily {
         case .systemSmall:
             smallWidgetContent
@@ -79,11 +86,11 @@ public struct ForecastWidgetView: View {
             mediumWidgetContent
         case .systemLarge:
             largeWidgetContent
+        case .systemExtraLarge:
+            extraLargeWidgetContent
         default:
             mediumWidgetContent
         }
-#else
-        mediumWidgetContent
 #endif
     }
 
@@ -165,7 +172,9 @@ public struct ForecastWidgetView: View {
         }
     }
 
-    /// iPad only.
+    /// The real Home Screen widget gallery only offers this size on iPad
+    /// and Mac; elsewhere it's reachable only via `previewFamily`, e.g. the
+    /// in-app "Widget" preview screen.
     private var extraLargeWidgetContent: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .top, spacing: 24) {

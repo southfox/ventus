@@ -1,4 +1,5 @@
 #if canImport(WidgetKit) && !os(tvOS)
+import Forescoop
 import SwiftUI
 import WidgetKit
 

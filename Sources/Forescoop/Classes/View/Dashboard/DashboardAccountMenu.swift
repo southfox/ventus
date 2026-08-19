@@ -14,12 +14,14 @@ struct DashboardAccountMenu: View {
     let isShowingWorkspace: Bool
     let isShowingGraph: Bool
     let showsWorkspaceOption: Bool
+    let showsWidgetPreview: Bool
     let isLoggedIn: Bool
     let onShowDashboard: () -> Void
     let onShowGrid: () -> Void
     let onShowWorkspace: () -> Void
     let onShowGraph: () -> Void
     let onShowSettings: () -> Void
+    let onShowWidgetPreview: () -> Void
     let onShowHelp: () -> Void
     let onShowAbout: () -> Void
     let onShowAccount: () -> Void
@@ -39,6 +41,9 @@ struct DashboardAccountMenu: View {
             }
             if !isShowingGraph {
                 Button("Forecast Graph", systemImage: "chart.xyaxis.line", action: onShowGraph)
+            }
+            if showsWidgetPreview {
+                Button("Widget", systemImage: "square.grid.2x2", action: onShowWidgetPreview)
             }
 
             Divider()
@@ -72,12 +77,14 @@ struct DashboardAccountMenu: View {
         isShowingWorkspace: false,
         isShowingGraph: false,
         showsWorkspaceOption: true,
+        showsWidgetPreview: true,
         isLoggedIn: true,
         onShowDashboard: {},
         onShowGrid: {},
         onShowWorkspace: {},
         onShowGraph: {},
         onShowSettings: {},
+        onShowWidgetPreview: {},
         onShowHelp: {},
         onShowAbout: {},
         onShowAccount: {},

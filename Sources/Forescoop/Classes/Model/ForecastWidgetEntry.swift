@@ -1,5 +1,12 @@
-#if canImport(WidgetKit) && !os(tvOS)
-import Forescoop
+//
+//  ForecastWidgetEntry.swift
+//  Forescoop package
+//
+//  Created by Javier Fuchs on 08/19/26.
+//  Copyright © 2026 Mobile Patagonia. All rights reserved.
+//
+
+#if canImport(WidgetKit)
 import SwiftUI
 import WidgetKit
 
