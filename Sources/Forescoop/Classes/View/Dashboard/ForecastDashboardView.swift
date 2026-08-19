@@ -44,7 +44,6 @@ public struct ForecastDashboardView: View {
     @State private var windDirectionDisplayMode: WindDirectionDisplayMode = .arrow
     @State private var gridHourStep = GridHourStepStore.load()
     @State private var activeSheet: DashboardSheet?
-    @State private var showsWidgetPreview = false
     @State private var content: ForecastViewMode
     @State private var weatherBackgroundStyle: WeatherBackgroundStyle
     @State private var theme: VentusTheme
@@ -131,15 +130,16 @@ public struct ForecastDashboardView: View {
             isShowingGrid: content == .grid,
             isShowingWorkspace: content == .workspace,
             isShowingGraph: content == .graph,
+            isShowingOverview: content == .overview,
             showsWorkspaceOption: ForecastViewMode.workspace.isAvailable,
-            showsWidgetPreview: forecast != nil,
+            showsOverviewOption: ForecastViewMode.overview.isAvailable,
             isLoggedIn: !account.username.isEmpty,
             onShowDashboard: { content = .dashboard },
             onShowGrid: { content = .grid },
             onShowWorkspace: { content = .workspace },
             onShowGraph: { content = .graph },
+            onShowOverview: { content = .overview },
             onShowSettings: { activeSheet = .weatherBackgroundSettings },
-            onShowWidgetPreview: { showsWidgetPreview = true },
             onShowHelp: { activeSheet = .help },
             onShowAbout: { activeSheet = .about },
             onShowAccount: { activeSheet = .login },
@@ -189,6 +189,14 @@ public struct ForecastDashboardView: View {
                                 modelForecasts: displayedModelForecasts,
                                 modelNamesByID: modelNamesByID,
                                 isModelComparisonEnabled: $showsDashboardModelComparison
+                            )
+                        } else if content == .overview {
+                            WidgetPreviewScreen(
+                                forecast: forecast,
+                                coordinateLocationName: coordinateLocationName,
+                                theme: theme,
+                                onSelectLocation: { activeSheet = .spotPicker },
+                                onShowMap: { activeSheet = .forecastMap }
                             )
                         } else {
                             forecastContent(for: forecast)
@@ -365,17 +373,6 @@ public struct ForecastDashboardView: View {
             .sheet(isPresented: sheetBinding(.about)) {
                 aboutSheet
             }
-            .navigationDestination(isPresented: $showsWidgetPreview) {
-                if let forecast {
-                    WidgetPreviewScreen(
-                        forecast: forecast,
-                        coordinateLocationName: coordinateLocationName,
-                        theme: theme,
-                        onSelectLocation: { activeSheet = .spotPicker },
-                        onShowMap: { activeSheet = .forecastMap }
-                    )
-                }
-            }
 #if !os(tvOS)
             .sheet(isPresented: sheetBinding(.forecastMap)) {
                 MapLocationPicker(
@@ -423,7 +420,8 @@ public struct ForecastDashboardView: View {
         for forecast: SpotForecast,
         includesLocationWorkspace: Bool = true,
         showsLocationHeader: Bool = true,
-        showsModelSummary: Bool = true
+        showsModelSummary: Bool = true,
+        isCompactOverview: Bool = false
     ) -> some View {
         ScrollView {
             VStack(spacing: 28) {
@@ -440,7 +438,7 @@ public struct ForecastDashboardView: View {
                 if usesWideLayout {
                     HStack(alignment: .top, spacing: 56) {
                         VStack(alignment: .leading, spacing: 28) {
-                            ForecastOverview(forecast: forecast, selectedHour: selectedHour, temperatureUnit: $viewModel.temperatureUnit, coordinateLocationName: coordinateLocationName, modelForecasts: displayedModelForecasts, modelNamesByID: modelNamesByID, isModelComparisonEnabled: showsDashboardModelComparison, showsLocationHeader: showsLocationHeader, showsModelSummary: showsModelSummary, onSelectLocation: { activeSheet = .spotPicker }, onSelectModel: { activeSheet = .modelPicker }, onShowMap: { activeSheet = .forecastMap })
+                            ForecastOverview(forecast: forecast, selectedHour: selectedHour, temperatureUnit: $viewModel.temperatureUnit, coordinateLocationName: coordinateLocationName, modelForecasts: displayedModelForecasts, modelNamesByID: modelNamesByID, isModelComparisonEnabled: showsDashboardModelComparison, showsLocationHeader: showsLocationHeader, showsModelSummary: showsModelSummary, isCompact: isCompactOverview, onSelectLocation: { activeSheet = .spotPicker }, onSelectModel: { activeSheet = .modelPicker }, onShowMap: { activeSheet = .forecastMap })
                         }
                         .frame(maxWidth: .infinity)
 
@@ -467,7 +465,7 @@ public struct ForecastDashboardView: View {
                     ForecastIntelligenceSummary(forecast: forecast, hour: selectedHour, coordinateLocationName: coordinateLocationName, temperatureUnit: viewModel.temperatureUnit, windSpeedUnit: viewModel.windSpeedUnit, precipitationUnit: viewModel.precipitationUnit, freezingLevelUnit: viewModel.freezingLevelUnit, pressureUnit: viewModel.pressureUnit)
                 } else {
                     VStack(spacing: 24) {
-                        ForecastOverview(forecast: forecast, selectedHour: selectedHour, temperatureUnit: $viewModel.temperatureUnit, coordinateLocationName: coordinateLocationName, modelForecasts: displayedModelForecasts, modelNamesByID: modelNamesByID, isModelComparisonEnabled: showsDashboardModelComparison, showsLocationHeader: showsLocationHeader, showsModelSummary: showsModelSummary, onSelectLocation: { activeSheet = .spotPicker }, onSelectModel: { activeSheet = .modelPicker }, onShowMap: { activeSheet = .forecastMap })
+                        ForecastOverview(forecast: forecast, selectedHour: selectedHour, temperatureUnit: $viewModel.temperatureUnit, coordinateLocationName: coordinateLocationName, modelForecasts: displayedModelForecasts, modelNamesByID: modelNamesByID, isModelComparisonEnabled: showsDashboardModelComparison, showsLocationHeader: showsLocationHeader, showsModelSummary: showsModelSummary, isCompact: isCompactOverview, onSelectLocation: { activeSheet = .spotPicker }, onSelectModel: { activeSheet = .modelPicker }, onShowMap: { activeSheet = .forecastMap })
                         ForecastWindDetails(forecast: forecast, selectedHour: selectedHour, windSpeedUnit: $viewModel.windSpeedUnit, windDirectionDisplayMode: $windDirectionDisplayMode, temperatureUnit: $viewModel.temperatureUnit, modelForecasts: displayedModelForecasts, modelNamesByID: modelNamesByID, isModelComparisonEnabled: showsDashboardModelComparison)
                         ForecastWeatherDetails(forecast: forecast, selectedHour: selectedHour, waveHeightUnit: $viewModel.waveHeightUnit, precipitationUnit: $viewModel.precipitationUnit, freezingLevelUnit: $viewModel.freezingLevelUnit, pressureUnit: $viewModel.pressureUnit, modelForecasts: displayedModelForecasts, modelNamesByID: modelNamesByID, isModelComparisonEnabled: showsDashboardModelComparison)
                         ForecastIntelligenceSummary(forecast: forecast, hour: selectedHour, coordinateLocationName: coordinateLocationName, temperatureUnit: viewModel.temperatureUnit, windSpeedUnit: viewModel.windSpeedUnit, precipitationUnit: viewModel.precipitationUnit, freezingLevelUnit: viewModel.freezingLevelUnit, pressureUnit: viewModel.pressureUnit)
@@ -556,7 +554,8 @@ public struct ForecastDashboardView: View {
                 for: forecast,
                 includesLocationWorkspace: false,
                 showsLocationHeader: false,
-                showsModelSummary: false
+                showsModelSummary: false,
+                isCompactOverview: true
             )
         }
     }

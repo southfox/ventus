@@ -18,6 +18,7 @@ public struct ForecastOverview: View {
     public let isModelComparisonEnabled: Bool
     public let showsLocationHeader: Bool
     public let showsModelSummary: Bool
+    public let isCompact: Bool
     @Binding public var temperatureUnit: TemperatureUnit
     @State private var showsTemperatureSources = false
     private let onSelectLocation: () -> Void
@@ -35,6 +36,7 @@ public struct ForecastOverview: View {
         isModelComparisonEnabled: Bool = false,
         showsLocationHeader: Bool = true,
         showsModelSummary: Bool = true,
+        isCompact: Bool = false,
         modelInfoURL: URL = URL(string: "https://www.windguru.cz/help.php?sec=models")!,
         onSelectLocation: @escaping () -> Void,
         onSelectModel: @escaping () -> Void,
@@ -48,6 +50,7 @@ public struct ForecastOverview: View {
         self.isModelComparisonEnabled = isModelComparisonEnabled
         self.showsLocationHeader = showsLocationHeader
         self.showsModelSummary = showsModelSummary
+        self.isCompact = isCompact
         _temperatureUnit = temperatureUnit
         self.modelInfoURL = modelInfoURL
         self.onSelectLocation = onSelectLocation
@@ -56,7 +59,7 @@ public struct ForecastOverview: View {
     }
 
     public var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: isCompact ? 6 : 16) {
             VStack(spacing: 4) {
                 if showsLocationHeader {
                     ForecastLocationHeader(
@@ -85,23 +88,23 @@ public struct ForecastOverview: View {
                     .foregroundStyle(.secondary)
             }
 
-            HStack(spacing: 12) {
+            HStack(spacing: isCompact ? 6 : 12) {
                 ForEach(forecast.weatherSymbolNames(hour: selectedHour), id: \.self) { symbol in
                     Image(systemName: symbol)
                 }
             }
-            .font(.system(size: 42))
+            .font(.system(size: isCompact ? 20 : 42))
             .symbolRenderingMode(.hierarchical)
 
-            VStack(spacing: 8) {
-                HStack(spacing: 12) {
+            VStack(spacing: isCompact ? 2 : 8) {
+                HStack(spacing: isCompact ? 6 : 12) {
                     ForecastUnitSelector(
                         "Temperature unit",
                         selection: $temperatureUnit,
                         unitTitle: \.label
                     ) {
                         ThermalLabel(temperature, celsius: currentCelsius)
-                            .font(.system(size: 44, weight: .semibold))
+                            .font(.system(size: isCompact ? 22 : 44, weight: .semibold))
                             .foregroundStyle(theme.accentColor)
                     }
                     .accessibilityLabel("Temperature")
@@ -117,17 +120,17 @@ public struct ForecastOverview: View {
 
                 if let realTemperature {
                     RealTemperatureLabel(realTemperature, celsius: realTemperatureCelsius)
-                        .font(.title3.weight(.medium))
+                        .font(isCompact ? .caption.weight(.medium) : .title3.weight(.medium))
                         .foregroundStyle(theme.accentColor)
                         .accessibilityLabel("Real temperature")
                 }
 
                 if let range = forecast.dailyTemperatureRange(hour: selectedHour), let highTemperatureText, let lowTemperatureText {
-                    HStack(spacing: 12) {
+                    HStack(spacing: isCompact ? 6 : 12) {
                         ThermalLabel(lowTemperatureText, celsius: range.low)
                         ThermalLabel(highTemperatureText, celsius: range.high)
                     }
-                    .font(.subheadline)
+                    .font(isCompact ? .caption2 : .subheadline)
                     .foregroundStyle(.secondary)
                 }
 
@@ -146,9 +149,6 @@ public struct ForecastOverview: View {
         }
     }
 
-    /// TMP only — deliberately not falling back to TMPE, so this headline
-    /// stays visually distinct from the "Real temperature" line below it
-    /// whenever the model actually reports both (matches the grid).
     private var currentCelsius: Double {
         let hour = selectedHour ?? forecast.currentForecastHour
         return forecast.forecast?.temperature(hh: hour) ?? forecast.forecast?.temperatureReal(hh: hour) ?? 0

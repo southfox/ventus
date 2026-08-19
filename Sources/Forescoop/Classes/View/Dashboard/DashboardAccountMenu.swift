@@ -13,15 +13,16 @@ struct DashboardAccountMenu: View {
     let isShowingGrid: Bool
     let isShowingWorkspace: Bool
     let isShowingGraph: Bool
+    let isShowingOverview: Bool
     let showsWorkspaceOption: Bool
-    let showsWidgetPreview: Bool
+    let showsOverviewOption: Bool
     let isLoggedIn: Bool
     let onShowDashboard: () -> Void
     let onShowGrid: () -> Void
     let onShowWorkspace: () -> Void
     let onShowGraph: () -> Void
+    let onShowOverview: () -> Void
     let onShowSettings: () -> Void
-    let onShowWidgetPreview: () -> Void
     let onShowHelp: () -> Void
     let onShowAbout: () -> Void
     let onShowAccount: () -> Void
@@ -30,7 +31,7 @@ struct DashboardAccountMenu: View {
 
     var body: some View {
         Menu {
-            if isShowingGrid || isShowingWorkspace || isShowingGraph {
+            if isShowingGrid || isShowingWorkspace || isShowingGraph || isShowingOverview {
                 Button("Forecast Dashboard", systemImage: "rectangle.3.group", action: onShowDashboard)
             }
             if !isShowingGrid {
@@ -42,8 +43,8 @@ struct DashboardAccountMenu: View {
             if !isShowingGraph {
                 Button("Forecast Graph", systemImage: "chart.xyaxis.line", action: onShowGraph)
             }
-            if showsWidgetPreview {
-                Button("Widget", systemImage: "square.grid.2x2", action: onShowWidgetPreview)
+            if showsOverviewOption, !isShowingOverview {
+                Button("Overview", systemImage: "square.grid.2x2", action: onShowOverview)
             }
 
             Divider()
@@ -76,15 +77,16 @@ struct DashboardAccountMenu: View {
         isShowingGrid: false,
         isShowingWorkspace: false,
         isShowingGraph: false,
+        isShowingOverview: false,
         showsWorkspaceOption: true,
-        showsWidgetPreview: true,
+        showsOverviewOption: true,
         isLoggedIn: true,
         onShowDashboard: {},
         onShowGrid: {},
         onShowWorkspace: {},
         onShowGraph: {},
+        onShowOverview: {},
         onShowSettings: {},
-        onShowWidgetPreview: {},
         onShowHelp: {},
         onShowAbout: {},
         onShowAccount: {},

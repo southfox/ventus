@@ -16,6 +16,7 @@ public enum ForecastViewMode: String, CaseIterable, Identifiable, Sendable {
     case grid
     case workspace
     case graph
+    case overview
 
     public var id: String { rawValue }
 
@@ -25,6 +26,7 @@ public enum ForecastViewMode: String, CaseIterable, Identifiable, Sendable {
         case .grid: "Forecast Grid"
         case .workspace: "Grid and Dashboard"
         case .graph: "Forecast Graph"
+        case .overview: "Overview"
         }
     }
 
@@ -34,18 +36,29 @@ public enum ForecastViewMode: String, CaseIterable, Identifiable, Sendable {
         case .grid: "tablecells"
         case .workspace: "rectangle.split.2x1"
         case .graph: "chart.xyaxis.line"
+        case .overview: "square.grid.2x2"
         }
     }
 
     public var isAvailable: Bool {
-        guard self == .workspace else { return true }
+        switch self {
+        case .workspace:
 #if os(watchOS)
-        return false
+            return false
 #elseif os(iOS)
-        return UIDevice.current.userInterfaceIdiom != .phone
+            return UIDevice.current.userInterfaceIdiom != .phone
 #else
-        return true
+            return true
 #endif
+        case .overview:
+#if os(watchOS)
+            return false
+#else
+            return true
+#endif
+        default:
+            return true
+        }
     }
 
     public static var availableCases: [ForecastViewMode] {
