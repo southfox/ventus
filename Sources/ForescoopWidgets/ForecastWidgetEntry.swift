@@ -98,7 +98,7 @@ public struct ForecastWidgetHour: Identifiable, Sendable {
     public var id: String { label }
 
     public static let placeholder = [
-        ForecastWidgetHour(label: "Now".localized, symbolName: "cloud.sun.fill", temperature: "12°"),
+        ForecastWidgetHour(label: "now".localized, symbolName: "cloud.sun.fill", temperature: "12°"),
         ForecastWidgetHour(label: "2 PM", symbolName: "cloud.sun.fill", temperature: "13°"),
         ForecastWidgetHour(label: "3 PM", symbolName: "cloud.fill", temperature: "13°"),
         ForecastWidgetHour(label: "4 PM", symbolName: "cloud.rain.fill", temperature: "11°"),
@@ -118,7 +118,7 @@ public struct ForecastWidgetDay: Identifiable, Sendable {
     public var id: String { "\(label)-\(lowValue)-\(highValue)" }
 
     public static let placeholder = [
-        ForecastWidgetDay(label: "Today", symbolName: "cloud.sun.fill", low: "6°", high: "14°", lowValue: 6, highValue: 14),
+        ForecastWidgetDay(label: "today", symbolName: "cloud.sun.fill", low: "6°", high: "14°", lowValue: 6, highValue: 14),
         ForecastWidgetDay(label: "Thu", symbolName: "cloud.rain.fill", low: "5°", high: "11°", lowValue: 5, highValue: 11),
         ForecastWidgetDay(label: "Fri", symbolName: "cloud.fill", low: "4°", high: "10°", lowValue: 4, highValue: 10),
         ForecastWidgetDay(label: "Sat", symbolName: "sun.max.fill", low: "6°", high: "16°", lowValue: 6, highValue: 16),

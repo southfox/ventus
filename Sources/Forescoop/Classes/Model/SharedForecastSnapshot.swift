@@ -186,7 +186,7 @@ public extension SharedForecastSnapshot {
             .prefix(10)
             .map { item in
                 let date = forecast.forecastDate(hour: item.hour) ?? .now
-                let label = item.hour == currentHour ? "Now".localized : date.formatted(.dateTime.hour(.defaultDigits(amPM: .abbreviated)))
+                let label = item.hour == currentHour ? "now".localized : date.formatted(.dateTime.hour(.defaultDigits(amPM: .abbreviated)))
                 let temperature = forecast.forecast?.temperatureReal(hh: item.hour) ?? forecast.forecast?.temperature(hh: item.hour) ?? 0
                 return Hour(
                     label: label,
@@ -210,7 +210,7 @@ public extension SharedForecastSnapshot {
             }
             guard let low = temperatures.min(), let high = temperatures.max() else { return nil }
             let representativeHour = hours.sorted { (Int($0) ?? 0) < (Int($1) ?? 0) }[hours.count / 2]
-            let label = calendar.isDateInToday(date) ? "Today".localized : date.formatted(.dateTime.weekday(.abbreviated))
+            let label = calendar.isDateInToday(date) ? "today".localized : date.formatted(.dateTime.weekday(.abbreviated))
             return Day(
                 label: label,
                 symbolName: forecast.weatherSymbolName(hour: representativeHour),

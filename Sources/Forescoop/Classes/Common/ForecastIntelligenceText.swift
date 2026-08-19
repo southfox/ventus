@@ -116,7 +116,7 @@ struct ForecastIntelligenceSnapshot: Hashable, Sendable {
         }
         let calendar = Calendar.current
         let day = calendar.isDateInToday(date)
-            ? "Today".localized(locale: locale)
+            ? "today".localized(locale: locale)
             : date.formatted(.dateTime.weekday(.abbreviated).day().locale(locale))
         let formatter = DateFormatter()
         formatter.locale = locale

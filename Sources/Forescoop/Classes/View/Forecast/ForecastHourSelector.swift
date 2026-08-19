@@ -102,7 +102,7 @@ public struct ForecastHourSelector: View {
 
         let calendar = Calendar.current
         let day = calendar.isDateInToday(date)
-            ? "Today".localized(locale: locale)
+            ? "today".localized(locale: locale)
             : date.formatted(.dateTime.weekday(.abbreviated).day())
         let formatter = DateFormatter()
         formatter.locale = .autoupdatingCurrent
