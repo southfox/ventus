@@ -271,7 +271,8 @@ class ModelTests: XCTestCase {
         let weatherSymbols = spotForecast?.weatherSymbolNames(hour: "10") ?? []
         XCTAssertGreaterThanOrEqual(weatherSymbols.count, 2)
         XCTAssertEqual(weatherSymbols.count, Set(weatherSymbols).count)
-        XCTAssertTrue(spotForecast?.weatherSymbolNames(hour: "29").contains("snowflake") == true)
+        XCTAssertFalse(spotForecast?.weatherSymbolNames(hour: "29").contains("snowflake") == true)
+        XCTAssertTrue(spotForecast?.weatherSymbolNames(hour: "54").contains("snowflake") == true)
         let blendedForecast: SpotForecast?
         do {
             blendedForecast = try SpotForecast.blended([spotForecast!, spotForecast!])

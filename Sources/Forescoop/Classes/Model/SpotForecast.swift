@@ -188,6 +188,7 @@ public extension SpotForecast {
             ?? forecast?.precipitation1(hh: hour)
             ?? 0
         let modelTemperature = forecast?.temperature(hh: hour) ?? forecast?.temperatureReal(hh: hour) ?? 0
+        let phaseTemperature = forecast?.temperatureReal(hh: hour) ?? forecast?.temperature(hh: hour) ?? 0
         let cloudCover = skyObscuringCloudCover(hh: hour)
         let humidity = forecast?.relativeHumidity(hh: hour) ?? 0
         let windSpeed = forecast?.windSpeed(hh: hour) ?? 0
@@ -196,7 +197,7 @@ public extension SpotForecast {
         var symbols: [String] = []
 
         let oktas = Int((Double(cloudCover) / 100 * 8).rounded())
-        let isSnow = precipitation > 0 && modelTemperature <= 0
+        let isSnow = precipitation > 0 && phaseTemperature <= 0
         let isHeavyRain = precipitation > 0 && !isSnow && precipitation >= 8
         let isLightRain = precipitation > 0 && !isSnow && !isHeavyRain
 
