@@ -16,6 +16,11 @@ public enum SelectedWindguruSpotStore {
         let context = ModelContext(SavedMapLocationStore.container)
         return (try? context.fetch(FetchDescriptor<VentusPreferenceRecord>()))?.first(where: { $0.key == key })?.value ?? SavedMapLocationStore.primarySpotID
     }
+
+    public static var hasSavedSelection: Bool {
+        let context = ModelContext(SavedMapLocationStore.container)
+        return (try? context.fetch(FetchDescriptor<VentusPreferenceRecord>()))?.contains(where: { $0.key == key }) ?? false
+    }
     public static func save(_ spotID: String) {
         let context = ModelContext(SavedMapLocationStore.container)
         if let record = (try? context.fetch(FetchDescriptor<VentusPreferenceRecord>()))?.first(where: { $0.key == key }) { record.value = spotID } else { context.insert(VentusPreferenceRecord(key: key, value: spotID)) }

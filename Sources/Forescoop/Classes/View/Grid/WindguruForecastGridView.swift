@@ -93,7 +93,6 @@ public struct WindguruForecastGridView: View {
                 onSelectLocation: onSelectLocation,
                 onShowMap: onShowMap
             )
-            .font(.default.bold())
 
             frozenGrid(scrollsVertically: true)
             ForecastGridModelSelector(
@@ -691,7 +690,8 @@ public struct WindguruForecastGridView: View {
         let formatter = DateFormatter()
         formatter.locale = .autoupdatingCurrent
         formatter.setLocalizedDateFormatFromTemplate("j")
-        return formatter.string(from: date) + "h"
+        let timeString = formatter.string(from: date)
+        return formatter.dateFormat.contains("a") ? timeString : "\(timeString)h"
     }
 
     private func daylightColumnOverlay(for hour: String) -> Color {

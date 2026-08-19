@@ -15,7 +15,7 @@ struct ForecastLocationHeader: View {
     let locationName: String
     let onSelectLocation: () -> Void
     let onShowMap: () -> Void
-    let font: Font = .title.bold()
+    let font: Font = .subheadline.bold()
 
     var body: some View {
         HStack(spacing: 8) {

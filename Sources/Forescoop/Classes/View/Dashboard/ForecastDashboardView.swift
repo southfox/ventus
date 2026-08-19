@@ -704,6 +704,10 @@ public struct ForecastDashboardView: View {
 
     @MainActor
     private func loadPreferredForecast() async {
+        guard !SelectedWindguruSpotStore.hasSavedSelection else {
+            await loadForecast(spotId: selectedSpotID, modelIDs: [])
+            return
+        }
         let preferredSpotID: String
         if !account.username.isEmpty,
            let password = account.password,
