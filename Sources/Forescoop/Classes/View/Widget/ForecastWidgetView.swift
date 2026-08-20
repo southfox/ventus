@@ -217,7 +217,9 @@ public struct ForecastWidgetView: View {
                     if isInAppPreview {
                         Divider()
                     }
-                    hourlyForecast(limit: 10)
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        hourlyForecast(limit: 10)
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -458,6 +460,7 @@ public struct ForecastWidgetView: View {
                         .font(.caption2.weight(.medium))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
+                        .minimumScaleFactor(0.7)
                         .frame(height: 14)
                     Image(systemName: hour.symbolName)
                         .font(.title3)
