@@ -95,7 +95,58 @@ class ModelTests: XCTestCase {
         XCTAssertNotNil(spot)
         XCTAssertEqual(spot?.name, "Argentina,  Bariloche, playa sin viento L. Moreno este")
     }
-    
+
+    func testSpotNameDeduplicatesRepeatedSegments() throws {
+        let repeatedCountry = try Spot(map: [
+            "id_spot": "11736",
+            "spotname": "Argentina - Argentina - Cerro Catedral",
+            "country": "Argentina"
+        ])
+        XCTAssertEqual(repeatedCountry?.name, "Argentina - Cerro Catedral")
+
+        let repeatedCity = try Spot(map: [
+            "id_spot": "64141",
+            "spotname": "Bariloche - Bariloche",
+            "country": "Argentina"
+        ])
+        XCTAssertEqual(repeatedCity?.name, "Bariloche")
+
+        let unaffected = try Spot(map: [
+            "id_spot": "64141",
+            "spotname": "Argentina - Cerro Catedral",
+            "country": "Argentina"
+        ])
+        XCTAssertEqual(unaffected?.name, "Argentina - Cerro Catedral")
+
+        let commaSeparated = try Spot(map: [
+            "id_spot": "64141",
+            "spotname": "Argentina, Argentina, Cerro Catedral",
+            "country": "Argentina"
+        ])
+        XCTAssertEqual(commaSeparated?.name, "Argentina, Cerro Catedral")
+
+        let spaceSeparated = try Spot(map: [
+            "id_spot": "64141",
+            "spotname": "Argentina Argentina - Cerro Catedral",
+            "country": "Argentina"
+        ])
+        XCTAssertEqual(spaceSeparated?.name, "Argentina - Cerro Catedral")
+
+        let mixedCase = try Spot(map: [
+            "id_spot": "64141",
+            "spotname": "argentina - Argentina - Cerro Catedral",
+            "country": "Argentina"
+        ])
+        XCTAssertEqual(mixedCase?.name, "argentina - Cerro Catedral")
+
+        let untouchedCommaList = try Spot(map: [
+            "id_spot": "64141",
+            "spotname": "Argentina,  Bariloche, playa sin viento L. Moreno este",
+            "country": "Argentina"
+        ])
+        XCTAssertEqual(untouchedCommaList?.name, "Argentina,  Bariloche, playa sin viento L. Moreno este")
+    }
+
     func testUser() {
         let user: User?
         do {

@@ -43,9 +43,26 @@ public class Spot: Object, Mappable {
             throw CustomError.notMappeable
         }
         id_spot = map?["id_spot"] as? String
-        spotname = map?["spotname"] as? String
+        spotname = Spot.deduplicatingRepeatedSegments(in: map?["spotname"] as? String)
         country = map?["country"] as? String
         nickname = map?["nickname"] as? String
+    }
+
+    private static let repeatedSegmentRegex = try? NSRegularExpression(
+        pattern: #"(\S.*?)(?:\s*[-,]\s*|\s+)\1\b"#,
+        options: [.caseInsensitive]
+    )
+
+    static func deduplicatingRepeatedSegments(in rawName: String?) -> String? {
+        guard let rawName, let regex = repeatedSegmentRegex else { return rawName }
+
+        var result = rawName
+        while let match = regex.firstMatch(in: result, range: NSRange(result.startIndex..., in: result)),
+              let matchRange = Range(match.range, in: result),
+              let segmentRange = Range(match.range(at: 1), in: result) {
+            result.replaceSubrange(matchRange, with: result[segmentRange])
+        }
+        return result
     }
     
     public var description : String {
