@@ -18,9 +18,9 @@ public enum ForecastInsightDetail: Sendable {
 
     var maxWords: Int {
         switch self {
-        case .brief: 25
-        case .compact: 100
-        case .extended: 2_000
+        case .brief: 250
+        case .compact: 1_000
+        case .extended: 20_000
         }
     }
 
@@ -45,6 +45,7 @@ public enum ForecastIntelligenceText {
         precipitationUnit: PrecipitationUnit = DeviceForecastPreferences.precipitationUnit,
         freezingLevelUnit: FreezingLevelUnit = DeviceForecastPreferences.freezingLevelUnit,
         pressureUnit: PressureUnit = DeviceForecastPreferences.pressureUnit,
+        waveHeightUnit: WaveHeightUnit = DeviceForecastPreferences.waveHeightUnit,
         locale: Locale = AppLanguageStore.currentLocale
     ) -> String {
         ForecastIntelligenceSnapshot(
@@ -56,8 +57,35 @@ public enum ForecastIntelligenceText {
             precipitationUnit: precipitationUnit,
             freezingLevelUnit: freezingLevelUnit,
             pressureUnit: pressureUnit,
+            waveHeightUnit: waveHeightUnit,
             locale: locale
         ).deterministicSummary
+    }
+
+    public static func detailedSummary(
+        forecast: SpotForecast,
+        hour: String?,
+        coordinateLocationName: String? = nil,
+        temperatureUnit: TemperatureUnit = DeviceForecastPreferences.temperatureUnit,
+        windSpeedUnit: WindSpeedUnit = DeviceForecastPreferences.windSpeedUnit,
+        precipitationUnit: PrecipitationUnit = DeviceForecastPreferences.precipitationUnit,
+        freezingLevelUnit: FreezingLevelUnit = DeviceForecastPreferences.freezingLevelUnit,
+        pressureUnit: PressureUnit = DeviceForecastPreferences.pressureUnit,
+        waveHeightUnit: WaveHeightUnit = DeviceForecastPreferences.waveHeightUnit,
+        locale: Locale = AppLanguageStore.currentLocale
+    ) -> String {
+        ForecastIntelligenceSnapshot(
+            forecast: forecast,
+            hour: hour,
+            coordinateLocationName: coordinateLocationName,
+            temperatureUnit: temperatureUnit,
+            windSpeedUnit: windSpeedUnit,
+            precipitationUnit: precipitationUnit,
+            freezingLevelUnit: freezingLevelUnit,
+            pressureUnit: pressureUnit,
+            waveHeightUnit: waveHeightUnit,
+            locale: locale
+        ).structuredOverview
     }
 }
 
@@ -75,11 +103,14 @@ struct ForecastIntelligenceSnapshot: Hashable, Sendable {
     let cloudCover: Int?
     let freezingLevel: String?
     let pressure: String?
+    let waveHeight: String?
     let locale: Locale
     let windOutlook: String?
     let temperatureOutlook: String?
     let precipitationOutlook: String?
+    let waveOutlook: String?
     let dailyOutlook: String?
+    let structuredOverview: String
 
     init(
         forecast: SpotForecast,
@@ -90,6 +121,7 @@ struct ForecastIntelligenceSnapshot: Hashable, Sendable {
         precipitationUnit: PrecipitationUnit,
         freezingLevelUnit: FreezingLevelUnit,
         pressureUnit: PressureUnit,
+        waveHeightUnit: WaveHeightUnit,
         locale: Locale
     ) {
         let hour = hour ?? forecast.currentForecastHour ?? "0"
@@ -117,6 +149,9 @@ struct ForecastIntelligenceSnapshot: Hashable, Sendable {
         pressure = source?.seaLevelPressure(hh: hour).map {
             Self.pressure($0, unit: pressureUnit, locale: locale)
         }
+        waveHeight = source?.waveHeight(hh: hour).map {
+            Self.waveHeight($0, unit: waveHeightUnit, locale: locale)
+        }
 
         let currentOffset = Int(hour) ?? 0
         let futureHours = forecast.availableForecastHours
@@ -126,10 +161,36 @@ struct ForecastIntelligenceSnapshot: Hashable, Sendable {
         let nextDay = futureHours.filter { $0.offset <= currentOffset + 24 }
         let nextTwoDays = futureHours.filter { $0.offset <= currentOffset + 48 }
 
-        windOutlook = Self.windOutlook(nextDay, forecast: forecast, unit: windSpeedUnit, locale: locale)
-        temperatureOutlook = Self.temperatureOutlook(nextTwoDays, forecast: forecast, unit: temperatureUnit, locale: locale)
-        precipitationOutlook = Self.precipitationOutlook(nextDay, forecast: forecast, unit: precipitationUnit, locale: locale)
-        dailyOutlook = Self.dailyOutlook(futureHours, forecast: forecast, temperatureUnit: temperatureUnit, locale: locale)
+        let windOutlook = Self.windOutlook(nextDay, forecast: forecast, unit: windSpeedUnit, locale: locale)
+        let temperatureOutlook = Self.temperatureOutlook(nextTwoDays, forecast: forecast, unit: temperatureUnit, locale: locale)
+        let precipitationOutlook = Self.precipitationOutlook(nextDay, forecast: forecast, unit: precipitationUnit, locale: locale)
+        let waveOutlook = Self.waveOutlook(nextTwoDays, forecast: forecast, unit: waveHeightUnit, locale: locale)
+        let days = Self.dayDetails(futureHours, forecast: forecast, locale: locale)
+        self.windOutlook = windOutlook
+        self.temperatureOutlook = temperatureOutlook
+        self.precipitationOutlook = precipitationOutlook
+        self.waveOutlook = waveOutlook
+        dailyOutlook = Self.dailyOutlook(days, temperatureUnit: temperatureUnit, locale: locale)
+        structuredOverview = Self.structuredOverview(
+            hourLabel: hourLabel,
+            currentTemperature: temperature,
+            wind: wind,
+            gust: gust,
+            hasSignificantGust: hasSignificantGust,
+            rain: rain,
+            hasRain: hasRain,
+            humidity: humidity,
+            cloudCover: cloudCover,
+            freezingLevel: freezingLevel,
+            pressure: pressure,
+            waveHeight: waveHeight,
+            windOutlook: windOutlook,
+            precipitationOutlook: precipitationOutlook,
+            waveOutlook: waveOutlook,
+            days: days,
+            temperatureUnit: temperatureUnit,
+            locale: locale
+        )
     }
 
     var languageInstruction: String {
@@ -151,9 +212,11 @@ struct ForecastIntelligenceSnapshot: Hashable, Sendable {
             "Freezing level: \(freezingLevel ?? "unavailable").",
             "Pressure: \(pressure ?? "unavailable")."
         ]
+        if let waveHeight { facts.append("Wave height: \(waveHeight).") }
         if let windOutlook { facts.append("Wind outlook for the next day: \(windOutlook).") }
         if let temperatureOutlook { facts.append("Temperature outlook for the next two days: \(temperatureOutlook).") }
         if let precipitationOutlook { facts.append("Precipitation outlook for the next day: \(precipitationOutlook).") }
+        if let waveOutlook { facts.append("Wave outlook for the next two days: \(waveOutlook).") }
         if let dailyOutlook { facts.append("Multi-day outlook: \(dailyOutlook).") }
         return facts.joined(separator: " ")
     }
@@ -169,9 +232,11 @@ struct ForecastIntelligenceSnapshot: Hashable, Sendable {
         if hasRain { phrases.append("%@ of rain".localized(locale: locale, formatArguments: [rain])) }
         if let freezingLevel { phrases.append("freezing level at %@".localized(locale: locale, formatArguments: [freezingLevel])) }
         if let pressure { phrases.append("pressure %@".localized(locale: locale, formatArguments: [pressure])) }
+        if let waveHeight { phrases.append("%@ waves".localized(locale: locale, formatArguments: [waveHeight])) }
         if let windOutlook { phrases.append(windOutlook) }
         if let temperatureOutlook { phrases.append(temperatureOutlook) }
         if let precipitationOutlook { phrases.append(precipitationOutlook) }
+        if let waveOutlook { phrases.append(waveOutlook) }
         let body = phrases.joined(separator: ", ") + "."
         return "%@ · %@: %@".localized(locale: locale, formatArguments: [locationName, hourLabel, body])
     }
@@ -198,10 +263,12 @@ struct ForecastIntelligenceSnapshot: Hashable, Sendable {
         }
         guard peakBeaufort >= SpotForecast.strongWindBeaufortThreshold, let peakHour else { return nil }
         let label = hourLabel(for: peakHour, forecast: forecast, locale: locale)
-        return "strong wind expected, up to \(wind(peakKnots, unit: unit, locale: locale)) (Beaufort \(peakBeaufort)) around \(label)"
+        return "strong wind expected, up to %@ (Beaufort %@) around %@".localized(
+            locale: locale,
+            formatArguments: [wind(peakKnots, unit: unit, locale: locale), "\(peakBeaufort)", label]
+        )
     }
 
-    /// Flags an unusually cold or hot reading in `hours`, and when.
     private static func temperatureOutlook(
         _ hours: [(hour: String, offset: Int)],
         forecast: SpotForecast,
@@ -218,11 +285,17 @@ struct ForecastIntelligenceSnapshot: Hashable, Sendable {
         }
         if let coldest, coldest.celsius <= -5 {
             let label = hourLabel(for: coldest.hour, forecast: forecast, locale: locale)
-            return "very cold, dropping to \(temperature(coldest.celsius, unit: unit, locale: locale)) around \(label)"
+            return "very cold, dropping to %@ around %@".localized(
+                locale: locale,
+                formatArguments: [temperature(coldest.celsius, unit: unit, locale: locale), label]
+            )
         }
         if let hottest, hottest.celsius >= 32 {
             let label = hourLabel(for: hottest.hour, forecast: forecast, locale: locale)
-            return "very hot, reaching \(temperature(hottest.celsius, unit: unit, locale: locale)) around \(label)"
+            return "very hot, reaching %@ around %@".localized(
+                locale: locale,
+                formatArguments: [temperature(hottest.celsius, unit: unit, locale: locale), label]
+            )
         }
         return nil
     }
@@ -247,52 +320,229 @@ struct ForecastIntelligenceSnapshot: Hashable, Sendable {
         }
         guard total > 0 else { return nil }
         let amountText = precipitation(total, unit: unit, locale: locale)
-        let kind = isSnow ? "snow" : "rain"
-        guard let onsetHour else { return "\(amountText) of \(kind) expected" }
+        let kind = (isSnow ? "snow" : "rain").localized(locale: locale)
+        guard let onsetHour else {
+            return "%@ of %@ expected".localized(locale: locale, formatArguments: [amountText, kind])
+        }
         let label = hourLabel(for: onsetHour, forecast: forecast, locale: locale)
-        return "\(amountText) of \(kind) expected, starting around \(label)"
+        return "%@ of %@ expected, starting around %@".localized(locale: locale, formatArguments: [amountText, kind, label])
     }
 
-    private static func dailyOutlook(
+    private static func waveOutlook(
         _ hours: [(hour: String, offset: Int)],
         forecast: SpotForecast,
-        temperatureUnit: TemperatureUnit,
+        unit: WaveHeightUnit,
         locale: Locale
     ) -> String? {
         guard let source = forecast.forecast else { return nil }
+        var peakMeters = 0.0
+        var peakHour: String?
+        for item in hours {
+            guard let meters = source.waveHeight(hh: item.hour), meters > peakMeters else { continue }
+            peakMeters = meters
+            peakHour = item.hour
+        }
+        guard peakMeters >= 2.5, let peakHour else { return nil }
+        let label = hourLabel(for: peakHour, forecast: forecast, locale: locale)
+        return "large swell expected, up to %@ around %@".localized(
+            locale: locale,
+            formatArguments: [waveHeight(peakMeters, unit: unit, locale: locale), label]
+        )
+    }
+
+    private struct DayDetail {
+        let label: String
+        let lowCelsius: Double
+        let highCelsius: Double
+        let precipitationMillimeters: Double
+        let isSnow: Bool
+        let peakBeaufort: Int
+        let condition: String
+    }
+
+    private static func dayDetails(
+        _ hours: [(hour: String, offset: Int)],
+        forecast: SpotForecast,
+        locale: Locale
+    ) -> [DayDetail] {
+        guard let source = forecast.forecast else { return [] }
         let calendar = Calendar.current
         let grouped = Dictionary(grouping: hours) { item in
             calendar.startOfDay(for: forecast.forecastDate(hour: item.hour) ?? Date())
         }
-        let days = grouped.keys.sorted().prefix(6)
-        guard days.count > 1 else { return nil }
+        let days = grouped.keys.sorted().prefix(10)
 
-        let lines: [String] = days.compactMap { day in
+        return days.compactMap { day -> DayDetail? in
             guard let dayHours = grouped[day], !dayHours.isEmpty else { return nil }
             let temps = dayHours.compactMap { source.temperatureReal(hh: $0.hour) ?? source.temperature(hh: $0.hour) }
             guard let low = temps.min(), let high = temps.max() else { return nil }
+
+            var precipitationTotal = 0.0
+            var isSnowDay = false
+            var peakBeaufort = 0
+            for item in dayHours {
+                let amount = source.precipitation1(hh: item.hour) ?? source.precipitation(hh: item.hour) ?? 0
+                precipitationTotal += amount
+                if amount > 0, let celsius = source.temperatureReal(hh: item.hour) ?? source.temperature(hh: item.hour), celsius <= 0 {
+                    isSnowDay = true
+                }
+                let windKnots = source.windSpeed(hh: item.hour) ?? 0
+                let gustKnots = source.windGustsKnots(hh: item.hour) ?? 0
+                peakBeaufort = max(peakBeaufort, Knots(windKnots).bft ?? 0, Knots(gustKnots).bft ?? 0)
+            }
+
             let representativeHour = dayHours.sorted { $0.offset < $1.offset }[dayHours.count / 2].hour
-            let condition = conditionWord(for: forecast, hour: representativeHour)
-            let dayLabel = calendar.isDateInToday(day)
+            let condition = conditionWord(for: forecast, hour: representativeHour, locale: locale)
+            let label = calendar.isDateInToday(day)
                 ? "today".localized(locale: locale)
                 : day.formatted(.dateTime.weekday(.abbreviated).locale(locale))
-            let lowText = temperature(low, unit: temperatureUnit, locale: locale)
-            let highText = temperature(high, unit: temperatureUnit, locale: locale)
-            return "\(dayLabel) \(lowText)–\(highText) \(condition)"
+
+            return DayDetail(
+                label: label,
+                lowCelsius: low,
+                highCelsius: high,
+                precipitationMillimeters: precipitationTotal,
+                isSnow: isSnowDay,
+                peakBeaufort: peakBeaufort,
+                condition: condition
+            )
         }
-        guard !lines.isEmpty else { return nil }
+    }
+
+    private static func dailyOutlook(_ days: [DayDetail], temperatureUnit: TemperatureUnit, locale: Locale) -> String? {
+        guard days.count > 1 else { return nil }
+        let lines = days.map { day in
+            "%@ %@–%@ %@".localized(
+                locale: locale,
+                formatArguments: [
+                    day.label,
+                    temperature(day.lowCelsius, unit: temperatureUnit, locale: locale),
+                    temperature(day.highCelsius, unit: temperatureUnit, locale: locale),
+                    day.condition
+                ]
+            )
+        }
         return lines.joined(separator: ", ")
     }
 
-    private static func conditionWord(for forecast: SpotForecast, hour: String) -> String {
+    private static func structuredOverview(
+        hourLabel: String,
+        currentTemperature: String,
+        wind: String,
+        gust: String?,
+        hasSignificantGust: Bool,
+        rain: String,
+        hasRain: Bool,
+        humidity: Int?,
+        cloudCover: Int?,
+        freezingLevel: String?,
+        pressure: String?,
+        waveHeight: String?,
+        windOutlook: String?,
+        precipitationOutlook: String?,
+        waveOutlook: String?,
+        days: [DayDetail],
+        temperatureUnit: TemperatureUnit,
+        locale: Locale
+    ) -> String {
+        var openingPhrases = ["%@ with %@ wind".localized(locale: locale, formatArguments: [currentTemperature, wind])]
+        if hasSignificantGust, let gust { openingPhrases.append("gusting to %@".localized(locale: locale, formatArguments: [gust])) }
+        if hasRain { openingPhrases.append("%@ of rain".localized(locale: locale, formatArguments: [rain])) }
+        if let cloudCover { openingPhrases.append("%@ cloud cover".localized(locale: locale, formatArguments: ["\(cloudCover)%"])) }
+        if let humidity { openingPhrases.append("%@ humidity".localized(locale: locale, formatArguments: ["\(humidity)%"])) }
+        if let freezingLevel { openingPhrases.append("freezing level at %@".localized(locale: locale, formatArguments: [freezingLevel])) }
+        if let pressure { openingPhrases.append("pressure %@".localized(locale: locale, formatArguments: [pressure])) }
+        if let waveHeight { openingPhrases.append("%@ waves".localized(locale: locale, formatArguments: [waveHeight])) }
+        let openingBody = openingPhrases.joined(separator: ", ")
+        let opening = "For %@, expect %@.".localized(locale: locale, formatArguments: [hourLabel, openingBody])
+
+        guard !days.isEmpty else { return opening }
+
+        let precipitationDays = days.filter { $0.precipitationMillimeters > 0 }
+        let hasUnsettledPattern = precipitationDays.count >= max(3, days.count / 2)
+        let coldestDay = days.min { $0.lowCelsius < $1.lowCelsius }
+        let hottestDay = days.max { $0.highCelsius < $1.highCelsius }
+        let iceRiskDay = days.indices.dropLast().first { index in
+            days[index].precipitationMillimeters > 0 && days[index + 1].lowCelsius <= 0
+        }.map { days[$0 + 1] }
+
+        var points: [(title: String, body: String)] = []
+
+        if let windOutlook {
+            let capitalized = windOutlook.prefix(1).uppercased() + windOutlook.dropFirst()
+            let chillNote = "Winds at that strength can make it feel noticeably colder than the air temperature alone suggests.".localized(locale: locale)
+            points.append(("Wind & Chill".localized(locale: locale), "\(capitalized). \(chillNote)"))
+        }
+
+        if let waveOutlook {
+            let capitalized = waveOutlook.prefix(1).uppercased() + waveOutlook.dropFirst()
+            points.append(("Sea & Swell".localized(locale: locale), "\(capitalized)."))
+        }
+
+        if let iceRiskDay {
+            let body = "Wet surfaces from rain, combined with a low of %@ around %@, can refreeze into ice on exposed paths and roads overnight.".localized(
+                locale: locale,
+                formatArguments: [temperature(iceRiskDay.lowCelsius, unit: temperatureUnit, locale: locale), iceRiskDay.label]
+            )
+            points.append(("Ice Hazard".localized(locale: locale), body))
+        }
+
+        if hasUnsettledPattern {
+            let kind = (precipitationDays.contains { $0.isSnow } ? "rain or snow" : "rain").localized(locale: locale)
+            let body = "%@ of the next %@ days bring %@, so expect a wet, changeable stretch rather than a single passing system.".localized(
+                locale: locale,
+                formatArguments: ["\(precipitationDays.count)", "\(days.count)", kind]
+            )
+            points.append(("Unsettled Outlook".localized(locale: locale), body))
+        } else if let precipitationOutlook {
+            let capitalized = precipitationOutlook.prefix(1).uppercased() + precipitationOutlook.dropFirst()
+            points.append(("Precipitation".localized(locale: locale), "\(capitalized)."))
+        }
+
+        if let coldestDay, coldestDay.lowCelsius <= -5 {
+            let body = "Overnight lows drop to around %@ on %@ — dress for a sharp chill after dark.".localized(
+                locale: locale,
+                formatArguments: [temperature(coldestDay.lowCelsius, unit: temperatureUnit, locale: locale), coldestDay.label]
+            )
+            points.append(("Cold Snap".localized(locale: locale), body))
+        }
+
+        if let hottestDay, hottestDay.highCelsius >= 32 {
+            let body = "Highs climb to around %@ on %@, well above the rest of the outlook.".localized(
+                locale: locale,
+                formatArguments: [temperature(hottestDay.highCelsius, unit: temperatureUnit, locale: locale), hottestDay.label]
+            )
+            points.append(("Heat".localized(locale: locale), body))
+        }
+
+        guard !points.isEmpty else {
+            if let outlook = dailyOutlook(days, temperatureUnit: temperatureUnit, locale: locale) {
+                let quiet = "No notable hazards ahead — a generally quiet stretch: %@.".localized(locale: locale, formatArguments: [outlook])
+                return "\(opening)\n\n\(quiet)"
+            }
+            return opening
+        }
+
+        let section = points
+            .map { "**\($0.title):** \($0.body)" }
+            .joined(separator: "\n\n")
+        let sectionTitle = "Key Trends & Impact".localized(locale: locale)
+        let result = "\(opening)\n\n**\(sectionTitle)**\n\n\(section)"
+
+        return result
+    }
+
+    private static func conditionWord(for forecast: SpotForecast, hour: String, locale: Locale) -> String {
         let symbols = forecast.weatherSymbolNames(hour: hour)
-        if symbols.contains(where: { $0.contains("snow") }) { return "snow" }
-        if symbols.contains(where: { $0.contains("rain") || $0.contains("drizzle") }) { return "rain" }
-        if symbols.contains(where: { $0.contains("fog") }) { return "fog" }
-        if symbols.contains("cloud.fill") { return "overcast" }
-        if symbols.contains(where: { $0.hasPrefix("cloud.sun") || $0.hasPrefix("cloud.moon") }) { return "partly cloudy" }
-        if symbols.contains("cloud") { return "cloudy" }
-        return "clear"
+        let word: String
+        if symbols.contains(where: { $0.contains("snow") }) { word = "snow" }
+        else if symbols.contains(where: { $0.contains("rain") || $0.contains("drizzle") }) { word = "rain" }
+        else if symbols.contains(where: { $0.contains("fog") }) { word = "fog" }
+        else if symbols.contains("cloud.fill") { word = "overcast" }
+        else if symbols.contains(where: { $0.hasPrefix("cloud.sun") || $0.hasPrefix("cloud.moon") }) { word = "partly cloudy" }
+        else if symbols.contains("cloud") { word = "cloudy" }
+        else { word = "clear" }
+        return word.localized(locale: locale)
     }
 
     private static func hourLabel(for hour: String, forecast: SpotForecast, locale: Locale) -> String {
@@ -305,7 +555,7 @@ struct ForecastIntelligenceSnapshot: Hashable, Sendable {
             : date.formatted(.dateTime.weekday(.abbreviated).day().locale(locale))
         let formatter = DateFormatter()
         formatter.locale = locale
-        formatter.setLocalizedDateFormatFromTemplate("j")
+        formatter.setLocalizedDateFormatFromTemplate("jm")
         return "\(day), \(formatter.string(from: date))"
     }
 
@@ -333,5 +583,10 @@ struct ForecastIntelligenceSnapshot: Hashable, Sendable {
         let value = AtmosphericPressure(hectopascals: hectopascals).value(in: unit)
         let precision = unit == .inchesOfMercury ? 2 : 0
         return "\(value.formatted(.number.precision(.fractionLength(precision)).locale(locale))) \(unit.label)"
+    }
+
+    private static func waveHeight(_ meters: Double, unit: WaveHeightUnit, locale: Locale) -> String {
+        let value = WaveHeight(meters: meters).value(in: unit)
+        return "\(value.formatted(.number.precision(.fractionLength(1)).locale(locale))) \(unit.label)"
     }
 }

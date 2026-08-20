@@ -18,7 +18,7 @@ struct WidgetPreviewScreen: View {
     var onShowMap: () -> Void = {}
 
     private var entry: ForecastWidgetEntry {
-        ForecastWidgetEntryBuilder.entry(from: forecast, coordinateLocationName: coordinateLocationName)
+        ForecastWidgetEntryBuilder.entry(from: forecast, coordinateLocationName: coordinateLocationName, useDetailedInsight: true)
     }
 
     var body: some View {

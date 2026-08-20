@@ -63,9 +63,9 @@ public struct SettingsView: View {
         NavigationStack {
             Form {
                 Section {
-                    Picker("Forecast view", selection: $forecastViewMode) {
+                    Picker("Forecast view".localized, selection: $forecastViewMode) {
                         ForEach(ForecastViewMode.availableCases) { mode in
-                            Label(mode.title, systemImage: mode.systemImage)
+                            Label(mode.title.localized, systemImage: mode.systemImage)
                                 .tag(mode)
                         }
                     }
@@ -101,7 +101,7 @@ public struct SettingsView: View {
 #endif
 
                 Section {
-                    Picker("Weather background", selection: $weatherBackgroundStyle) {
+                    Picker("Weather background".localized, selection: $weatherBackgroundStyle) {
                         ForEach(WeatherBackgroundStyle.allCases) { style in
                             Label(style.title.localized, systemImage: style.systemImage)
                                 .tag(style)
@@ -109,72 +109,72 @@ public struct SettingsView: View {
                     }
                     .pickerStyle(.inline)
                 } header: {
-                    Text("Animations")
+                    Text("Animations".localized)
                 } footer: {
-                    Text("The selected animation is used as the forecast background on this device.")
+                    Text("The selected animation is used as the forecast background on this device.".localized)
                 }
 
                 Section {
-                    Picker("Appearance", selection: $appAppearanceMode) {
+                    Picker("Appearance".localized, selection: $appAppearanceMode) {
                         ForEach(AppAppearanceMode.allCases) { mode in
-                            Label(mode.title, systemImage: mode.systemImage)
+                            Label(mode.title.localized, systemImage: mode.systemImage)
                                 .tag(mode)
                         }
                     }
                     .pickerStyle(.inline)
                 } header: {
-                    Text("Display")
+                    Text("Display".localized)
                 } footer: {
-                    Text("System follows this device's Light or Dark appearance setting.")
+                    Text("System follows this device's Light or Dark appearance setting.".localized)
                 }
 
                 Section {
-                    Picker("Theme", selection: $theme) {
+                    Picker("Theme".localized, selection: $theme) {
                         ForEach(VentusTheme.allCases) { theme in
-                            Label(theme.title, systemImage: "paintpalette")
+                            Label(theme.title.localized, systemImage: "paintpalette")
                                 .tag(theme)
                         }
                     }
                     .pickerStyle(.inline)
                 } header: {
-                    Text("Appearance")
+                    Text("Appearance".localized)
                 } footer: {
-                    Text("Themes change colors and font design without changing text sizes. System Default follows the current device appearance.")
+                    Text("Themes change colors and font design without changing text sizes. System Default follows the current device appearance.".localized)
                 }
 
                 Section {
-                    Picker("Language", selection: $appLanguage) {
+                    Picker("Language".localized, selection: $appLanguage) {
                         ForEach(AppLanguage.allCases) { language in
                             Text(language.title(locale: locale)).tag(language)
                         }
                     }
                     .pickerStyle(.inline)
                 } header: {
-                    Text("Language")
+                    Text("Language".localized)
                 } footer: {
-                    Text("System follows the device's language. Choosing a language overrides it for Ventus only.")
+                    Text("System follows the device's language. Choosing a language overrides it for Ventus only.".localized)
                 }
 
                 Section {
-                    Toggle("Severe weather alerts", isOn: $notificationsEnabled)
+                    Toggle("Severe weather alerts".localized, isOn: $notificationsEnabled)
 #if !os(watchOS)
                     NavigationLink {
                         ForecastAlertsListView(forecastService: forecastService, account: account)
                     } label: {
-                        Label("Forecast Alerts", systemImage: "bell.badge")
+                        Label("Forecast Alerts".localized, systemImage: "bell.badge")
                     }
 #endif
                 } header: {
-                    Text("Notifications")
+                    Text("Notifications".localized)
                 } footer: {
-                    Text("Get notified about heavy snow, extreme cold, or extreme heat forecast near your selected location, or set up your own push alerts for specific spots, models, and conditions.")
+                    Text("Get notified about heavy snow, extreme cold, or extreme heat forecast near your selected location, or set up your own push alerts for specific spots, models, and conditions.".localized)
                 }
 
             }
-            .navigationTitle("Settings")
+            .navigationTitle("Settings".localized)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                    Button("Done".localized) { dismiss() }
                 }
             }
         }

@@ -29,6 +29,7 @@ public struct ForecastIntelligenceSummary: View {
         precipitationUnit: PrecipitationUnit = DeviceForecastPreferences.precipitationUnit,
         freezingLevelUnit: FreezingLevelUnit = DeviceForecastPreferences.freezingLevelUnit,
         pressureUnit: PressureUnit = DeviceForecastPreferences.pressureUnit,
+        waveHeightUnit: WaveHeightUnit = DeviceForecastPreferences.waveHeightUnit,
         locale: Locale = AppLanguageStore.currentLocale
     ) {
         let snapshot = ForecastIntelligenceSnapshot(
@@ -40,25 +41,30 @@ public struct ForecastIntelligenceSummary: View {
             precipitationUnit: precipitationUnit,
             freezingLevelUnit: freezingLevelUnit,
             pressureUnit: pressureUnit,
+            waveHeightUnit: waveHeightUnit,
             locale: locale
         )
         self.snapshot = snapshot
-        _summary = State(initialValue: snapshot.deterministicSummary)
+        _summary = State(initialValue: snapshot.structuredOverview)
     }
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 6) {
-                Label("Forecast insight", systemImage: "sparkles")
+                Label("Overview", systemImage: "sparkles")
                     .font(.headline)
                     .foregroundStyle(theme.accentColor)
                 if isGenerating {
                     ProgressView().controlSize(.small)
                 }
             }
-            Text(summary)
-                .font(.subheadline)
-                .fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: 10) {
+                ForEach(Array(summary.markdownSections.enumerated()), id: \.offset) { _, section in
+                    Text(markdown: section)
+                        .font(.subheadline)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
         }
         .padding(12)
         .background {
@@ -75,7 +81,7 @@ public struct ForecastIntelligenceSummary: View {
         }
         .ventusGlassEffect(theme: theme, in: RoundedRectangle(cornerRadius: 14))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Forecast insight. \(summary)")
+        .accessibilityLabel("Overview. \(summary)")
         .accessibilityAddTraits(.isStaticText)
         .accessibilityIdentifier("forecast.insight")
         .task(id: snapshot) {
@@ -85,7 +91,7 @@ public struct ForecastIntelligenceSummary: View {
 
     @MainActor
     private func generateSummary() async {
-        summary = snapshot.deterministicSummary
+        summary = snapshot.structuredOverview
 #if canImport(FoundationModels) && !os(tvOS)
         guard SystemLanguageModel.default.isAvailable else { return }
         isGenerating = true
@@ -95,7 +101,19 @@ public struct ForecastIntelligenceSummary: View {
             let detail = ForecastInsightDetail.deviceDefault
             let session = LanguageModelSession(
                 model: SystemLanguageModel.default,
-                instructions: "You are a precise weather forecaster. Using only the supplied forecast facts: current conditions, the wind, temperature, and precipitation outlook, and the multi-day breakdown. Write a helpful analysis of what's happening now and how conditions will change over the next hours and days. Clearly call out anything severe: strong wind, heavy rain or snow, or unusually cold or hot temperatures. Stay under \(detail.maxWords) words. Use only the supplied facts. Do not invent safety advice or facts. \(snapshot.languageInstruction)"
+                instructions: """
+                You are a precise weather forecaster writing a brief summary for a forecast app.
+
+                Using only the supplied forecast facts (current conditions, wind, temperature, precipitation, and multi-day breakdown):
+                Write an opening paragraph with the header **Overview** characterizing the current conditions and the upcoming multi-day outlook.
+                Only if supported by the provided facts, include a **Key Trends & Impact** section. Use bold sub-points formatted strictly as * **Title:** sentence to highlight notable conditions (such as strong winds/wind chill, refreeze/ice risk, persistent precipitation, or temperature extremes).
+
+                Constraints:
+                Omit the Key Trends section entirely if conditions are mild or unremarkable.
+                Do not invent safety advice, travel warnings, or facts not present in the data.
+                Keep the entire response under \(detail.maxWords) words.
+                \(snapshot.languageInstruction)
+                """
             )
             let response = try await session.respond(to: snapshot.prompt)
             let generated = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -105,6 +123,24 @@ public struct ForecastIntelligenceSummary: View {
         } catch {
         }
 #endif
+    }
+}
+
+extension Text {
+    init(markdown string: String) {
+        if let attributed = try? AttributedString(markdown: string, options: .init(interpretedSyntax: .full)) {
+            self.init(attributed)
+        } else {
+            self.init(string)
+        }
+    }
+}
+
+extension String {
+    var markdownSections: [String] {
+        components(separatedBy: "\n\n")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
     }
 }
 

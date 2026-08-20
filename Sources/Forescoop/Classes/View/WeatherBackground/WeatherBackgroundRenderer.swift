@@ -64,7 +64,7 @@ public enum WeatherBackgroundStyle: String, CaseIterable, Identifiable, Sendable
 
     public var title: String {
         switch self {
-        case .none: "None".localized
+        case .none: "None"
         case .animated: "Native"
         case .metal: "Metal"
         case .spriteKit: "SpriteKit"

@@ -30,7 +30,7 @@ struct WatchForecastSettingsView: View {
                     }
                 }
             } footer: {
-                Text("Takes effect the next time you open Ventus.")
+                Text("Takes effect the next time you open Ventus.".localized(locale: locale))
             }
 
             Picker("Temperature", selection: $temperatureUnitRaw) {

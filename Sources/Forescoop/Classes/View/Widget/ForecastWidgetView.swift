@@ -216,7 +216,7 @@ public struct ForecastWidgetView: View {
 
                 VStack(alignment: .leading, spacing: 12) {
 
-                    Label("10-Day Forecast", systemImage: "calendar")
+                    Label("10-Day Forecast".localized, systemImage: "calendar")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(theme.accentColor(for: colorScheme))
                     dailyForecast(limit: 10, columns: isInAppPreview ? 1 : 2)
@@ -251,7 +251,7 @@ public struct ForecastWidgetView: View {
             if isInAppPreview {
                 Divider()
             }
-            Label("10-Day Forecast", systemImage: "calendar")
+            Label("10-Day Forecast".localized, systemImage: "calendar")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(theme.accentColor(for: colorScheme))
             dailyForecast(limit: 10)
@@ -275,14 +275,31 @@ public struct ForecastWidgetView: View {
     }
 
     private var insightCard: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Label("Forecast insight", systemImage: "sparkles")
-                .font(.subheadline.weight(.semibold))
+        VStack(alignment: .leading, spacing: isInAppPreview ? 8 : 4) {
+            Label("Forecast insight".localized, systemImage: "sparkles")
+                .font(isInAppPreview ? .headline : .subheadline.weight(.semibold))
                 .foregroundStyle(theme.accentColor(for: colorScheme))
+#if !os(watchOS)
+            if isInAppPreview {
+                VStack(alignment: .leading, spacing: 10) {
+                    ForEach(Array(entry.insight.markdownSections.enumerated()), id: \.offset) { _, section in
+                        Text(markdown: section)
+                            .font(.subheadline)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            } else {
+                Text(entry.insight)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+#else
             Text(entry.insight)
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
+#endif
         }
     }
 

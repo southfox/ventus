@@ -10,7 +10,11 @@
 import Foundation
 
 public enum ForecastWidgetEntryBuilder {
-    public static func entry(from forecast: SpotForecast, coordinateLocationName: String?) -> ForecastWidgetEntry {
+    public static func entry(
+        from forecast: SpotForecast,
+        coordinateLocationName: String?,
+        useDetailedInsight: Bool = false
+    ) -> ForecastWidgetEntry {
         let hour = forecast.currentForecastHour
         let units = VentusForecastUnitStore.load()
         let temperature = forecast.forecast?.temperature(hh: hour) ?? forecast.forecast?.temperatureReal(hh: hour) ?? 0
@@ -50,15 +54,25 @@ public enum ForecastWidgetEntryBuilder {
             highCelsius: dailyRange?.high ?? temperature,
             low: today?.low ?? temperatureText(temperature, unit: units.temperatureUnit),
             lowCelsius: dailyRange?.low ?? temperature,
-            insight: ForecastIntelligenceText.summary(
-                forecast: forecast,
-                hour: hour,
-                temperatureUnit: units.temperatureUnit,
-                windSpeedUnit: units.windSpeedUnit,
-                precipitationUnit: units.precipitationUnit,
-                freezingLevelUnit: units.freezingLevelUnit,
-                pressureUnit: units.pressureUnit
-            ),
+            insight: useDetailedInsight
+                ? ForecastIntelligenceText.detailedSummary(
+                    forecast: forecast,
+                    hour: hour,
+                    temperatureUnit: units.temperatureUnit,
+                    windSpeedUnit: units.windSpeedUnit,
+                    precipitationUnit: units.precipitationUnit,
+                    freezingLevelUnit: units.freezingLevelUnit,
+                    pressureUnit: units.pressureUnit
+                )
+                : ForecastIntelligenceText.summary(
+                    forecast: forecast,
+                    hour: hour,
+                    temperatureUnit: units.temperatureUnit,
+                    windSpeedUnit: units.windSpeedUnit,
+                    precipitationUnit: units.precipitationUnit,
+                    freezingLevelUnit: units.freezingLevelUnit,
+                    pressureUnit: units.pressureUnit
+                ),
             hourly: hourly,
             daily: daily,
             errorMessage: nil
