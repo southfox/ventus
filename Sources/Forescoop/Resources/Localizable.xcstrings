@@ -7424,34 +7424,6 @@
         }
       }
     },
-    "Switch between Forecast Dashboard, Forecast Grid, or Grid and Dashboard from the menu or Settings." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wechsle im Menü oder in den Einstellungen zwischen Vorhersage-Dashboard, Vorhersage-Raster oder Raster und Dashboard."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cambia entre Panel de pronóstico, Cuadrícula de pronóstico o Cuadrícula y panel desde el menú o los ajustes."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Basculez entre Tableau de bord des prévisions, Grille des prévisions ou Grille et tableau de bord depuis le menu ou les réglages."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alterne entre Painel de previsão, Grade de previsão ou Grade e painel pelo menu ou nos Ajustes."
-          }
-        }
-      }
-    },
     "System" : {
       "localizations" : {
         "de" : {
@@ -10842,6 +10814,118 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "SpriteKit"
+          }
+        }
+      }
+    },
+    "Switch between Forecast Dashboard, Forecast Grid, Grid and Dashboard, or Overview from the menu or Settings." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wechsle im Menü oder in den Einstellungen zwischen Vorhersage-Dashboard, Vorhersagetabelle, Tabelle und Dashboard oder Übersicht."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cambia entre Panel de pronóstico, Grilla de pronóstico, Grilla y panel o Resumen desde el menú o los ajustes."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Basculez entre Tableau de bord des prévisions, Grille de prévision, Grille et tableau de bord ou Aperçu depuis le menu ou les réglages."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alterne entre Painel de previsão, Grade de previsão, Grade e painel ou Visão geral pelo menu ou nos Ajustes."
+          }
+        }
+      }
+    },
+    "Shows the same large layout as the Home Screen widget, with a written analysis of current conditions and the days ahead — flagging strong wind and chill, refreeze or ice risk, extended rain or snow, temperature extremes, and swell when relevant." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeigt dasselbe große Layout wie das Home-Bildschirm-Widget, mit einer geschriebenen Analyse der aktuellen Bedingungen und der kommenden Tage — mit Hinweisen auf starken Wind und Windchill, Vereisungsgefahr, anhaltenden Regen oder Schnee, Temperaturextreme und Dünung, wenn relevant."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muestra el mismo diseño grande que el widget de pantalla de inicio, con un análisis escrito de las condiciones actuales y los próximos días, señalando viento fuerte y sensación térmica, riesgo de hielo, lluvia o nieve prolongadas, temperaturas extremas y oleaje cuando corresponda."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Affiche la même grande mise en page que le widget de l'écran d'accueil, avec une analyse écrite des conditions actuelles et des prochains jours — signalant vent fort et refroidissement éolien, risque de verglas, pluie ou neige prolongées, températures extrêmes et houle si pertinent."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra o mesmo layout grande do widget da tela inicial, com uma análise escrita das condições atuais e dos próximos dias — sinalizando vento forte e sensação térmica, risco de gelo, chuva ou neve prolongadas, temperaturas extremas e ondulação quando relevante."
+          }
+        }
+      }
+    },
+    "Appearance and theme" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erscheinungsbild und Design"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apariencia y tema"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apparence et thème"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aparência e tema"
+          }
+        }
+      }
+    },
+    "Choose System, Light, or Dark in Settings, plus a color theme that changes the palette and font design independently of light or dark mode." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle System, Hell oder Dunkel in den Einstellungen, sowie ein Farbthema, das Palette und Schriftdesign unabhängig vom Hell-/Dunkelmodus ändert."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige Sistema, Claro u Oscuro en Ajustes, además de un tema de color que cambia la paleta y el diseño de fuente independientemente del modo claro u oscuro."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisissez Système, Clair ou Sombre dans les Réglages, ainsi qu'un thème de couleur qui modifie la palette et la police indépendamment du mode clair ou sombre."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha Sistema, Claro ou Escuro em Ajustes, além de um tema de cor que muda a paleta e o design da fonte independentemente do modo claro ou escuro."
           }
         }
       }

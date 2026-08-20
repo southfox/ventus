@@ -36,7 +36,7 @@ public struct VentusHelpView: View {
                         HelpStep(
                             number: 2,
                             title: "Pick the forecast view".localized,
-                            detail: "Switch between Forecast Dashboard, Forecast Grid, or Grid and Dashboard from the menu or Settings.".localized
+                            detail: "Switch between Forecast Dashboard, Forecast Grid, Grid and Dashboard, or Overview from the menu or Settings.".localized
                         )
                         HelpStep(
                             number: 3,
@@ -87,8 +87,10 @@ public struct VentusHelpView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         HelpFeature(symbol: "tablecells", title: "Forecast Grid".localized, detail: "Scroll through hours, tap a column to select it, and use the comparison control to inspect individual or all model sources.".localized)
                         HelpFeature(symbol: "rectangle.split.2x1", title: "Grid and Dashboard".localized, detail: "Drag the separator to choose your preferred balance. The selected hour, units, location, and models stay synchronized.".localized)
+                        HelpFeature(symbol: "square.grid.2x2", title: "Overview".localized, detail: "Shows the same large layout as the Home Screen widget, with a written analysis of current conditions and the days ahead — flagging strong wind and chill, refreeze or ice risk, extended rain or snow, temperature extremes, and swell when relevant.".localized)
                         HelpFeature(symbol: "cpu", title: "Forecast models".localized, detail: "Ventus combines selected models into a Forescoop Mix. Expand the model summary in the grid to change the selected sources.".localized)
                         HelpFeature(symbol: "map", title: "Maps and saved locations".localized, detail: "View forecast locations on the map, keep places locally, and use Windguru favorites when signed in.".localized)
+                        HelpFeature(symbol: "circle.righthalf.filled", title: "Appearance and theme".localized, detail: "Choose System, Light, or Dark in Settings, plus a color theme that changes the palette and font design independently of light or dark mode.".localized)
                     }
                     .padding(.vertical, 4)
                 } label: {
