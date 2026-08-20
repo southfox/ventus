@@ -31,7 +31,6 @@ struct WidgetPreviewScreen: View {
                 onShowMap: onShowMap
             )
             .frame(minHeight: 420)
-            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
             .padding()
         }
         .navigationTitle(entry.locationName)

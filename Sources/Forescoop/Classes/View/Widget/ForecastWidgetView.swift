@@ -38,6 +38,16 @@ public struct ForecastWidgetView: View {
     }
 
     @ViewBuilder public var body: some View {
+        if isInAppPreview {
+            styledContent
+                .background { widgetBackground }
+        } else {
+            styledContent
+                .containerBackground(for: .widget) { widgetBackground }
+        }
+    }
+
+    @ViewBuilder private var styledContent: some View {
         Group {
             if let errorMessage = entry.errorMessage {
                 errorContent(errorMessage)
@@ -47,7 +57,6 @@ public struct ForecastWidgetView: View {
         }
         .foregroundStyle(theme.primaryTextColor(for: colorScheme))
         .tint(theme.accentColor(for: colorScheme))
-        .containerBackground(for: .widget) { widgetBackground }
         .modifier(ForecastWidgetFontDesign(design: theme.fontDesign))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(entry.errorMessage ?? "\(entry.locationName). Temperature \(entry.temperature). Wind \(entry.wind), gusts \(entry.gust), from \(entry.windDirection). Rain \(entry.rain). Humidity \(entry.humidity). Cloud cover \(entry.cloudCover). Pressure \(entry.pressure).")
