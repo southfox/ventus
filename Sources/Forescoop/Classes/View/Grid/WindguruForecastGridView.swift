@@ -144,6 +144,9 @@ public struct WindguruForecastGridView: View {
     private var hasWaveData: Bool {
         hours.contains { weather?.waveHeight(hh: $0) != nil }
     }
+    private var hasWindChillData: Bool {
+        forecast.availableForecastHours.contains { weather?.windChill(hh: $0) != nil }
+    }
 
     private func weather(for source: SpotForecast?) -> Forecast? {
         source?.forecast ?? weather
@@ -378,7 +381,9 @@ public struct WindguruForecastGridView: View {
         gridRow(id: "windDirection", label: windDirectionLabel, values: { windDirection($0) }, comparisonValues: { windDirection($1, source: $0) }, in: column)
         gridRow(id: "temperature", label: unitLabel("Temperature (\(viewModel.temperatureUnit.label))", icon: "thermometer.medium", selection: $viewModel.temperatureUnit, unitLabel: \.label), values: { temperature($0) }, comparisonValues: { temperature($1, source: $0) }, background: temperatureColor, in: column)
         gridRow(id: "temperatureReal", label: unitLabel("Real temperature (\(viewModel.temperatureUnit.label))", icon: "thermometer.variable.and.figure", selection: $viewModel.temperatureUnit, unitLabel: \.label), values: { temperatureReal($0) }, comparisonValues: { temperatureReal($1, source: $0) }, background: temperatureColor, in: column)
-        gridRow(id: "windChill", label: unitLabel("Wind chill (\(viewModel.temperatureUnit.label))", icon: "thermometer.snowflake", selection: $viewModel.temperatureUnit, unitLabel: \.label), values: { windChill($0) }, comparisonValues: { windChill($1, source: $0) }, background: temperatureColor, in: column)
+        if hasWindChillData {
+            gridRow(id: "windChill", label: unitLabel("Wind chill (\(viewModel.temperatureUnit.label))", icon: "thermometer.snowflake", selection: $viewModel.temperatureUnit, unitLabel: \.label), values: { windChill($0) }, comparisonValues: { windChill($1, source: $0) }, background: temperatureColor, in: column)
+        }
         gridRow(id: "freezingLevel", label: unitLabel("Freezing level (\(viewModel.freezingLevelUnit.label))", icon: "snowflake", selection: $viewModel.freezingLevelUnit, unitLabel: \.label), values: { freezingLevel($0) }, comparisonValues: { freezingLevel($1, source: $0) }, in: column)
         cloudRows(in: column)
         gridRow(id: "precipitation", label: unitLabel("Precipitation (\(viewModel.precipitationUnit.label))", icon: "cloud.rain", selection: $viewModel.precipitationUnit, unitLabel: \.label), values: { precipitation($0) }, comparisonValues: { precipitation($1, source: $0) }, background: precipitationColor, in: column)

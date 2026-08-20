@@ -188,6 +188,7 @@ public struct ForecastDashboardView: View {
                                 selectedHour: selectedHourBinding,
                                 coordinateLocationName: coordinateLocationName,
                                 windSpeedUnit: $viewModel.windSpeedUnit,
+                                waveHeightUnit: $viewModel.waveHeightUnit,
                                 modelForecasts: displayedModelForecasts,
                                 modelNamesByID: modelNamesByID,
                                 isModelComparisonEnabled: $showsDashboardModelComparison,

@@ -58,6 +58,7 @@ public struct SharedForecastSnapshot: Codable, Sendable {
     public let humidity: String
     public let cloudCover: String
     public let pressure: String
+    public let wave: String?
     public let symbolName: String
     public let condition: String
     public let high: String
@@ -85,6 +86,7 @@ public struct SharedForecastSnapshot: Codable, Sendable {
         humidity: String,
         cloudCover: String,
         pressure: String,
+        wave: String? = nil,
         symbolName: String,
         condition: String,
         high: String,
@@ -111,6 +113,7 @@ public struct SharedForecastSnapshot: Codable, Sendable {
         self.humidity = humidity
         self.cloudCover = cloudCover
         self.pressure = pressure
+        self.wave = wave
         self.symbolName = symbolName
         self.condition = condition
         self.high = high
@@ -135,6 +138,7 @@ public extension SharedForecastSnapshot {
         let humidity = forecast.forecast?.relativeHumidity(hh: hour) ?? 0
         let cloudCover = forecast.forecast?.cloudCoverTotal(hh: hour) ?? 0
         let pressure = forecast.forecast?.seaLevelPressure(hh: hour) ?? 0
+        let wave = forecast.forecast?.waveHeight(hh: hour)
         let hourly = hourlyForecast(for: forecast, currentHour: hour, unit: units.temperatureUnit)
         let daily = dailyForecast(for: forecast, unit: units.temperatureUnit)
         let today = daily.first
@@ -157,6 +161,7 @@ public extension SharedForecastSnapshot {
             humidity: "\(humidity)%",
             cloudCover: "\(cloudCover)%",
             pressure: pressureText(pressure, unit: units.pressureUnit),
+            wave: wave.map { waveHeightText($0, unit: units.waveHeightUnit) },
             symbolName: forecast.weatherSymbolName(hour: hour),
             condition: conditionText(for: forecast, hour: hour),
             high: today?.high ?? temperatureText(temperature, unit: units.temperatureUnit),
@@ -253,6 +258,11 @@ public extension SharedForecastSnapshot {
         let value = AtmosphericPressure(hectopascals: hectopascals).value(in: unit)
         let precision = unit == .inchesOfMercury ? 2 : 0
         return "\(value.formatted(.number.precision(.fractionLength(precision)))) \(unit.label)"
+    }
+
+    private static func waveHeightText(_ meters: Double, unit: WaveHeightUnit) -> String {
+        let value = WaveHeight(meters: meters).value(in: unit)
+        return "\(value.formatted(.number.precision(.fractionLength(1)))) \(unit.label)"
     }
 }
 

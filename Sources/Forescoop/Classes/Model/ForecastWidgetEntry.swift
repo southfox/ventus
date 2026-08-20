@@ -27,6 +27,65 @@ public struct ForecastWidgetEntry: TimelineEntry, Sendable {
     public let humidity: String
     public let cloudCover: String
     public let pressure: String
+    public let wave: String?
+
+    public init(
+        date: Date,
+        locationName: String,
+        temperature: String,
+        temperatureCelsius: Double,
+        rawTemperature: String,
+        rawTemperatureCelsius: Double,
+        realTemperature: String,
+        realTemperatureCelsius: Double,
+        wind: String,
+        gust: String,
+        windDirection: String,
+        windDirectionDegrees: Double,
+        rain: String,
+        humidity: String,
+        cloudCover: String,
+        pressure: String,
+        wave: String? = nil,
+        symbolName: String,
+        condition: String,
+        high: String,
+        highCelsius: Double,
+        low: String,
+        lowCelsius: Double,
+        insight: String,
+        hourly: [ForecastWidgetHour],
+        daily: [ForecastWidgetDay],
+        errorMessage: String?
+    ) {
+        self.date = date
+        self.locationName = locationName
+        self.temperature = temperature
+        self.temperatureCelsius = temperatureCelsius
+        self.rawTemperature = rawTemperature
+        self.rawTemperatureCelsius = rawTemperatureCelsius
+        self.realTemperature = realTemperature
+        self.realTemperatureCelsius = realTemperatureCelsius
+        self.wind = wind
+        self.gust = gust
+        self.windDirection = windDirection
+        self.windDirectionDegrees = windDirectionDegrees
+        self.rain = rain
+        self.humidity = humidity
+        self.cloudCover = cloudCover
+        self.pressure = pressure
+        self.wave = wave
+        self.symbolName = symbolName
+        self.condition = condition
+        self.high = high
+        self.highCelsius = highCelsius
+        self.low = low
+        self.lowCelsius = lowCelsius
+        self.insight = insight
+        self.hourly = hourly
+        self.daily = daily
+        self.errorMessage = errorMessage
+    }
     public let symbolName: String
     public let condition: String
     public let high: String

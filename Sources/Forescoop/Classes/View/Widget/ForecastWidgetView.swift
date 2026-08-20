@@ -59,7 +59,7 @@ public struct ForecastWidgetView: View {
         .tint(theme.accentColor(for: colorScheme))
         .modifier(ForecastWidgetFontDesign(design: theme.fontDesign))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(entry.errorMessage ?? "\(entry.locationName). Temperature \(entry.temperature). Wind \(entry.wind), gusts \(entry.gust), from \(entry.windDirection). Rain \(entry.rain). Humidity \(entry.humidity). Cloud cover \(entry.cloudCover). Pressure \(entry.pressure).")
+        .accessibilityLabel(entry.errorMessage ?? "\(entry.locationName). Temperature \(entry.temperature). Wind \(entry.wind), gusts \(entry.gust), from \(entry.windDirection). Rain \(entry.rain). Humidity \(entry.humidity). Cloud cover \(entry.cloudCover). Pressure \(entry.pressure).\(entry.wave.map { " Wave \($0)." } ?? "")")
         .accessibilityHint("Open Ventus for the full forecast.")
         .accessibilityIdentifier("forecast.widget")
     }
@@ -323,6 +323,9 @@ public struct ForecastWidgetView: View {
             expandedMetric("Humidity", value: entry.humidity, symbol: "humidity")
             expandedMetric("Clouds", value: entry.cloudCover, symbol: "cloud.fill")
             expandedMetric("Pressure", value: entry.pressure, symbol: "gauge.medium")
+            if let wave = entry.wave {
+                expandedMetric("Wave", value: wave, symbol: "water.waves")
+            }
         }
     }
 

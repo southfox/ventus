@@ -101,7 +101,11 @@ public class Forecast: Object, Mappable {
 public extension Forecast {
 
     var availableHours: [String] {
-        weathers?[TypeOfWeather.WINDSPD.rawValue]?.orderedKeys ?? []
+        if let windSpeedHours = weathers?[TypeOfWeather.WINDSPD.rawValue]?.orderedKeys,
+           !windSpeedHours.isEmpty {
+            return windSpeedHours
+        }
+        return weathers?.values.first(where: { !$0.orderedKeys.isEmpty })?.orderedKeys ?? []
     }
 
     var stepIntervalHours: Int {

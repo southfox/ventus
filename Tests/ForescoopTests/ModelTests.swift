@@ -407,6 +407,19 @@ class ModelTests: XCTestCase {
         XCTAssertEqual(forecast?.availableHours, ["0", "1", "2", "3"])
     }
 
+    func testWaveOnlyModelReportsAvailableHours() throws {
+        let waveOnlyForecast = try Forecast(map: [
+            "model_name": "GFS-Wave 16 km",
+            "HTSGW": ["0": 0.9, "3": 1.1, "6": 1.3],
+            "WVHGT": ["0": 0.5, "3": 0.6, "6": 0.7],
+            "WVPER": ["0": 7.0, "3": 7.5, "6": 8.0],
+            "WVDIR": ["0": 210.0, "3": 215.0, "6": 220.0]
+        ])
+
+        XCTAssertEqual(waveOnlyForecast?.availableHours, ["0", "3", "6"])
+        XCTAssertEqual(waveOnlyForecast?.waveHeight(hh: "3"), 1.1)
+    }
+
     func testWSpotForecast() {
         let wspotForecast: WSpotForecast?
         do {

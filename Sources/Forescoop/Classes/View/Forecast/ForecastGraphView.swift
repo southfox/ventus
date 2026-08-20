@@ -12,6 +12,7 @@ public struct ForecastGraphView: View {
     @Binding public var selectedHour: String?
     private let coordinateLocationName: String?
     @Binding private var windSpeedUnit: WindSpeedUnit
+    @Binding private var waveHeightUnit: WaveHeightUnit
     private let modelForecasts: [SpotForecast]
     private let modelNamesByID: [String: String]
     @Binding private var isModelComparisonEnabled: Bool
@@ -23,6 +24,7 @@ public struct ForecastGraphView: View {
         selectedHour: Binding<String?>,
         coordinateLocationName: String? = nil,
         windSpeedUnit: Binding<WindSpeedUnit>,
+        waveHeightUnit: Binding<WaveHeightUnit> = .constant(.meters),
         modelForecasts: [SpotForecast] = [],
         modelNamesByID: [String: String] = [:],
         isModelComparisonEnabled: Binding<Bool> = .constant(false),
@@ -33,6 +35,7 @@ public struct ForecastGraphView: View {
         _selectedHour = selectedHour
         self.coordinateLocationName = coordinateLocationName
         _windSpeedUnit = windSpeedUnit
+        _waveHeightUnit = waveHeightUnit
         self.modelForecasts = modelForecasts
         self.modelNamesByID = modelNamesByID
         _isModelComparisonEnabled = isModelComparisonEnabled
@@ -56,6 +59,8 @@ public struct ForecastGraphView: View {
                     ?? .now
                 let windKnots = source.forecast?.windSpeed(hh: hour) ?? 0
                 let gustKnots = source.forecast?.windGustsKnots(hh: hour) ?? windKnots
+                let waveMeters = source.forecast?.waveHeight(hh: hour)
+                let wave: Double? = waveMeters.map { WaveHeight(meters: $0).value(in: waveHeightUnit) }
                 return ForecastGraphPoint(
                     id: hour,
                     date: date,
@@ -66,7 +71,8 @@ public struct ForecastGraphView: View {
                     humidity: Double(source.forecast?.relativeHumidity(hh: hour) ?? 0),
                     pressure: source.forecast?.seaLevelPressure(hh: hour) ?? 0,
                     temperature: source.forecast?.temperatureReal(hh: hour) ?? source.forecast?.temperature(hh: hour) ?? 0,
-                    precipitation: source.forecast?.precipitation1(hh: hour) ?? source.forecast?.precipitation(hh: hour) ?? 0
+                    precipitation: source.forecast?.precipitation1(hh: hour) ?? source.forecast?.precipitation(hh: hour) ?? 0,
+                    wave: wave
                 )
             }
     }

@@ -19,8 +19,9 @@ public struct ForecastGraphPoint: Identifiable, Sendable {
     public let pressure: Double
     public let temperature: Double
     public let precipitation: Double
+    public let wave: Double?
 
-    public init(id: String, date: Date, wind: Double, gust: Double, direction: Double?, cloudCover: Double, humidity: Double, pressure: Double, temperature: Double, precipitation: Double) {
+    public init(id: String, date: Date, wind: Double, gust: Double, direction: Double?, cloudCover: Double, humidity: Double, pressure: Double, temperature: Double, precipitation: Double, wave: Double? = nil) {
         self.id = id
         self.date = date
         self.wind = wind
@@ -31,6 +32,7 @@ public struct ForecastGraphPoint: Identifiable, Sendable {
         self.pressure = pressure
         self.temperature = temperature
         self.precipitation = precipitation
+        self.wave = wave
     }
 }
 

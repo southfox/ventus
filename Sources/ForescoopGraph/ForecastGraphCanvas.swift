@@ -24,6 +24,10 @@ public struct ForecastGraphCanvas: View {
         guard let low = values.min(), let high = values.max(), low != high else { return 0...1 }
         return low...high
     }
+    private var hasWaveData: Bool {
+        points.contains { $0.wave != nil } || comparisonSeries.contains { $0.points.contains { $0.wave != nil } }
+    }
+    private var canvasHeight: CGFloat { hasWaveData ? 630 : 520 }
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -46,7 +50,7 @@ public struct ForecastGraphCanvas: View {
                 Canvas(opaque: false, colorMode: .linear, rendersAsynchronously: true) { context, size in
                     draw(in: &context, size: size)
                 }
-                .frame(width: width, height: 520)
+                .frame(width: width, height: canvasHeight)
                 .contentShape(Rectangle())
 #if !os(tvOS)
                 .simultaneousGesture(SpatialTapGesture().onEnded { value in
@@ -57,7 +61,9 @@ public struct ForecastGraphCanvas: View {
             }
             .scrollIndicators(.hidden)
         }
-        .accessibilityLabel("Wind, gust, cloud cover, humidity, pressure, temperature and precipitation forecast graph")
+        .accessibilityLabel(hasWaveData
+            ? "Wind, gust, cloud cover, humidity, pressure, temperature, precipitation and wave forecast graph"
+            : "Wind, gust, cloud cover, humidity, pressure, temperature and precipitation forecast graph")
     }
 
     private var legend: some View {
@@ -74,6 +80,9 @@ public struct ForecastGraphCanvas: View {
             ForecastGraphLegendItem(label: Text("Temperature"), color: .yellow, style: .dot)
             ForecastGraphLegendItem(label: Text("Rain"), color: .cyan, style: .bar)
             ForecastGraphLegendItem(label: Text("Wind direction"), color: .primary, style: .arrow)
+            if hasWaveData {
+                ForecastGraphLegendItem(label: Text("Wave"), color: .indigo, style: .area)
+            }
         }
         .font(.caption2)
         .foregroundStyle(.secondary)
@@ -92,6 +101,8 @@ public struct ForecastGraphCanvas: View {
     private func draw(in context: inout GraphicsContext, size: CGSize) {
         let wind = CGRect(x: 42, y: 28, width: size.width - 58, height: 240)
         let weather = CGRect(x: 42, y: 334, width: wind.width, height: 165)
+        let wave = hasWaveData ? CGRect(x: 42, y: weather.maxY + 24, width: wind.width, height: 90) : nil
+        let bottomY = wave?.maxY ?? weather.maxY
         let x: (Int) -> CGFloat = { wind.minX + CGFloat($0) / CGFloat(max(points.count - 1, 1)) * wind.width }
         let maxGust = max((points.map(\.gust) + comparisonSeries.flatMap { $0.points.map(\.gust) }).max() ?? 1, 1)
         let windY: (Double) -> CGFloat = { wind.maxY - CGFloat($0 / maxGust) * wind.height }
@@ -99,7 +110,7 @@ public struct ForecastGraphCanvas: View {
 
         for index in points.indices {
             guard index.isMultiple(of: 2) else { continue }
-            var line = Path(); line.move(to: CGPoint(x: x(index), y: wind.minY)); line.addLine(to: CGPoint(x: x(index), y: weather.maxY))
+            var line = Path(); line.move(to: CGPoint(x: x(index), y: wind.minY)); line.addLine(to: CGPoint(x: x(index), y: bottomY))
             context.stroke(line, with: .color(.secondary.opacity(0.2)), style: StrokeStyle(lineWidth: 1, dash: [3, 3]))
             context.draw(Text(axisLabel(for: points[index].date)).font(.caption2).foregroundStyle(.secondary), at: CGPoint(x: x(index), y: 12))
         }
@@ -136,8 +147,22 @@ public struct ForecastGraphCanvas: View {
             context.fill(Path(ellipseIn: CGRect(x: temperatureCenter.x - 10, y: temperatureCenter.y - 10, width: 20, height: 20)), with: .color(.yellow.opacity(0.9)))
             context.draw(Text(point.temperature, format: .number.precision(.fractionLength(0))).font(.caption2.weight(.bold)), at: temperatureCenter)
         }
+        if let wave {
+            let maxWave = max((points.compactMap(\.wave) + comparisonSeries.flatMap { $0.points.compactMap(\.wave) }).max() ?? 1, 1)
+            let waveY: (Double) -> CGFloat = { wave.maxY - CGFloat($0 / maxWave) * wave.height }
+            let waveValues = points.map { $0.wave ?? 0 }
+            var waveArea = smoothPath(waveValues, x: x, y: waveY)
+            waveArea.addLine(to: CGPoint(x: x(points.count - 1), y: wave.maxY)); waveArea.closeSubpath()
+            context.fill(waveArea, with: .color(.indigo.opacity(0.25)))
+            drawLine(waveValues, color: .indigo, in: &context, x: x, y: waveY)
+            for index in points.indices where points[index].wave != nil {
+                let point = CGPoint(x: x(index), y: waveY(points[index].wave ?? 0))
+                context.draw(Text(points[index].wave ?? 0, format: .number.precision(.fractionLength(1))).font(.caption2.monospacedDigit()), at: CGPoint(x: point.x, y: point.y - 10))
+            }
+        }
+
         if let index = points.firstIndex(where: { $0.id == selectedID }) {
-            var selection = Path(); selection.move(to: CGPoint(x: x(index), y: wind.minY)); selection.addLine(to: CGPoint(x: x(index), y: weather.maxY))
+            var selection = Path(); selection.move(to: CGPoint(x: x(index), y: wind.minY)); selection.addLine(to: CGPoint(x: x(index), y: bottomY))
             context.stroke(selection, with: .color(.accentColor), style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
         }
     }

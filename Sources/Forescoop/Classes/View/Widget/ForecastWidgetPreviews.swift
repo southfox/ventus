@@ -27,6 +27,7 @@ extension ForecastWidgetEntry {
         humidity: "82%",
         cloudCover: "94%",
         pressure: "1002 hPa",
+        wave: "2.4 m",
         symbolName: "cloud.rain.fill",
         condition: "Rain showers",
         high: "8°",
