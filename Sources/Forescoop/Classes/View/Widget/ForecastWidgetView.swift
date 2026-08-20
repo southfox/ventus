@@ -184,8 +184,6 @@ public struct ForecastWidgetView: View {
         }
     }
 
-    /// iPhone in portrait doesn't have the width for the two-column layout
-    /// below, so every section stacks one after another instead.
     private var stacksExtraLargeSections: Bool {
 #if os(iOS)
         horizontalSizeClass == .compact && verticalSizeClass == .regular
@@ -437,7 +435,7 @@ public struct ForecastWidgetView: View {
     }
 
     private func hourlyForecast(limit: Int) -> some View {
-        HStack(alignment: .top, spacing: isInAppPreview ? 15 : 1) {
+        HStack(alignment: .top, spacing: isInAppPreview ? 25 : 1) {
             ForEach(Array(entry.hourly.prefix(limit))) { hour in
                 VStack(spacing: 5) {
                     Text(hour.label)

@@ -64,7 +64,7 @@ struct ForecastGridHourCell: View {
                 Text(day(hour)).font(.caption2)
                 Text(time(hour)).font(.caption.bold())
                 HStack(spacing: 2) {
-                    if let daylightSymbol = daylightSymbol(hour) {
+                    if let daylightSymbol = daylightSymbol(hour), !hasPrecipitation(hour) {
                         Image(systemName: daylightSymbol)
                             .foregroundStyle(.orange)
                     } else {
@@ -106,6 +106,10 @@ struct ForecastGridHourCell: View {
     }
 
     private var accentColor: Color { theme.accentColor(for: colorScheme) }
+
+    private func hasPrecipitation(_ hour: String) -> Bool {
+        weatherSymbols(hour).contains { $0.contains("snow") || $0.contains("rain") || $0.contains("drizzle") }
+    }
 }
 
 struct ForecastGridHeaderSelectionBorder: Shape {
