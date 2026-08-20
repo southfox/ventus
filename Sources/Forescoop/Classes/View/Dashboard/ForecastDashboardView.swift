@@ -186,10 +186,13 @@ public struct ForecastDashboardView: View {
                             ForecastGraphView(
                                 forecast: forecast,
                                 selectedHour: selectedHourBinding,
+                                coordinateLocationName: coordinateLocationName,
                                 windSpeedUnit: $viewModel.windSpeedUnit,
                                 modelForecasts: displayedModelForecasts,
                                 modelNamesByID: modelNamesByID,
-                                isModelComparisonEnabled: $showsDashboardModelComparison
+                                isModelComparisonEnabled: $showsDashboardModelComparison,
+                                onSelectLocation: { activeSheet = .spotPicker },
+                                onShowMap: { activeSheet = .forecastMap }
                             )
                         } else if content == .overview {
                             WidgetPreviewScreen(

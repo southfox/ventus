@@ -10,25 +10,38 @@ import SwiftUI
 public struct ForecastGraphView: View {
     public let forecast: SpotForecast
     @Binding public var selectedHour: String?
+    private let coordinateLocationName: String?
     @Binding private var windSpeedUnit: WindSpeedUnit
     private let modelForecasts: [SpotForecast]
     private let modelNamesByID: [String: String]
     @Binding private var isModelComparisonEnabled: Bool
+    private let onSelectLocation: () -> Void
+    private let onShowMap: () -> Void
 
     public init(
         forecast: SpotForecast,
         selectedHour: Binding<String?>,
+        coordinateLocationName: String? = nil,
         windSpeedUnit: Binding<WindSpeedUnit>,
         modelForecasts: [SpotForecast] = [],
         modelNamesByID: [String: String] = [:],
-        isModelComparisonEnabled: Binding<Bool> = .constant(false)
+        isModelComparisonEnabled: Binding<Bool> = .constant(false),
+        onSelectLocation: @escaping () -> Void = {},
+        onShowMap: @escaping () -> Void = {}
     ) {
         self.forecast = forecast
         _selectedHour = selectedHour
+        self.coordinateLocationName = coordinateLocationName
         _windSpeedUnit = windSpeedUnit
         self.modelForecasts = modelForecasts
         self.modelNamesByID = modelNamesByID
         _isModelComparisonEnabled = isModelComparisonEnabled
+        self.onSelectLocation = onSelectLocation
+        self.onShowMap = onShowMap
+    }
+
+    private var locationName: String {
+        forecast.locationDisplayName(coordinateLocationName: coordinateLocationName)
     }
 
     private var points: [ForecastGraphPoint] {
@@ -73,8 +86,11 @@ public struct ForecastGraphView: View {
     public var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                Text(forecast.locationDisplayName())
-                    .font(.title2.weight(.semibold))
+                ForecastLocationHeader(
+                    locationName: locationName,
+                    onSelectLocation: onSelectLocation,
+                    onShowMap: onShowMap
+                )
                 if points.isEmpty {
                     ContentUnavailableView("Graph unavailable", systemImage: "chart.xyaxis.line")
                 } else {
@@ -90,7 +106,7 @@ public struct ForecastGraphView: View {
             .padding()
         }
         .forecastAccessibilityContainer(
-            "Forecast graph for \(forecast.locationDisplayName())",
+            "Forecast graph for \(locationName)",
             hint: "Explore forecast metrics and select a point to change the active forecast hour.",
             identifier: "forecast.graph"
         )

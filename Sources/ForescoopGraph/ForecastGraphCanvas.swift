@@ -8,8 +8,6 @@
 
 import SwiftUI
 
-/// Self-contained Canvas renderer. This target deliberately depends only on SwiftUI,
-/// allowing Xcode to cache it separately from the forecast dashboard target.
 public struct ForecastGraphCanvas: View {
     public let points: [ForecastGraphPoint]
     public let comparisonSeries: [ForecastGraphSeries]
@@ -51,9 +49,6 @@ public struct ForecastGraphCanvas: View {
                 .frame(width: width, height: 520)
                 .contentShape(Rectangle())
 #if !os(tvOS)
-                // Selection is a tap. A drag must remain available to the
-                // enclosing horizontal scroll view so long forecasts can be
-                // explored rather than getting stuck on the first columns.
                 .simultaneousGesture(SpatialTapGesture().onEnded { value in
                     let progress = min(max((value.location.x - 42) / (width - 58), 0), 1)
                     selectedID = points[Int((progress * CGFloat(points.count - 1)).rounded())].id
@@ -84,6 +79,16 @@ public struct ForecastGraphCanvas: View {
         .foregroundStyle(.secondary)
     }
 
+    private func axisLabel(for date: Date) -> String {
+        let weekday = date.formatted(.dateTime.weekday(.abbreviated))
+        let formatter = DateFormatter()
+        formatter.locale = .autoupdatingCurrent
+        formatter.setLocalizedDateFormatFromTemplate("j")
+        let timeString = formatter.string(from: date)
+        let hourText = formatter.dateFormat.contains("a") ? timeString : "\(timeString)h"
+        return "\(weekday), \(hourText)"
+    }
+
     private func draw(in context: inout GraphicsContext, size: CGSize) {
         let wind = CGRect(x: 42, y: 28, width: size.width - 58, height: 240)
         let weather = CGRect(x: 42, y: 334, width: wind.width, height: 165)
@@ -96,7 +101,7 @@ public struct ForecastGraphCanvas: View {
             guard index.isMultiple(of: 2) else { continue }
             var line = Path(); line.move(to: CGPoint(x: x(index), y: wind.minY)); line.addLine(to: CGPoint(x: x(index), y: weather.maxY))
             context.stroke(line, with: .color(.secondary.opacity(0.2)), style: StrokeStyle(lineWidth: 1, dash: [3, 3]))
-            context.draw(Text(points[index].date.formatted(.dateTime.weekday(.abbreviated).hour())).font(.caption2).foregroundStyle(.secondary), at: CGPoint(x: x(index), y: 12))
+            context.draw(Text(axisLabel(for: points[index].date)).font(.caption2).foregroundStyle(.secondary), at: CGPoint(x: x(index), y: 12))
         }
 
         var gustArea = smoothPath(points.map(\.gust), x: x, y: windY)
@@ -141,9 +146,6 @@ public struct ForecastGraphCanvas: View {
         context.stroke(smoothPath(values, x: x, y: y), with: .color(color), lineWidth: 2)
     }
 
-    /// Cubic Catmull–Rom interpolation expressed as Bezier segments. It keeps
-    /// the line close to the supplied forecast points without the kinks that
-    /// midpoint quadratic curves can leave at every sample.
     private func smoothPath(_ values: [Double], x: (Int) -> CGFloat, y: (Double) -> CGFloat) -> Path {
         guard !values.isEmpty else { return Path() }
         func point(_ index: Int) -> CGPoint { CGPoint(x: x(index), y: y(values[index])) }
