@@ -423,6 +423,31 @@ public struct ForecastDashboardView: View {
     }
 #endif
 
+    private func steppedHours(for forecast: SpotForecast) -> [String] {
+        forecast.steppedForecastHours(anchorHour: forecast.currentForecastHour, step: GridHourStepStore.load(), includingPast: false)
+    }
+
+    private func moveSelectedHour(by offset: Int, in forecast: SpotForecast) {
+        let hours = steppedHours(for: forecast)
+        guard let currentHour = selectedHour ?? forecast.currentForecastHour,
+              let currentIndex = hours.firstIndex(of: currentHour) else { return }
+        let newIndex = hours.index(currentIndex, offsetBy: offset)
+        guard hours.indices.contains(newIndex) else { return }
+        selectedHour = hours[newIndex]
+    }
+
+#if !os(tvOS)
+    private func hourSwipeGesture(for forecast: SpotForecast) -> some Gesture {
+        DragGesture(minimumDistance: 24)
+            .onEnded { value in
+                let horizontal = value.translation.width
+                let vertical = value.translation.height
+                guard abs(horizontal) > abs(vertical) * 1.3, abs(horizontal) > 40 else { return }
+                moveSelectedHour(by: horizontal < 0 ? 1 : -1, in: forecast)
+            }
+    }
+#endif
+
     private func forecastContent(
         for forecast: SpotForecast,
         includesLocationWorkspace: Bool = true,
@@ -483,6 +508,9 @@ public struct ForecastDashboardView: View {
             .frame(maxWidth: forecastContentMaximumWidth)
             .padding()
         }
+#if !os(tvOS)
+        .simultaneousGesture(hourSwipeGesture(for: forecast))
+#endif
     }
 
     private var forecastContentMaximumWidth: CGFloat? {
