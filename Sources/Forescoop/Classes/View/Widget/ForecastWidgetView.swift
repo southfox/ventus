@@ -422,16 +422,20 @@ public struct ForecastWidgetView: View {
         }
     }
 
-    private var windGustsMetric: some View {
-        HStack(alignment: .center, spacing: 6) {
-            Image(systemName: "wind")
-                .font(.body)
-                .foregroundStyle(.secondary)
-                .frame(width: 16, alignment: .center)
-            VStack(alignment: .leading, spacing: 2) {
-                windGustsLine("Wind", value: entry.wind)
-                windGustsLine("Gusts", value: entry.gust)
+    @ViewBuilder private var windGustsMetric: some View {
+        if isInAppPreview {
+            HStack(alignment: .center, spacing: 6) {
+                Image(systemName: "wind")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 16, alignment: .center)
+                VStack(alignment: .leading, spacing: 2) {
+                    windGustsLine("Wind", value: entry.wind)
+                    windGustsLine("Gusts", value: entry.gust)
+                }
             }
+        } else {
+            widgetMetric(windAndGustText(entry.wind, entry.gust), symbol: "wind")
         }
     }
 
