@@ -17,6 +17,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var window: NSWindow?
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        VentusFirebase.configure()
         let window = NSWindow(contentViewController: NSHostingController(rootView: ForecastDashboardView()))
         window.title = "Ventus"
         window.setContentSize(NSSize(width: 1_180, height: 820))
@@ -45,8 +46,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc private func addVentusWidget(_ sender: Any?) {
-        // macOS owns widget placement. This is the same action used by its
-        // Widget Gallery; if it is unavailable, offer the manual path below.
         let didOpenGallery = NSApp.sendAction(
             Selector(("showWidgetGallery:")),
             to: nil,
@@ -80,6 +79,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
+        VentusFirebase.configure()
         ForecastAlertBackgroundRefresh.register()
         ForecastAlertBackgroundRefresh.schedule()
         return true

@@ -401,6 +401,7 @@ public struct ForecastWidgetView: View {
                         .font(.system(.title3, design: .rounded).weight(.light))
                         .minimumScaleFactor(0.5)
 
+#if !os(watchOS)
                     if displayedFamily == .systemLarge || displayedFamily == .systemExtraLarge {
                         RealTemperatureLabel(entry.realTemperature, celsius: entry.realTemperatureCelsius)
                             .font(.system(.title3, design: .rounded).weight(.light))
@@ -415,6 +416,10 @@ public struct ForecastWidgetView: View {
                         windGustsMetric
                             .layoutPriority(1)
                     }
+#else
+                    ThermalLabel(entry.low, celsius: entry.lowCelsius)
+                    ThermalLabel(entry.high, celsius: entry.highCelsius)
+#endif
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)

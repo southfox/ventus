@@ -14,6 +14,10 @@ import Forescoop
 struct VisionForescoopApp: App {
     @Environment(\.scenePhase) private var scenePhase
 
+    init() {
+        VentusFirebase.configure()
+    }
+
     var body: some Scene {
         WindowGroup {
             VisionForecastView()

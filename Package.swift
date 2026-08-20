@@ -30,6 +30,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/airbnb/lottie-spm.git", from: "4.6.1"),
+        .package(url: "https://github.com/firebase/firebase-ios-sdk.git", from: "12.0.0"),
     ],
     targets: [
         .target(
@@ -42,12 +43,17 @@ let package = Package(
                 .product(
                     name: "Lottie",
                     package: "lottie-spm",
-                    // Lottie is distributed as a static XCFramework. Xcode's
-                    // macOS JIT preview agent crashes while registering its
-                    // Swift protocol conformances, even for views that do not
-                    // render a Lottie animation. macOS uses the native
-                    // fallback declared in LottieWeatherBackground instead.
                     condition: .when(platforms: [.iOS, .tvOS, .visionOS])
+                ),
+                .product(
+                    name: "FirebaseAnalytics",
+                    package: "firebase-ios-sdk",
+                    condition: .when(platforms: [.iOS, .macOS, .tvOS])
+                ),
+                .product(
+                    name: "FirebaseCrashlytics",
+                    package: "firebase-ios-sdk",
+                    condition: .when(platforms: [.iOS, .macOS, .tvOS, .watchOS])
                 ),
             ],
             path: "Sources/Forescoop",

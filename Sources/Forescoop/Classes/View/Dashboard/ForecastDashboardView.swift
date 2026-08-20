@@ -196,13 +196,7 @@ public struct ForecastDashboardView: View {
                                 onShowMap: { activeSheet = .forecastMap }
                             )
                         } else if content == .overview {
-                            WidgetPreviewScreen(
-                                forecast: forecast,
-                                coordinateLocationName: coordinateLocationName,
-                                theme: theme,
-                                onSelectLocation: { activeSheet = .spotPicker },
-                                onShowMap: { activeSheet = .forecastMap }
-                            )
+                            overviewContent(for: forecast)
                         } else {
                             forecastContent(for: forecast)
                         }
@@ -447,6 +441,21 @@ public struct ForecastDashboardView: View {
             }
     }
 #endif
+
+    @ViewBuilder
+    private func overviewContent(for forecast: SpotForecast) -> some View {
+#if !os(watchOS) && canImport(WidgetKit)
+        WidgetPreviewScreen(
+            forecast: forecast,
+            coordinateLocationName: coordinateLocationName,
+            theme: theme,
+            onSelectLocation: { activeSheet = .spotPicker },
+            onShowMap: { activeSheet = .forecastMap }
+        )
+#else
+        forecastContent(for: forecast)
+#endif
+    }
 
     private func forecastContent(
         for forecast: SpotForecast,

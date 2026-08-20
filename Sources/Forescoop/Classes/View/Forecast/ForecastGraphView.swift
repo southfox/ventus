@@ -118,7 +118,6 @@ public struct ForecastGraphView: View {
         )
     }
 }
-#endif
 
 #if DEBUG
 #Preview("Unavailable") {
@@ -131,4 +130,5 @@ public struct ForecastGraphView: View {
         isModelComparisonEnabled: .constant(false)
     )
 }
+#endif
 #endif

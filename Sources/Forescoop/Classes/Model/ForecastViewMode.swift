@@ -51,7 +51,7 @@ public enum ForecastViewMode: String, CaseIterable, Identifiable, Sendable {
             return true
 #endif
         case .overview:
-#if os(watchOS)
+#if os(watchOS) || !canImport(WidgetKit)
             return false
 #else
             return true
