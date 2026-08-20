@@ -409,8 +409,9 @@ public struct ForecastWidgetView: View {
                     }
 
                     if displayedFamily != .systemSmall {
-                        Spacer()
+                        Spacer(minLength: 8)
                         windGustsMetric
+                            .layoutPriority(1)
                     }
                 }
                 .font(.caption)
@@ -437,12 +438,15 @@ public struct ForecastWidgetView: View {
             Text(title)
                 .font(.caption2)
                 .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .layoutPriority(1)
             Spacer()
                 .frame(maxWidth: 1)
             Text(value)
                 .font(.subheadline.weight(.semibold))
                 .lineLimit(1)
-                .minimumScaleFactor(0.75)
+                .minimumScaleFactor(0.7)
         }
     }
 
