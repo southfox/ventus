@@ -59,6 +59,8 @@ enum TypeOfWeather: String {
     case WVDIR // Wind-wave direction (degrees)
     case PERPW // Peak wave period (s)
     case DIRPW // Peak wave direction (degrees)
+    case APCP_MAX
+    case APCP1_MAX
 }
 
 public class Forecast: Object, Mappable {
@@ -217,6 +219,11 @@ public extension Forecast {
     /// APCP1: Precip. (mm/1h)
     func precipitation1(hh: String?) -> Double? {
         weathers?[TypeOfWeather.APCP1.rawValue]?.value(hh: hh)
+    }
+
+    func precipitationCeiling(hh: String?) -> Double? {
+        weathers?[TypeOfWeather.APCP1_MAX.rawValue]?.value(hh: hh)
+            ?? weathers?[TypeOfWeather.APCP_MAX.rawValue]?.value(hh: hh)
     }
 
     /// Significant combined wave height, with wind-wave height as a fallback.

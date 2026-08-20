@@ -373,6 +373,80 @@ class ModelTests: XCTestCase {
         XCTAssertEqual(forecast?.precipitation1(hh: "10"), 0.8)
     }
 
+    func testBlendedPrecipitationUsesMedianNotWeightedMean() throws {
+        func spotForecast(modelName: String, precipitation: Double) throws -> SpotForecast? {
+            try SpotForecast(map: [
+                "id_spot": "1",
+                "spotname": "Test Spot",
+                "country": "Testland",
+                "models": [3],
+                "forecast": [
+                    "3": [
+                        "initstamp": 1_700_000_000,
+                        "initdate": "2023-11-14 00:00:00",
+                        "model_name": modelName,
+                        "WINDSPD": ["0": 10.0],
+                        "APCP1": ["0": precipitation]
+                    ]
+                ]
+            ])
+        }
+
+        let models: [(name: String, precipitation: Double)] = [
+            ("Zephyr-HD 3.3 km", 0),
+            ("IFS-HRES 9 km", 1),
+            ("GFS 13 km", 0),
+            ("WRF 12 km", 0),
+            ("ICON 13 km", 0),
+            ("GDPS 15 km", 0)
+        ]
+        let forecasts = try models.compactMap { try spotForecast(modelName: $0.name, precipitation: $0.precipitation) }
+        XCTAssertEqual(forecasts.count, 6)
+
+        let blended = try SpotForecast.blended(forecasts)
+        XCTAssertEqual(blended?.forecast?.precipitation1(hh: "0"), 0)
+        XCTAssertEqual(blended?.forecast?.precipitationCeiling(hh: "0"), 1)
+    }
+
+    func testTodaysDailySymbolOnlyLooksAtHoursStillAhead() throws {
+        let todayMidnight = Calendar.current.startOfDay(for: Date())
+        let initStamp = Int(todayMidnight.timeIntervalSince1970)
+        func todayForecast(precipitationByHour: [String: Double]) throws -> SpotForecast? {
+            try SpotForecast(map: [
+                "id_spot": "1",
+                "spotname": "Test Spot",
+                "country": "Testland",
+                "models": [3],
+                "forecast": [
+                    "3": [
+                        "initstamp": initStamp,
+                        "model_name": "GFS 13 km",
+                        "WINDSPD": Dictionary(uniqueKeysWithValues: (0...23).map { (String($0), 10.0) }),
+                        "TMP": Dictionary(uniqueKeysWithValues: (0...23).map { (String($0), 10.0) }),
+                        "APCP1": precipitationByHour
+                    ]
+                ]
+            ])
+        }
+
+        let baseline = try todayForecast(precipitationByHour: [:])
+        let currentHour = try XCTUnwrap(baseline?.currentForecastHour.flatMap(Int.init))
+        try XCTSkipIf(currentHour < 2 || currentHour > 21, "need headroom on both sides of the current hour for this test")
+        let pastHour = String(currentHour - 2)
+        let futureHour = String(currentHour + 2)
+        let units = ForecastUnitPreferences(temperatureUnit: .celsius, windSpeedUnit: .knots, waveHeightUnit: .meters, pressureUnit: .hectopascals, precipitationUnit: .millimeters, freezingLevelUnit: .meters)
+
+        let rainedEarlier = try todayForecast(precipitationByHour: [pastHour: 2.0])
+        let pastRainSnapshot = SharedForecastSnapshot.make(from: rainedEarlier!, units: units)
+        let todaySymbol = try XCTUnwrap(pastRainSnapshot.daily.first?.symbolName)
+        XCTAssertFalse(todaySymbol.contains("rain") || todaySymbol.contains("drizzle"), "Rain that already happened shouldn't make \"today\" show a rain icon while the remaining hours are dry: got \(todaySymbol)")
+
+        let rainStillAhead = try todayForecast(precipitationByHour: [futureHour: 2.0])
+        let futureRainSnapshot = SharedForecastSnapshot.make(from: rainStillAhead!, units: units)
+        let aheadSymbol = try XCTUnwrap(futureRainSnapshot.daily.first?.symbolName)
+        XCTAssertTrue(aheadSymbol.contains("rain") || aheadSymbol.contains("drizzle"), "Rain still ahead today should be reflected in \"today\"'s icon: got \(aheadSymbol)")
+    }
+
     func testWeatherUnitConversions() {
         let wind = Knots(10)
         XCTAssertEqual(wind.value(in: .knots), 10)

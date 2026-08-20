@@ -40,6 +40,7 @@ public extension SpotForecast {
         var blendedWeather = [String: [String: Any]]()
         for key in weatherKeys where key != TypeOfWeather.WINDIRNAME.rawValue {
             var valuesByHour = [String: Any]()
+            var ceilingByHour = [String: Any]()
             for hour in availableHours {
                 var values = [Double]()
                 var weightedSum = 0.0
@@ -52,14 +53,21 @@ public extension SpotForecast {
                     weightTotal += weights[index]
                 }
                 guard !values.isEmpty else { continue }
-                let average = circularDirectionWeatherKeys.contains(key)
-                    ? circularMean(values)
-                    : weightTotal > 0 ? weightedSum / weightTotal : values.reduce(0, +) / Double(values.count)
+                let average: Double
+                if circularDirectionWeatherKeys.contains(key) {
+                    average = circularMean(values)
+                } else if precipitationWeatherKeys.contains(key) {
+                    average = median(values)
+                    ceilingByHour[hour] = values.max() ?? average
+                } else {
+                    average = weightTotal > 0 ? weightedSum / weightTotal : values.reduce(0, +) / Double(values.count)
+                }
                 valuesByHour[hour] = integerWeatherKeys.contains(key)
                     ? Int(average.rounded())
                     : average
             }
             if !valuesByHour.isEmpty { blendedWeather[key] = valuesByHour }
+            if !ceilingByHour.isEmpty { blendedWeather["\(key)_MAX"] = ceilingByHour }
         }
 
         if let directions = blendedWeather[TypeOfWeather.WINDDIR.rawValue] {
@@ -114,6 +122,17 @@ private let circularDirectionWeatherKeys: Set<String> = [
     TypeOfWeather.WVDIR.rawValue,
     TypeOfWeather.DIRPW.rawValue
 ]
+
+private let precipitationWeatherKeys: Set<String> = [
+    TypeOfWeather.APCP.rawValue,
+    TypeOfWeather.APCP1.rawValue
+]
+
+private func median(_ values: [Double]) -> Double {
+    let sorted = values.sorted()
+    let mid = sorted.count / 2
+    return sorted.count.isMultiple(of: 2) ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid]
+}
 
 private let fineTuneWeightsByModelName: [(matches: [String], weight: Double)] = [
     (["zephyr-hd", "zephyr_hd", "zephyrhd", "zephyr"], 0.397),

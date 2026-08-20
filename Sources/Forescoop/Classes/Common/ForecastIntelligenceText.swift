@@ -310,8 +310,12 @@ struct ForecastIntelligenceSnapshot: Hashable, Sendable {
         var total = 0.0
         var isSnow = false
         var onsetHour: String?
+        var hasLocallyHeavyRisk = false
         for item in hours {
             let amount = source.precipitation1(hh: item.hour) ?? source.precipitation(hh: item.hour) ?? 0
+            if let ceiling = source.precipitationCeiling(hh: item.hour), ceiling - amount >= 1 {
+                hasLocallyHeavyRisk = true
+            }
             guard amount > 0 else { continue }
             total += amount
             if onsetHour == nil { onsetHour = item.hour }
@@ -321,11 +325,15 @@ struct ForecastIntelligenceSnapshot: Hashable, Sendable {
         guard total > 0 else { return nil }
         let amountText = precipitation(total, unit: unit, locale: locale)
         let kind = (isSnow ? "snow" : "rain").localized(locale: locale)
-        guard let onsetHour else {
-            return "%@ of %@ expected".localized(locale: locale, formatArguments: [amountText, kind])
+        let base: String
+        if let onsetHour {
+            let label = hourLabel(for: onsetHour, forecast: forecast, locale: locale)
+            base = "%@ of %@ expected, starting around %@".localized(locale: locale, formatArguments: [amountText, kind, label])
+        } else {
+            base = "%@ of %@ expected".localized(locale: locale, formatArguments: [amountText, kind])
         }
-        let label = hourLabel(for: onsetHour, forecast: forecast, locale: locale)
-        return "%@ of %@ expected, starting around %@".localized(locale: locale, formatArguments: [amountText, kind, label])
+        guard hasLocallyHeavyRisk else { return base }
+        return "\(base) \("Showers may be locally heavy.".localized(locale: locale))"
     }
 
     private static func waveOutlook(

@@ -8080,6 +8080,34 @@
         }
       }
     },
+    "Showers may be locally heavy." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schauer können örtlich kräftig ausfallen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los chaparrones podrían ser localmente intensos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les averses pourraient être localement fortes."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os aguaceiros podem ser localmente intensos."
+          }
+        }
+      }
+    },
     "Shows high, mid, and low cloud cover" : {
       "localizations" : {
         "de" : {

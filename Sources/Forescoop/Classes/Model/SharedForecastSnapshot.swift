@@ -203,18 +203,23 @@ public extension SharedForecastSnapshot {
 
     private static func dailyForecast(for forecast: SpotForecast, unit: TemperatureUnit) -> [Day] {
         let calendar = Calendar.current
+        let currentOffset = Int(forecast.currentForecastHour ?? "") ?? 0
         let grouped = Dictionary(grouping: forecast.availableForecastHours) { hour in
             calendar.startOfDay(for: forecast.forecastDate(hour: hour) ?? .now)
         }
         let today = calendar.startOfDay(for: .now)
         let dates = grouped.keys.filter { $0 >= today }.sorted().prefix(10)
         return dates.compactMap { date in
-            guard let hours = grouped[date] else { return nil }
+            guard let allHours = grouped[date] else { return nil }
+            let hours = calendar.isDateInToday(date)
+                ? allHours.filter { (Int($0) ?? 0) >= currentOffset }
+                : allHours
+            guard !hours.isEmpty else { return nil }
             let temperatures = hours.compactMap { hour in
                 (forecast.forecast?.temperatureReal(hh: hour) ?? forecast.forecast?.temperature(hh: hour)).map { Temperature(celsius: $0).value(in: unit) }
             }
             guard let low = temperatures.min(), let high = temperatures.max() else { return nil }
-            let representativeHour = hours.sorted { (Int($0) ?? 0) < (Int($1) ?? 0) }[hours.count / 2]
+            let representativeHour = representativeHour(among: hours, forecast: forecast)
             let label = calendar.isDateInToday(date) ? "today".localized : date.formatted(.dateTime.weekday(.abbreviated))
             return Day(
                 label: label,
@@ -225,6 +230,18 @@ public extension SharedForecastSnapshot {
                 highValue: high
             )
         }
+    }
+
+    private static func representativeHour(among hours: [String], forecast: SpotForecast) -> String {
+        let sortedHours = hours.sorted { (Int($0) ?? 0) < (Int($1) ?? 0) }
+        func precipitation(_ hour: String) -> Double {
+            forecast.forecast?.precipitation1(hh: hour) ?? forecast.forecast?.precipitation(hh: hour) ?? 0
+        }
+        if let wettestHour = sortedHours.max(by: { precipitation($0) < precipitation($1) }),
+           precipitation(wettestHour) > 0 {
+            return wettestHour
+        }
+        return sortedHours[sortedHours.count / 2]
     }
 
     private static func conditionText(for forecast: SpotForecast, hour: String?) -> String {
