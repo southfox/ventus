@@ -10929,6 +10929,34 @@
           }
         }
       }
+    },
+    "I couldn't load the forecast right now." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Vorhersage konnte gerade nicht geladen werden."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No pude cargar el pronóstico en este momento."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je n'ai pas pu charger les prévisions pour le moment."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não consegui carregar a previsão agora."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"
