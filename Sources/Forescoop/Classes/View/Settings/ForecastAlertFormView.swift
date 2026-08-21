@@ -175,6 +175,9 @@ struct ForecastAlertFormView: View {
                         isPresentingSpotPicker = false
                     }
                 )
+#if os(macOS)
+                .macSheetFrame(widthFraction: 0.45, minWidth: 560, heightFraction: 0.55, minHeight: 520)
+#endif
             }
             .sheet(isPresented: $isPresentingModelPicker) {
                 ForecastModelPicker(

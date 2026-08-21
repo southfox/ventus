@@ -319,6 +319,9 @@ public struct ForecastDashboardView: View {
                         Task { await loadForecast(coordinate: coordinate, locationName: locationName) }
                     }
                 )
+#if os(macOS)
+                .macSheetFrame(widthFraction: 0.45, minWidth: 560, heightFraction: 0.55, minHeight: 520)
+#endif
             }
             .sheet(isPresented: sheetBinding(.modelPicker)) {
                 let forecastSpotID = displayedForecastSpotID ?? selectedSpotID
@@ -355,10 +358,7 @@ public struct ForecastDashboardView: View {
                     onProfileLoaded: applyUserPreferences
                 )
 #if os(macOS)
-                .frame(
-                    width: max(520, appWindowSize.width * 0.4),
-                    height: max(420, appWindowSize.height * 0.45)
-                )
+                .macSheetFrame(widthFraction: 0.4, minWidth: 520, heightFraction: 0.45, minHeight: 420)
 #endif
             }
             .sheet(isPresented: sheetBinding(.favorites), onDismiss: {
@@ -374,10 +374,7 @@ public struct ForecastDashboardView: View {
                     }
                 )
 #if os(macOS)
-                .frame(
-                    width: max(560, appWindowSize.width * 0.45),
-                    height: max(520, appWindowSize.height * 0.55)
-                )
+                .macSheetFrame(widthFraction: 0.45, minWidth: 560, heightFraction: 0.55, minHeight: 520)
 #endif
             }
             .sheet(isPresented: sheetBinding(.weatherBackgroundSettings)) {
@@ -413,6 +410,9 @@ public struct ForecastDashboardView: View {
                     environment: environment,
                     onSelection: { _ in }
                 )
+#if os(macOS)
+                .macSheetFrame(widthFraction: 0.6, minWidth: 640, heightFraction: 0.6, minHeight: 520)
+#endif
             }
 #endif
         }
@@ -434,18 +434,9 @@ public struct ForecastDashboardView: View {
             AboutView()
         }
 #if os(macOS)
-        .frame(
-            width: max(640, appWindowSize.width * 0.5),
-            height: max(480, appWindowSize.height * 0.5)
-        )
+        .macSheetFrame(widthFraction: 0.5, minWidth: 640, heightFraction: 0.5, minHeight: 480)
 #endif
     }
-
-#if os(macOS)
-    private var appWindowSize: CGSize {
-        NSApp.mainWindow?.contentLayoutRect.size ?? CGSize(width: 1_280, height: 900)
-    }
-#endif
 
     private func steppedHours(for forecast: SpotForecast) -> [String] {
         forecast.steppedForecastHours(anchorHour: forecast.currentForecastHour, step: environment.gridHourStepStore.load(), includingPast: false)

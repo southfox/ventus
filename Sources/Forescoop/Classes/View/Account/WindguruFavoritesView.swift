@@ -98,6 +98,9 @@ public struct WindguruFavoritesView: View {
                     Task { await viewModel.loadFavorites(username: username, password: password) }
                 }
             )
+#if os(macOS)
+            .macSheetFrame(widthFraction: 0.45, minWidth: 560, heightFraction: 0.55, minHeight: 520)
+#endif
         }
 #if !os(tvOS)
         .sheet(isPresented: Binding(
@@ -110,6 +113,9 @@ public struct WindguruFavoritesView: View {
                 environment: environment,
                 onSelection: { _ in }
             )
+#if os(macOS)
+            .macSheetFrame(widthFraction: 0.6, minWidth: 640, heightFraction: 0.6, minHeight: 520)
+#endif
         }
 #endif
         .trackScreenView("Favorites")

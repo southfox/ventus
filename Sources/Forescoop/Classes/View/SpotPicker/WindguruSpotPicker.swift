@@ -165,6 +165,9 @@ public struct WindguruSpotPicker: View {
                     }
                 }
             }
+#if os(macOS)
+            .macSheetFrame(widthFraction: 0.6, minWidth: 640, heightFraction: 0.6, minHeight: 520)
+#endif
         }
         .sheet(isPresented: Binding(
             get: { mapCoordinateToShow != nil },
@@ -176,6 +179,9 @@ public struct WindguruSpotPicker: View {
                 environment: environment,
                 onSelection: { _ in }
             )
+#if os(macOS)
+            .macSheetFrame(widthFraction: 0.6, minWidth: 640, heightFraction: 0.6, minHeight: 520)
+#endif
         }
 #endif
         .alert("Rename location", isPresented: Binding(
