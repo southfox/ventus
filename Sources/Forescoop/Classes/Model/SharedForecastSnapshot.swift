@@ -147,11 +147,11 @@ public extension SharedForecastSnapshot {
         return SharedForecastSnapshot(
             date: .now,
             locationName: forecast.locationDisplayName(coordinateLocationName: coordinateLocationName),
-            temperature: "\(Temperature(celsius: temperature).value(in: units.temperatureUnit).forecastFormatted(precision: 0))\(units.temperatureUnit.label)",
+            temperature: temperatureText(temperature, unit: units.temperatureUnit),
             temperatureCelsius: temperature,
-            rawTemperature: rawTemperature.map { "\(Temperature(celsius: $0).value(in: units.temperatureUnit).forecastFormatted(precision: 0))\(units.temperatureUnit.label)" } ?? "—",
+            rawTemperature: rawTemperature.map { temperatureText($0, unit: units.temperatureUnit) } ?? "—",
             rawTemperatureCelsius: rawTemperature ?? temperature,
-            realTemperature: realTemperature.map { "\(Temperature(celsius: $0).value(in: units.temperatureUnit).forecastFormatted(precision: 0))\(units.temperatureUnit.label)" } ?? "—",
+            realTemperature: realTemperature.map { temperatureText($0, unit: units.temperatureUnit) } ?? "—",
             realTemperatureCelsius: realTemperature ?? temperature,
             wind: windText(wind, unit: units.windSpeedUnit),
             gust: windText(gust, unit: units.windSpeedUnit),
@@ -276,7 +276,7 @@ public extension SharedForecastSnapshot {
 
     private static func windText(_ knots: Double, unit: WindSpeedUnit) -> String {
         guard let value = Knots(knots).value(in: unit) else { return "—" }
-        return "\(value.formatted(.number.precision(.fractionLength(0)))) \(unit.label)"
+        return "\(value.formatted(.number.precision(.fractionLength(0)))) \(unit.widgetLabel)"
     }
 
     private static func precipitationText(_ millimeters: Double, unit: PrecipitationUnit) -> String {

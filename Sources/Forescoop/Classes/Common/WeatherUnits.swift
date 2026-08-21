@@ -29,6 +29,17 @@ public enum WindSpeedUnit: String, CaseIterable, Identifiable, Sendable {
         case .beaufort: "Bft"
         }
     }
+
+    /// Compact unit label for the widget's constrained space, e.g. "kmh" instead of "km/h".
+    public var widgetLabel: String {
+        switch self {
+        case .knots: "kts"
+        case .metersPerSecond: "ms"
+        case .kilometersPerHour: "kmh"
+        case .milesPerHour: "mph"
+        case .beaufort: "Bft"
+        }
+    }
 }
 
 public extension WindSpeedUnit {
