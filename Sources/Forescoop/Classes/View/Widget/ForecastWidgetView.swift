@@ -154,21 +154,21 @@ public struct ForecastWidgetView: View {
     }
 
     private var smallWidgetContent: some View {
-        VStack(alignment: .leading, spacing: 7) {
-            Text(nameOnly(entry.locationName))
-                .font(.headline)
+        VStack(alignment: .leading, spacing: 4) {
+            ForecastLocationHeader(locationName: entry.locationName)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
+
             HStack(spacing: 8) {
                 Image(systemName: entry.symbolName)
-                    .font(.title)
+                    .font(.default)
                     .widgetAccentable()
                 ThermalLabel(entry.temperature, celsius: entry.temperatureCelsius)
                     .font(.system(.title3, design: .rounded).weight(.light))
                     .minimumScaleFactor(0.5)
             }
             VStack(alignment: .leading, spacing: 8) {
-                widgetMetric(windAndGustText(entry.wind, entry.gust), symbol: "wind")
+                windGustsMetric
                 HStack(alignment: .bottom, spacing: 8) {
                     widgetMetric(entry.rain, symbol: "drop.fill")
                     widgetMetric(entry.cloudCover, symbol: "cloud.fill")
@@ -178,18 +178,20 @@ public struct ForecastWidgetView: View {
     }
 
     private var mediumWidgetContent: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 5) {
             weatherHeader
+            Divider()
             hourlyForecast(limit: 6)
         }
     }
 
     private var largeWidgetContent: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 8) {
             weatherHeader
+            Divider()
             hourlyForecast(limit: 6)
             Divider()
-            dailyForecast(limit: 5)
+            dailyForecast(limit: 6)
         }
     }
 
@@ -214,9 +216,9 @@ public struct ForecastWidgetView: View {
             HStack(alignment: .top, spacing: 24) {
                 VStack(alignment: .leading, spacing: 16) {
                     weatherHeader
-                    if isInAppPreview {
+//                    if isInAppPreview {
                         Divider()
-                    }
+//                    }
                     ScrollView(.horizontal, showsIndicators: false) {
                         hourlyForecast(limit: 10)
                     }
@@ -232,18 +234,18 @@ public struct ForecastWidgetView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
-            if isInAppPreview {
+//            if isInAppPreview {
                 Divider()
-            }
-            
+//            }
+
             Label("Conditions", systemImage: "list.bullet.rectangle")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(theme.accentColor(for: colorScheme))
 
             expandedConditions(compact: false)
-            if isInAppPreview {
+//            if isInAppPreview {
                 Divider()
-            }
+//            }
             insightCard
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -257,26 +259,26 @@ public struct ForecastWidgetView: View {
                 hourlyForecast(limit: 10)
             }
 
-            if isInAppPreview {
+//            if isInAppPreview {
                 Divider()
-            }
+//            }
             Label("10-Day Forecast".localized, systemImage: "calendar")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(theme.accentColor(for: colorScheme))
             dailyForecast(limit: 10)
 
-            if isInAppPreview {
+//            if isInAppPreview {
                 Divider()
-            }
+//            }
             Label("Conditions", systemImage: "list.bullet.rectangle")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(theme.accentColor(for: colorScheme))
 
             expandedConditions(compact: true)
 
-            if isInAppPreview {
+//            if isInAppPreview {
                 Divider()
-            }
+//            }
             insightCard
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -315,7 +317,7 @@ public struct ForecastWidgetView: View {
     private func expandedConditions(compact: Bool) -> some View {
         LazyVGrid(
             columns: Array(repeating: GridItem(.flexible(), alignment: .trailing), count: compact ? 2 : 4),
-            alignment: .trailing,
+            alignment: .leading,
             spacing: isInAppPreview ? 12 : 4
         ) {
             expandedMetric("Wind", value: entry.wind, symbol: "wind")
@@ -377,19 +379,13 @@ public struct ForecastWidgetView: View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 4) {
 #if !os(watchOS)
-                if isInAppPreview {
-                    ForecastLocationHeader(
-                        locationName: entry.locationName,
-                        onSelectLocation: onSelectLocation,
-                        onShowMap: onShowMap
-                    )
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.6)
-                } else {
-                    Label(entry.locationName, systemImage: "mappin.and.ellipse")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(theme.accentColor(for: colorScheme))
-                }
+                ForecastLocationHeader(
+                    locationName: entry.locationName,
+                    onSelectLocation: isInAppPreview ? onSelectLocation : nil,
+                    onShowMap: isInAppPreview ? onShowMap : nil
+                )
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
 #else
                 Text(entry.locationName)
                     .font(.headline)
@@ -398,21 +394,21 @@ public struct ForecastWidgetView: View {
 #endif
                 HStack(spacing: 10) {
                     ThermalLabel(entry.temperature, celsius: entry.temperatureCelsius)
-                        .font(.system(.title3, design: .rounded).weight(.light))
+                        .font(.system(isInAppPreview ? .title : .title2, design: .rounded).weight(.light))
                         .minimumScaleFactor(0.5)
 
 #if !os(watchOS)
-                    if displayedFamily == .systemLarge || displayedFamily == .systemExtraLarge {
+                    if isInAppPreview {
+                    // if displayedFamily == .systemLarge || displayedFamily == .systemExtraLarge {
                         RealTemperatureLabel(entry.realTemperature, celsius: entry.realTemperatureCelsius)
-                            .font(.system(.title3, design: .rounded).weight(.light))
+                            .font(.system(.title, design: .rounded).weight(.light))
                             .minimumScaleFactor(0.5)
-                    } else {
+                    } else if displayedFamily == .systemExtraLarge {
                         ThermalLabel(entry.low, celsius: entry.lowCelsius)
                         ThermalLabel(entry.high, celsius: entry.highCelsius)
                     }
-
-                    if displayedFamily != .systemSmall {
-                        Spacer(minLength: 8)
+                    if !isInAppPreview && displayedFamily != .systemSmall {
+                        Spacer()
                         windGustsMetric
                             .layoutPriority(1)
                     }
@@ -428,32 +424,26 @@ public struct ForecastWidgetView: View {
     }
 
     @ViewBuilder private var windGustsMetric: some View {
-        if isInAppPreview {
-            HStack(alignment: .center, spacing: 6) {
-                Image(systemName: "wind")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                    .frame(width: 16, alignment: .center)
-                VStack(alignment: .leading, spacing: 2) {
-                    windGustsLine("Wind", value: entry.wind)
-                    windGustsLine("Gusts", value: entry.gust)
-                }
-            }
-        } else {
-            widgetMetric(windAndGustText(entry.wind, entry.gust), symbol: "wind")
+        HStack(alignment: .center, spacing: 6) {
+            windGustsLine("Wind", symbol: "wind", value: String(entry.wind.split(separator: " ").first!))
+            windGustsLine("Gusts", symbol: "wind.circle", value: entry.gust)
         }
     }
 
-    private func windGustsLine(_ title: LocalizedStringKey, value: String) -> some View {
-        HStack(spacing: 4) {
-            Text(title)
-                .font(.caption2)
+    private func windGustsLine(_ title: LocalizedStringKey, symbol: String, value: String) -> some View {
+        HStack(spacing: 2) {
+            Image(systemName: symbol)
+                .font(.body)
                 .foregroundStyle(.secondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-                .layoutPriority(1)
-            Spacer()
-                .frame(maxWidth: 1)
+                .frame(width: 16, alignment: .center)
+            if displayedFamily != .systemSmall {
+                Text(title)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .layoutPriority(1)
+            }
             Text(value)
                 .font(.subheadline.weight(.semibold))
                 .lineLimit(1)

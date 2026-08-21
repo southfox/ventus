@@ -13,24 +13,33 @@ struct ForecastLocationHeader: View {
     @Environment(\.ventusTheme) private var theme
     @Environment(\.colorScheme) private var colorScheme
     let locationName: String
-    let onSelectLocation: () -> Void
-    let onShowMap: () -> Void
+    var onSelectLocation: (() -> Void)? = nil
+    var onShowMap: (() -> Void)? = nil
     let font: Font = .subheadline.bold()
 
     var body: some View {
         HStack(spacing: 8) {
-            Button(action: onSelectLocation) {
-                Label(locationName, systemImage: "mappin.and.ellipse")
+            if let onSelectLocation {
+                Button(action: onSelectLocation) {
+                    Label(locationName, systemImage: "mappin.and.ellipse")
+                        .font(.headline.weight(.semibold))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Choose location")
+            } else {
+                Text(locationName)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Choose location")
 
 #if !os(tvOS)
-            LocationMapButton(
-                locationName: locationName,
-                buttonStyle: .plain,
-                action: onShowMap
-            )
+            if let onShowMap {
+                LocationMapButton(
+                    locationName: locationName,
+                    buttonStyle: .plain,
+                    action: onShowMap
+                )
+            }
 #endif
         }
         .font(font)
@@ -40,6 +49,10 @@ struct ForecastLocationHeader: View {
 
 #if DEBUG
 #Preview("Forecast location header") {
+    ForecastLocationHeader(locationName: "Bariloche #64141")
+    .padding()
+}
+#Preview("Forecast location header (w/Selection)") {
     ForecastLocationHeader(
         locationName: "Bariloche #64141",
         onSelectLocation: {},
