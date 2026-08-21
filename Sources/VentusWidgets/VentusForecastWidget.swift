@@ -1,9 +1,9 @@
 #if canImport(WidgetKit) && !os(tvOS)
-import Forescoop
+import Ventus
 import SwiftUI
 import WidgetKit
 
-public struct ForescoopForecastWidget: Widget {
+public struct VentusForecastWidget: Widget {
     public let kind = "org.forescoop.forecast"
     private let environment = AppEnvironment()
 

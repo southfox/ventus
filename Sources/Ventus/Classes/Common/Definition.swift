@@ -10,8 +10,8 @@ import Foundation
 
 public struct Constants {
     public static let plist = "ForecastWindguruService"
-    public static let frameworkBundle = "Forescoop"
-    public static let bundleResource = "Forescoop"
+    public static let frameworkBundle = "Ventus"
+    public static let bundleResource = "Ventus"
 }
 
 public class Definition {

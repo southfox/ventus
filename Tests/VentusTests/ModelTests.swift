@@ -7,7 +7,7 @@
 //
 
 import XCTest
-import Forescoop
+import Ventus
 import CoreLocation
 
 class ModelTests: XCTestCase {

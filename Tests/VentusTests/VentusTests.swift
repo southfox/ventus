@@ -1,16 +1,16 @@
 //
-//  ForescoopTests.swift
-//  ForescoopTests
+//  VentusTests.swift
+//  VentusTests
 //
 //  Created by Javier Fuchs on 07/26/26.
 //  Copyright © 2026 Mobile Patagonia. All rights reserved.
 //
 
 import XCTest
-@testable import Forescoop
+@testable import Ventus
 import CoreLocation
 
-final class ForescoopTests: XCTestCase {
+final class VentusTests: XCTestCase {
     private struct TestPreferencesProvider: ForecastPreferencesProviding {
         let forecastUnitPreferences: ForecastUnitPreferences
     }
@@ -19,7 +19,7 @@ final class ForescoopTests: XCTestCase {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct
         // results.
-        XCTAssertEqual(Forescoop().text, "Hello, World!")
+        XCTAssertEqual(Ventus().text, "Hello, World!")
     }
 
     @MainActor

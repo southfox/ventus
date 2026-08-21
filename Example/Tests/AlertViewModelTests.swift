@@ -7,7 +7,7 @@
 //
 
 import XCTest
-import Forescoop
+import Ventus
 @testable import Forescoop_Example
 
 final class AlertViewModelTests: XCTestCase {

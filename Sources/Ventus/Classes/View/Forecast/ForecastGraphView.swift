@@ -4,7 +4,7 @@
 //
 
 #if !os(watchOS)
-import ForescoopGraph
+import VentusGraph
 import SwiftUI
 
 public struct ForecastGraphView: View {

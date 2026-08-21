@@ -8,7 +8,7 @@
 
 #if os(visionOS)
 import SwiftUI
-import Forescoop
+import Ventus
 
 @main
 struct VisionForescoopApp: App {

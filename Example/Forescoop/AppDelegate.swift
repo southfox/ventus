@@ -6,7 +6,7 @@
 //  Copyright © 2023 southfox. All rights reserved.
 //
 
-import Forescoop
+import Ventus
 
 #if os(macOS)
 import Cocoa

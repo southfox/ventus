@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "2600"
+   LastUpgradeVersion = "1420"
    version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "AA0100000000000000000005"
-               BuildableName = "ForescoopWatchOnly.app"
-               BlueprintName = "ForescoopWatchOnly"
+               BlueprintIdentifier = "B0010000000000000000000F"
+               BuildableName = "VentusVisionOS.app"
+               BlueprintName = "VentusVisionOS"
                ReferencedContainer = "container:Forescoop.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -26,7 +26,7 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      shouldUseLaunchSchemeArgsEnv = "NO"
+      shouldUseLaunchSchemeArgsEnv = "YES"
       shouldAutocreateTestPlan = "YES">
    </TestAction>
    <LaunchAction
@@ -43,9 +43,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "AA0100000000000000000005"
-            BuildableName = "ForescoopWatchOnly.app"
-            BlueprintName = "ForescoopWatchOnly"
+            BlueprintIdentifier = "B0010000000000000000000F"
+            BuildableName = "VentusVisionOS.app"
+            BlueprintName = "VentusVisionOS"
             ReferencedContainer = "container:Forescoop.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -56,6 +56,16 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "B0010000000000000000000F"
+            BuildableName = "VentusVisionOS.app"
+            BlueprintName = "VentusVisionOS"
+            ReferencedContainer = "container:Forescoop.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

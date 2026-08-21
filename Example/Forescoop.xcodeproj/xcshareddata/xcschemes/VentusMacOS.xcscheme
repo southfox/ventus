@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "98688A0322D5936400A09AD0"
-               BuildableName = "ForescoopMacOS.app"
-               BlueprintName = "ForescoopMacOS"
+               BuildableName = "VentusMacOS.app"
+               BlueprintName = "VentusMacOS"
                ReferencedContainer = "container:Forescoop.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -45,8 +45,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "98688A0322D5936400A09AD0"
-            BuildableName = "ForescoopMacOS.app"
-            BlueprintName = "ForescoopMacOS"
+            BuildableName = "VentusMacOS.app"
+            BlueprintName = "VentusMacOS"
             ReferencedContainer = "container:Forescoop.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -62,8 +62,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "98688A0322D5936400A09AD0"
-            BuildableName = "ForescoopMacOS.app"
-            BlueprintName = "ForescoopMacOS"
+            BuildableName = "VentusMacOS.app"
+            BlueprintName = "VentusMacOS"
             ReferencedContainer = "container:Forescoop.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

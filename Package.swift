@@ -3,7 +3,7 @@
 
 //
 //  Package.swift
-//  Forescoop package
+//  Ventus package
 //
 //  Created by Javier Fuchs on 07/26/26.
 //  Copyright © 2026 Mobile Patagonia. All rights reserved.
@@ -12,7 +12,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "ForescoopPackage",
+    name: "VentusPackage",
     defaultLocalization: "en",
     platforms: [
         .iOS(.v26),
@@ -22,11 +22,11 @@ let package = Package(
         .watchOS(.v26)
     ], products: [
         .library(
-            name: "Forescoop",
-            targets: ["Forescoop"]),
+            name: "Ventus",
+            targets: ["Ventus"]),
         .library(
-            name: "ForescoopWidgets",
-            targets: ["ForescoopWidgets"]),
+            name: "VentusWidgets",
+            targets: ["VentusWidgets"]),
     ],
     dependencies: [
         .package(url: "https://github.com/airbnb/lottie-spm.git", from: "4.6.1"),
@@ -34,12 +34,12 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "ForescoopGraph",
-            path: "Sources/ForescoopGraph"),
+            name: "VentusGraph",
+            path: "Sources/VentusGraph"),
         .target(
-            name: "Forescoop",
+            name: "Ventus",
             dependencies: [
-                "ForescoopGraph",
+                "VentusGraph",
                 .product(
                     name: "Lottie",
                     package: "lottie-spm",
@@ -56,15 +56,15 @@ let package = Package(
                     condition: .when(platforms: [.iOS, .macOS, .tvOS, .watchOS])
                 ),
             ],
-            path: "Sources/Forescoop",
+            path: "Sources/Ventus",
             resources: [.process("Resources")]),
         .target(
-            name: "ForescoopWidgets",
-            dependencies: ["Forescoop"],
-            path: "Sources/ForescoopWidgets"),
+            name: "VentusWidgets",
+            dependencies: ["Ventus"],
+            path: "Sources/VentusWidgets"),
         .testTarget(
-            name: "ForescoopTests",
-            dependencies: ["Forescoop"],
-            path: "Tests/ForescoopTests"),
+            name: "VentusTests",
+            dependencies: ["Ventus"],
+            path: "Tests/VentusTests"),
     ]
 )

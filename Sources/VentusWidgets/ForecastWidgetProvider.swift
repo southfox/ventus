@@ -7,7 +7,7 @@
 //
 
 #if canImport(WidgetKit) && !os(tvOS)
-import Forescoop
+import Ventus
 import SwiftUI
 import WidgetKit
 

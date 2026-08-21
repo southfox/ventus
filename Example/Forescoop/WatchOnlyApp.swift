@@ -9,7 +9,7 @@
 #if os(watchOS)
 import SwiftUI
 import WatchKit
-import Forescoop
+import Ventus
 
 @main
 struct ForescoopWatchOnlyApp: App {
