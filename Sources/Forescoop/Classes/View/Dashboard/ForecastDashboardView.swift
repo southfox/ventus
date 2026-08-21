@@ -354,6 +354,12 @@ public struct ForecastDashboardView: View {
                     },
                     onProfileLoaded: applyUserPreferences
                 )
+#if os(macOS)
+                .frame(
+                    width: max(520, appWindowSize.width * 0.4),
+                    height: max(420, appWindowSize.height * 0.45)
+                )
+#endif
             }
             .sheet(isPresented: sheetBinding(.favorites), onDismiss: {
                 Task { await loadFavoriteMapLocations() }
@@ -367,6 +373,12 @@ public struct ForecastDashboardView: View {
                         Task { await loadForecast(spotId: spotID) }
                     }
                 )
+#if os(macOS)
+                .frame(
+                    width: max(560, appWindowSize.width * 0.45),
+                    height: max(520, appWindowSize.height * 0.55)
+                )
+#endif
             }
             .sheet(isPresented: sheetBinding(.weatherBackgroundSettings)) {
                 SettingsView(
