@@ -18,13 +18,15 @@ import SwiftUI
 @MainActor
 public struct VisionForecastView: View {
     private let forecastService: ForecastWindguruProtocol
+    private let analytics: AnalyticsLogging
 
-    public init(forecastService: ForecastWindguruProtocol = ForecastWindguruService()) {
+    public init(forecastService: ForecastWindguruProtocol = ForecastWindguruService(), analytics: AnalyticsLogging) {
         self.forecastService = forecastService
+        self.analytics = analytics
     }
 
     public var body: some View {
-        ForecastDashboardView(forecastService: forecastService)
+        ForecastDashboardView(forecastService: forecastService, analytics: analytics)
             .forecastAccessibilityContainer(
                 "Ventus forecast workspace",
                 hint: "Use forecast controls to choose a location, hour, layout, or settings.",
@@ -34,6 +36,6 @@ public struct VisionForecastView: View {
 }
 
 #Preview(windowStyle: .automatic) {
-    VisionForecastView(forecastService: ForecastWindguruMockup())
+    VisionForecastView(forecastService: ForecastWindguruMockup(), analytics: NoOpAnalyticsLogger())
 }
 #endif

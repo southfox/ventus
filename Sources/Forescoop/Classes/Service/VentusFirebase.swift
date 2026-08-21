@@ -17,19 +17,21 @@ import FirebaseAnalytics
 import FirebaseCrashlytics
 #endif
 
-public enum VentusFirebase {
+public final class VentusFirebase: AnalyticsLogging {
     private static let deviceIdentifierKey = "ventusFirebaseDeviceIdentifier"
 
-    public static var deviceIdentifier: String {
-        if let existing = VentusPreferenceStore.value(forKey: deviceIdentifierKey) {
+    public init() {}
+
+    private var deviceIdentifier: String {
+        if let existing = VentusPreferenceStore.value(forKey: Self.deviceIdentifierKey) {
             return existing
         }
         let generated = UUID().uuidString
-        VentusPreferenceStore.save(generated, forKey: deviceIdentifierKey)
+        VentusPreferenceStore.save(generated, forKey: Self.deviceIdentifierKey)
         return generated
     }
 
-    public static func configure() {
+    public func configure() {
 #if canImport(FirebaseCore)
         guard FirebaseApp.app() == nil else { return }
         FirebaseApp.configure()
@@ -42,25 +44,25 @@ public enum VentusFirebase {
 #endif
     }
 
-    public static func logEvent(_ name: String, parameters: [String: Any]? = nil) {
+    public func logEvent(_ name: String, parameters: [String: Any]? = nil) {
 #if canImport(FirebaseAnalytics)
         Analytics.logEvent(name, parameters: parameters)
 #endif
     }
 
-    public static func setUserProperty(_ value: String?, forName name: String) {
+    public func setUserProperty(_ value: String?, forName name: String) {
 #if canImport(FirebaseAnalytics)
         Analytics.setUserProperty(value, forName: name)
 #endif
     }
 
-    public static func log(_ message: String) {
+    public func log(_ message: String) {
 #if canImport(FirebaseCrashlytics)
         Crashlytics.crashlytics().log(message)
 #endif
     }
 
-    public static func recordError(_ error: Error) {
+    public func recordError(_ error: Error) {
 #if canImport(FirebaseCrashlytics)
         Crashlytics.crashlytics().record(error: error)
 #endif

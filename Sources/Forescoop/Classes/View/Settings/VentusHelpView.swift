@@ -130,6 +130,7 @@ public struct VentusHelpView: View {
             }
         }
 #endif
+        .trackScreenView("Help")
     }
 }
 

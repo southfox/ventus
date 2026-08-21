@@ -14,6 +14,8 @@ struct ForecastAlertsListView: View {
     let account: WindguruAccount
     private let modelInfoLoader: @MainActor () async throws -> Models?
 
+    @Environment(\.analytics) private var analytics
+
     @State private var alerts = ForecastAlertStore.load()
     @State private var modelNamesByID = [String: String]()
     @State private var editingAlert: ForecastAlert?
@@ -57,6 +59,7 @@ struct ForecastAlertsListView: View {
             hint: "Manage push notification alerts for saved spots.",
             identifier: "settings.alerts"
         )
+        .trackScreenView("Alerts List")
     }
 
     private func row(for alert: ForecastAlert) -> some View {
@@ -99,6 +102,7 @@ struct ForecastAlertsListView: View {
     private func remove(_ alert: ForecastAlert) {
         ForecastAlertStore.remove(alert)
         reload()
+        analytics.log(.alertDeleted)
     }
 
     private func reload() {

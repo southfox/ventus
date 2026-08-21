@@ -39,6 +39,7 @@ public struct WindguruSpotPicker: View {
     public init(
         forecastService: ForecastWindguruProtocol,
         account: WindguruAccount,
+        analytics: AnalyticsLogging,
         onSpotSelected: @escaping (SpotOwner) -> Void,
         onSpotIDSelected: @escaping (String) -> Void = { _ in },
         onFavoriteSelected: @escaping (SpotOwner) -> Void = { _ in },
@@ -46,7 +47,7 @@ public struct WindguruSpotPicker: View {
         purpose: Purpose = .chooseLocation,
         onFavoriteAdded: @escaping () -> Void = {}
     ) {
-        _viewModel = StateObject(wrappedValue: WindguruSpotPickerViewModel(forecastService: forecastService))
+        _viewModel = StateObject(wrappedValue: WindguruSpotPickerViewModel(forecastService: forecastService, analytics: analytics))
         self.purpose = purpose
         self.account = account
         self.onSpotSelected = onSpotSelected
@@ -183,6 +184,7 @@ public struct WindguruSpotPicker: View {
             Button("Save") { renameLocation() }
             Button("Cancel", role: .cancel) { locationToRename = nil }
         }
+        .trackScreenView("Spot Picker")
     }
 
     @ViewBuilder
@@ -744,6 +746,7 @@ private enum DeviceLocationError: LocalizedError {
     WindguruSpotPicker(
         forecastService: ForecastWindguruMockup(),
         account: WindguruAccount(),
+        analytics: NoOpAnalyticsLogger(),
         onSpotSelected: { _ in },
         onCoordinateSelected: { _, _ in }
     )

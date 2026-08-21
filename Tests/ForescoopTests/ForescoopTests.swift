@@ -34,7 +34,8 @@ final class ForescoopTests: XCTestCase {
         )
         let viewModel = ForecastDashboardViewModel(
             forecastService: ForecastWindguruMockup(),
-            preferencesProvider: TestPreferencesProvider(forecastUnitPreferences: expected)
+            preferencesProvider: TestPreferencesProvider(forecastUnitPreferences: expected),
+            analytics: NoOpAnalyticsLogger()
         )
 
         XCTAssertEqual(viewModel.deviceUnitPreferences, expected)
@@ -58,7 +59,7 @@ final class ForescoopTests: XCTestCase {
         SavedMapLocationStore.save(originalLocations + [sessionLocation])
         SelectedWindguruSpotStore.save(sessionLocation.spotID!)
 
-        let viewModel = ForecastDashboardViewModel(forecastService: ForecastWindguruMockup())
+        let viewModel = ForecastDashboardViewModel(forecastService: ForecastWindguruMockup(), analytics: NoOpAnalyticsLogger())
         viewModel.clearPersistedSessionData()
 
         XCTAssertEqual(viewModel.savedMapLocations.map(\.spotID), [SavedMapLocationStore.primarySpotID])

@@ -116,6 +116,7 @@ public struct WindguruLoginView: View {
             }
             .overlay { if isLoading { ProgressView("Signing in…") } }
         }
+        .trackScreenView("Login")
     }
 
     @MainActor

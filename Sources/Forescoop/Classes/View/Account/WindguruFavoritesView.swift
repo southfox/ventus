@@ -19,6 +19,7 @@ public struct WindguruFavoritesView: View {
     private let onSpotSelected: (SpotOwner) -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.analytics) private var analytics
 
     @StateObject private var viewModel: WindguruFavoritesViewModel
     @State private var showsAddFavorite = false
@@ -89,6 +90,7 @@ public struct WindguruFavoritesView: View {
             WindguruSpotPicker(
                 forecastService: forecastService,
                 account: account,
+                analytics: analytics,
                 onSpotSelected: { _ in },
                 onCoordinateSelected: { _, _ in },
                 purpose: .addFavorite,
@@ -109,6 +111,7 @@ public struct WindguruFavoritesView: View {
             )
         }
 #endif
+        .trackScreenView("Favorites")
     }
 
     private func favoriteRow(_ spot: SpotOwner) -> some View {
@@ -179,6 +182,7 @@ public struct WindguruFavoritesView: View {
     @MainActor
     private func removeFavorite(_ spot: SpotOwner) async {
         await viewModel.removeFavorite(spot, username: username, password: password)
+        analytics.log(.favoriteRemoved(spotID: spot.identifier ?? "unknown"))
     }
 }
 

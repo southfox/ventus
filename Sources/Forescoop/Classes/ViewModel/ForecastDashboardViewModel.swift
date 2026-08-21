@@ -28,13 +28,44 @@ public final class ForecastDashboardViewModel: ObservableObject {
     @Published var displayedModelForecasts = [SpotForecast]()
     @Published var severeWeatherAlert: ForecastSevereWeatherAlert?
     @Published var savedMapLocations = SavedMapLocationStore.load()
-    @Published var temperatureUnit: TemperatureUnit { didSet { persistWidgetUnits() } }
-    @Published var windSpeedUnit: WindSpeedUnit { didSet { persistWidgetUnits() } }
-    @Published var waveHeightUnit: WaveHeightUnit { didSet { persistWidgetUnits() } }
-    @Published var pressureUnit: PressureUnit { didSet { persistWidgetUnits() } }
-    @Published var precipitationUnit: PrecipitationUnit { didSet { persistWidgetUnits() } }
-    @Published var freezingLevelUnit: FreezingLevelUnit { didSet { persistWidgetUnits() } }
+    @Published var temperatureUnit: TemperatureUnit {
+        didSet {
+            persistWidgetUnits()
+            if oldValue != temperatureUnit { analytics.log(.unitChanged(kind: "temperature", value: temperatureUnit.rawValue)) }
+        }
+    }
+    @Published var windSpeedUnit: WindSpeedUnit {
+        didSet {
+            persistWidgetUnits()
+            if oldValue != windSpeedUnit { analytics.log(.unitChanged(kind: "wind_speed", value: windSpeedUnit.rawValue)) }
+        }
+    }
+    @Published var waveHeightUnit: WaveHeightUnit {
+        didSet {
+            persistWidgetUnits()
+            if oldValue != waveHeightUnit { analytics.log(.unitChanged(kind: "wave_height", value: waveHeightUnit.rawValue)) }
+        }
+    }
+    @Published var pressureUnit: PressureUnit {
+        didSet {
+            persistWidgetUnits()
+            if oldValue != pressureUnit { analytics.log(.unitChanged(kind: "pressure", value: pressureUnit.rawValue)) }
+        }
+    }
+    @Published var precipitationUnit: PrecipitationUnit {
+        didSet {
+            persistWidgetUnits()
+            if oldValue != precipitationUnit { analytics.log(.unitChanged(kind: "precipitation", value: precipitationUnit.rawValue)) }
+        }
+    }
+    @Published var freezingLevelUnit: FreezingLevelUnit {
+        didSet {
+            persistWidgetUnits()
+            if oldValue != freezingLevelUnit { analytics.log(.unitChanged(kind: "freezing_level", value: freezingLevelUnit.rawValue)) }
+        }
+    }
 
+    private let analytics: AnalyticsLogging
     private let profileLoader: @MainActor (String, String) async throws -> User?
     private let preferencesProvider: any ForecastPreferencesProviding
     private let forecastLoader: @MainActor (String, String?) async throws -> SpotForecast?
@@ -50,8 +81,10 @@ public final class ForecastDashboardViewModel: ObservableObject {
 
     public init(
         forecastService: ForecastWindguruProtocol = ForecastWindguruService(),
-        preferencesProvider: any ForecastPreferencesProviding = DeviceForecastPreferenceProvider()
+        preferencesProvider: any ForecastPreferencesProviding = DeviceForecastPreferenceProvider(),
+        analytics: AnalyticsLogging
     ) {
+        self.analytics = analytics
         self.preferencesProvider = preferencesProvider
         let unitPreferences = VentusForecastUnitStore.load(fallback: preferencesProvider.forecastUnitPreferences)
         temperatureUnit = unitPreferences.temperatureUnit
@@ -89,7 +122,20 @@ public final class ForecastDashboardViewModel: ObservableObject {
 
     public func loadUserProfile(username: String, password: String) async -> User? {
         guard !username.isEmpty else { return nil }
-        return try? await profileLoader(username, password)
+        analytics.log(.loginAttempted)
+        do {
+            let profile = try await profileLoader(username, password)
+            if profile != nil {
+                analytics.log(.loginSucceeded)
+            } else {
+                analytics.log(.loginFailed(reason: "empty response"))
+            }
+            return profile
+        } catch {
+            analytics.log(.loginFailed(reason: "\(error)"))
+            analytics.recordError(error)
+            return nil
+        }
     }
 
     public func applyUserProfile(_ profile: User) {
@@ -312,9 +358,12 @@ public final class ForecastDashboardViewModel: ObservableObject {
             severeWeatherAlert = ForecastSevereWeatherNotifier.evaluate(forecast)
             ForecastSevereWeatherNotifier.evaluateCustomAlerts(forecast)
             persistWidgetSnapshot()
+            analytics.log(.forecastLoadSucceeded(spotID: spotID, modelCount: displayedModelForecasts.count))
             return true
         } catch {
             errorMessage = forecastErrorMessage(for: error)
+            analytics.log(.forecastLoadFailed(spotID: spotID, reason: "\(error)"))
+            analytics.recordError(error)
             return false
         }
     }
@@ -373,8 +422,11 @@ public final class ForecastDashboardViewModel: ObservableObject {
                 ForecastSevereWeatherNotifier.evaluateCustomAlerts(forecast)
             }
             persistWidgetSnapshot()
+            analytics.log(.coordinateLocationSelected)
         } catch {
             errorMessage = forecastErrorMessage(for: error)
+            analytics.log(.forecastLoadFailed(spotID: "coordinate", reason: "\(error)"))
+            analytics.recordError(error)
         }
     }
 

@@ -112,6 +112,7 @@ public struct MapLocationPicker: View {
                 }
             }
         }
+        .trackScreenView("Map Location Picker")
     }
 
     @ViewBuilder private var map: some View {

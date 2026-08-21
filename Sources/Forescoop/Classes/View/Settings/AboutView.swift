@@ -129,6 +129,7 @@ public struct AboutView: View {
             }
         }
 #endif
+        .trackScreenView("About")
     }
 
     private var versionDescription: String {

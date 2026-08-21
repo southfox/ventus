@@ -14,11 +14,12 @@ import SwiftUI
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
+    private let analytics = VentusFirebase()
     private var window: NSWindow?
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        VentusFirebase.configure()
-        let window = NSWindow(contentViewController: NSHostingController(rootView: ForecastDashboardView()))
+        analytics.configure()
+        let window = NSWindow(contentViewController: NSHostingController(rootView: ForecastDashboardView(analytics: analytics)))
         window.title = "Ventus"
         window.setContentSize(NSSize(width: 1_180, height: 820))
         window.minSize = NSSize(width: 900, height: 650)
@@ -46,6 +47,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc private func addVentusWidget(_ sender: Any?) {
+        analytics.log(.widgetAddRequested)
         let didOpenGallery = NSApp.sendAction(
             Selector(("showWidgetGallery:")),
             to: nil,
@@ -74,12 +76,13 @@ import SwiftUI
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
+    let analytics = VentusFirebase()
 
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
-        VentusFirebase.configure()
+        analytics.configure()
         ForecastAlertBackgroundRefresh.register()
         ForecastAlertBackgroundRefresh.schedule()
         return true
@@ -132,8 +135,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     ) {
         guard let windowScene = scene as? UIWindowScene else { return }
 
+        let analytics = (UIApplication.shared.delegate as? AppDelegate)?.analytics ?? VentusFirebase()
         let window = UIWindow(windowScene: windowScene)
-        window.rootViewController = UIHostingController(rootView: ForecastDashboardView())
+        window.rootViewController = UIHostingController(rootView: ForecastDashboardView(analytics: analytics))
         window.makeKeyAndVisible()
         self.window = window
     }

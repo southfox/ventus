@@ -30,6 +30,7 @@ public struct ForecastDashboardView: View {
     }
 
     private let forecastService: ForecastWindguruProtocol
+    private let analytics: AnalyticsLogging
     private let spotSearch: @MainActor (String) async throws -> SpotResult?
     private let favoriteSpotsLoader: @MainActor (String, String) async throws -> SpotResult?
     private let spotInfoLoader: @MainActor (String) async throws -> SpotInfo?
@@ -59,9 +60,11 @@ public struct ForecastDashboardView: View {
         initialViewMode: ForecastViewMode? = nil,
         initialWeatherBackgroundStyle: WeatherBackgroundStyle? = nil,
         previewForecast: SpotForecast? = nil,
-        previewModelForecasts: [SpotForecast] = []
+        previewModelForecasts: [SpotForecast] = [],
+        analytics: AnalyticsLogging
     ) {
         self.forecastService = forecastService
+        self.analytics = analytics
         usesPreviewForecast = previewForecast != nil
         let initialSpotID = previewForecast?.identifier ?? SelectedWindguruSpotStore.load()
         _selectedSpotID = State(initialValue: initialSpotID)
@@ -70,7 +73,7 @@ public struct ForecastDashboardView: View {
         )
         _theme = State(initialValue: VentusThemeStore.load())
         _content = State(initialValue: initialViewMode ?? ForecastViewModeStore.load())
-        let viewModel = ForecastDashboardViewModel(forecastService: forecastService)
+        let viewModel = ForecastDashboardViewModel(forecastService: forecastService, analytics: analytics)
         if let previewForecast {
             viewModel.usePreviewForecast(previewForecast, spotID: initialSpotID, modelForecasts: previewModelForecasts)
         }
@@ -135,11 +138,11 @@ public struct ForecastDashboardView: View {
             showsWorkspaceOption: ForecastViewMode.workspace.isAvailable,
             showsOverviewOption: ForecastViewMode.overview.isAvailable,
             isLoggedIn: !account.username.isEmpty,
-            onShowDashboard: { content = .dashboard },
-            onShowGrid: { content = .grid },
-            onShowWorkspace: { content = .workspace },
-            onShowGraph: { content = .graph },
-            onShowOverview: { content = .overview },
+            onShowDashboard: { setContent(.dashboard) },
+            onShowGrid: { setContent(.grid) },
+            onShowWorkspace: { setContent(.workspace) },
+            onShowGraph: { setContent(.graph) },
+            onShowOverview: { setContent(.overview) },
             onShowSettings: { activeSheet = .weatherBackgroundSettings },
             onShowHelp: { activeSheet = .help },
             onShowAbout: { activeSheet = .about },
@@ -149,7 +152,13 @@ public struct ForecastDashboardView: View {
         )
     }
 
+    private func setContent(_ mode: ForecastViewMode) {
+        content = mode
+        analytics.log(.viewModeChanged(mode.rawValue))
+    }
+
     private func logout() {
+        analytics.log(.logoutTapped)
         account.signOut()
         selectedSpotID = "64141"
         viewModel.resetSessionForecastState()
@@ -285,6 +294,7 @@ public struct ForecastDashboardView: View {
                 WindguruSpotPicker(
                     forecastService: forecastService,
                     account: account,
+                    analytics: analytics,
                     onSpotSelected: { spot in
                         guard let spotId = spot.identifier else { return }
                         activeSheet = nil
@@ -391,6 +401,7 @@ public struct ForecastDashboardView: View {
         .appLanguage(appLanguage)
         .appAppearance(appAppearanceMode)
         .id(appLanguage)
+        .environment(\.analytics, analytics)
         .forecastAccessibilityContainer(
             "Ventus forecast dashboard",
             hint: "Choose a location, forecast hour, view mode, or settings.",
@@ -569,12 +580,14 @@ public struct ForecastDashboardView: View {
             gridHourStep: $gridHourStep,
             onSelectLocation: { activeSheet = .spotPicker },
             onToggleModel: { modelID in
+                let isEnabling = !selectedForecastModelIDs.contains(modelID)
                 toggleGridModel(
                     modelID,
                     for: forecastSpotID,
                     coordinate: isCoordinateForecast ? forecast.location?.coordinate : nil,
                     locationName: coordinateLocationName
                 )
+                analytics.log(.modelToggled(modelID: modelID, isEnabled: isEnabling))
             },
             onSelectHour: { hour in
                 selectedHour = hour
@@ -582,6 +595,7 @@ public struct ForecastDashboardView: View {
             onShowMap: { activeSheet = .forecastMap },
             onModelComparisonChanged: { isEnabled in
                 showsDashboardModelComparison = isEnabled
+                analytics.log(.modelComparisonToggled(isEnabled: isEnabled))
             },
             showsModelComparisonInitially: false
         )
@@ -784,15 +798,19 @@ public struct ForecastDashboardView: View {
         persistSelection: Bool = true
     ) async {
         let requestedSpotID = spotId ?? selectedSpotID
+        let isChangingSpot = requestedSpotID != selectedSpotID
         let didLoad = await viewModel.loadForecast(
             spotID: requestedSpotID,
             modelIDs: modelIDs,
-            isChangingSpot: requestedSpotID != selectedSpotID,
+            isChangingSpot: isChangingSpot,
             persistSelection: persistSelection,
             account: account
         )
         if didLoad, persistSelection {
             selectedSpotID = requestedSpotID
+            if isChangingSpot {
+                analytics.log(.spotSelected(id: requestedSpotID))
+            }
         }
         if didLoad, let forecast {
             ForescoopSpotlightIndexer.index(forecast: forecast, savedLocations: savedMapLocations)
@@ -837,7 +855,8 @@ public struct ForecastDashboardView: View {
         initialViewMode: .dashboard,
         initialWeatherBackgroundStyle: .animated,
         previewForecast: mockup.dashboardPreviewForecast,
-        previewModelForecasts: mockup.dashboardPreviewForecasts
+        previewModelForecasts: mockup.dashboardPreviewForecasts,
+        analytics: NoOpAnalyticsLogger()
     )
 }
 #endif

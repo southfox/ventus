@@ -23,8 +23,10 @@ struct ForescoopWatchOnlyApp: App {
 }
 
 class WatchExtensionDelegate: NSObject, WKApplicationDelegate {
+    let analytics = VentusFirebase()
+
     func applicationDidFinishLaunching() {
-        VentusFirebase.configure()
+        analytics.configure()
         ForecastAlertWatchBackgroundRefresh.schedule()
     }
 

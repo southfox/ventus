@@ -11,6 +11,7 @@ import SwiftUI
 public struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
+    @Environment(\.analytics) private var analytics
     @Binding private var weatherBackgroundStyle: WeatherBackgroundStyle
     @Binding private var forecastViewMode: ForecastViewMode
     @Binding private var theme: VentusTheme
@@ -180,18 +181,23 @@ public struct SettingsView: View {
         }
         .onChange(of: weatherBackgroundStyle) { _, style in
             WeatherBackgroundStyleStore.save(style)
+            analytics.log(.weatherBackgroundChanged(style.rawValue))
         }
         .onChange(of: forecastViewMode) { _, mode in
             ForecastViewModeStore.save(mode)
+            analytics.log(.viewModeChanged(mode.rawValue))
         }
         .onChange(of: theme) { _, theme in
             VentusThemeStore.save(theme)
+            analytics.log(.themeChanged(theme.rawValue))
         }
         .onChange(of: appLanguage) { _, appLanguage in
             AppLanguageStore.save(appLanguage)
+            analytics.log(.languageChanged(appLanguage.rawValue))
         }
         .onChange(of: appAppearanceMode) { _, mode in
             AppAppearanceModeStore.save(mode)
+            analytics.log(.appearanceModeChanged(mode.rawValue))
         }
         .onChange(of: notificationsEnabled) { _, isEnabled in
             ForecastSevereWeatherNotificationsStore.save(isEnabled)
@@ -206,6 +212,7 @@ public struct SettingsView: View {
             hint: "Choose appearance, forecast layout, and weather animation preferences.",
             identifier: "settings"
         )
+        .trackScreenView("Settings")
     }
 }
 

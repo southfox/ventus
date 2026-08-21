@@ -21,6 +21,9 @@ public struct ReadForecastInsightIntent: AppIntent {
     public init() {}
 
     public func perform() async throws -> some IntentResult & ProvidesDialog {
+        let analytics = VentusFirebase()
+        analytics.configure()
+        analytics.log(.siriInsightRequested)
         let spotID = SelectedWindguruSpotStore.load()
         let username = WindguruCredentialStore.activeUsername()
         let isProUser = WindguruCredentialStore.activeProUser()

@@ -13,14 +13,15 @@ import Forescoop
 @main
 struct VisionForescoopApp: App {
     @Environment(\.scenePhase) private var scenePhase
+    private let analytics = VentusFirebase()
 
     init() {
-        VentusFirebase.configure()
+        analytics.configure()
     }
 
     var body: some Scene {
         WindowGroup {
-            VisionForecastView()
+            VisionForecastView(analytics: analytics)
         }
         .defaultSize(width: 1_280, height: 900)
         .backgroundTask(.appRefresh(ForecastAlertBackgroundRefresh.taskIdentifier)) {
