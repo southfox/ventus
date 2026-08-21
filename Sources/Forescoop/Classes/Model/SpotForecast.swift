@@ -147,6 +147,47 @@ public extension SpotForecast {
         return (low, high)
     }
 
+    /// Inserts a sunrise/sunset marker between two chronologically adjacent
+    /// items whenever the transition falls between them. There's no
+    /// forecast value exactly at sunrise/sunset, so its temperature is the
+    /// average of the two neighboring items.
+    func insertingDaylightEvents<Item>(
+        into items: [Item],
+        date: (Item) -> Date,
+        temperatureCelsius: (Item) -> Double,
+        make: (_ label: String, _ symbolName: String, _ temperatureCelsius: Double) -> Item
+    ) -> [Item] {
+        guard items.count > 1 else { return items }
+        var result = [Item]()
+        result.reserveCapacity(items.count + 2)
+        for index in items.indices {
+            let item = items[index]
+            result.append(item)
+            guard index < items.count - 1 else { continue }
+            let next = items[index + 1]
+            let start = date(item)
+            let end = date(next)
+            guard start < end else { continue }
+            for event in daylightEvents(from: start, until: end) {
+                let label = event.date.formatted(.dateTime.hour(.defaultDigits(amPM: .abbreviated)).minute())
+                let averageCelsius = (temperatureCelsius(item) + temperatureCelsius(next)) / 2
+                result.append(make(label, event.symbolName, averageCelsius))
+            }
+        }
+        return result
+    }
+
+    private func daylightEvents(from start: Date, until end: Date) -> [(date: Date, symbolName: String)] {
+        var events = [(date: Date, symbolName: String)]()
+        if let sunrise = sunriseDate(on: start), start <= sunrise, sunrise < end {
+            events.append((sunrise, "sunrise.fill"))
+        }
+        if let sunset = sunsetDate(on: start), start <= sunset, sunset < end {
+            events.append((sunset, "sunset.fill"))
+        }
+        return events.sorted { $0.date < $1.date }
+    }
+
     var numberOfForecasts: Int {
         forecasts.count
     }

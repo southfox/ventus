@@ -193,6 +193,16 @@ public extension SpotInfo {
         if start <= sunset && sunset < end { return .sunset }
         return nil
     }
+
+    /// Sunrise, as a real `Date`, on the same calendar day as `date`.
+    func sunriseDate(on date: Date) -> Date? {
+        daylightDate(from: sunrise, on: date)
+    }
+
+    /// Sunset, as a real `Date`, on the same calendar day as `date`.
+    func sunsetDate(on date: Date) -> Date? {
+        daylightDate(from: sunset, on: date)
+    }
     
     var countryIdentifier: Int {
         id_country

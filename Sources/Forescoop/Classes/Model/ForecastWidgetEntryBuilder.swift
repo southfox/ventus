@@ -118,21 +118,33 @@ public enum ForecastWidgetEntryBuilder {
 
     private static func hourlyForecast(for forecast: SpotForecast, currentHour: String?, unit: TemperatureUnit, environment: AppEnvironment) -> [ForecastWidgetHour] {
         let currentOffset = Int(currentHour ?? "") ?? 0
-        return forecast.steppedForecastHours(anchorHour: currentHour, step: environment.gridHourStepStore.load())
+        let items = forecast.steppedForecastHours(anchorHour: currentHour, step: environment.gridHourStepStore.load())
             .compactMap { hour -> (hour: String, offset: Int)? in Int(hour).map { (hour, $0) } }
             .filter { $0.offset >= currentOffset }
             .sorted { $0.offset < $1.offset }
             .prefix(10)
-            .map { item in
+            .map { item -> (date: Date, celsius: Double, hour: ForecastWidgetHour) in
                 let date = forecast.forecastDate(hour: item.hour) ?? .now
                 let label = item.hour == currentHour ? "now".localized : date.formatted(.dateTime.hour(.defaultDigits(amPM: .abbreviated)))
-                let temperature = forecast.forecast?.temperatureReal(hh: item.hour) ?? forecast.forecast?.temperature(hh: item.hour) ?? 0
-                return ForecastWidgetHour(
-                    label: label,
-                    symbolName: forecast.weatherSymbolName(hour: item.hour),
-                    temperature: temperatureText(temperature, unit: unit)
+                let celsius = forecast.forecast?.temperatureReal(hh: item.hour) ?? forecast.forecast?.temperature(hh: item.hour) ?? 0
+                return (
+                    date: date,
+                    celsius: celsius,
+                    hour: ForecastWidgetHour(
+                        label: label,
+                        symbolName: forecast.weatherSymbolName(hour: item.hour),
+                        temperature: temperatureText(celsius, unit: unit)
+                    )
                 )
             }
+        return forecast.insertingDaylightEvents(
+            into: items,
+            date: { $0.date },
+            temperatureCelsius: { $0.celsius },
+            make: { label, symbolName, celsius in
+                (date: .distantPast, celsius: celsius, hour: ForecastWidgetHour(label: label, symbolName: symbolName, temperature: temperatureText(celsius, unit: unit)))
+            }
+        ).map(\.hour)
     }
 
     private static func dailyForecast(for forecast: SpotForecast, unit: TemperatureUnit) -> [ForecastWidgetDay] {
