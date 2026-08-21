@@ -52,7 +52,7 @@ public struct ForecastGraphView: View {
     }
 
     private func points(for source: SpotForecast) -> [ForecastGraphPoint] {
-        source.availableForecastHours.compactMap { hour in
+        let realPoints = source.availableForecastHours.compactMap { hour -> ForecastGraphPoint? in
             guard let offset = Int(hour) else { return nil }
                 let date = source.forecastDate(hour: hour)
                     ?? Calendar.current.date(byAdding: .hour, value: offset, to: Calendar.current.startOfDay(for: .now))
@@ -75,6 +75,36 @@ public struct ForecastGraphView: View {
                     wave: wave
                 )
             }
+        return source.insertingDaylightEvents(
+            into: realPoints,
+            date: { $0.date },
+            make: { previous, next, eventDate, symbolName in
+                ForecastGraphPoint(
+                    id: "sun:\(symbolName):\(previous.id):\(next.id)",
+                    date: eventDate,
+                    wind: average(previous.wind, next.wind),
+                    gust: average(previous.gust, next.gust),
+                    direction: averageOptional(previous.direction, next.direction),
+                    cloudCover: average(previous.cloudCover, next.cloudCover),
+                    humidity: average(previous.humidity, next.humidity),
+                    pressure: average(previous.pressure, next.pressure),
+                    temperature: average(previous.temperature, next.temperature),
+                    precipitation: average(previous.precipitation, next.precipitation),
+                    wave: averageOptional(previous.wave, next.wave)
+                )
+            }
+        )
+    }
+
+    private func average(_ a: Double, _ b: Double) -> Double { (a + b) / 2 }
+
+    private func averageOptional(_ a: Double?, _ b: Double?) -> Double? {
+        switch (a, b) {
+        case let (a?, b?): (a + b) / 2
+        case let (a?, nil): a
+        case let (nil, b?): b
+        case (nil, nil): nil
+        }
     }
 
     private var comparisonSeries: [ForecastGraphSeries] {

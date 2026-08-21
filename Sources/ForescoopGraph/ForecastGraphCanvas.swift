@@ -31,12 +31,6 @@ public struct ForecastGraphCanvas: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-//            HStack(spacing: 12) {
-//                Label("Wind", systemImage: "chart.line.uptrend.xyaxis")
-//                Label("Gusts", systemImage: "wind")
-//                Label("Cloud · humidity · pressure · temperature · rain", systemImage: "chart.bar.xaxis")
-//            }
-//            .font(.caption).foregroundStyle(.secondary)
             legend
             if !comparisonSeries.isEmpty {
                 HStack(spacing: 10) {
@@ -55,7 +49,8 @@ public struct ForecastGraphCanvas: View {
 #if !os(tvOS)
                 .simultaneousGesture(SpatialTapGesture().onEnded { value in
                     let progress = min(max((value.location.x - 42) / (width - 58), 0), 1)
-                    selectedID = points[Int((progress * CGFloat(points.count - 1)).rounded())].id
+                    let tappedID = points[Int((progress * CGFloat(points.count - 1)).rounded())].id
+                    selectedID = realID(for: tappedID)
                 })
 #endif
             }
@@ -113,6 +108,16 @@ public struct ForecastGraphCanvas: View {
             var line = Path(); line.move(to: CGPoint(x: x(index), y: wind.minY)); line.addLine(to: CGPoint(x: x(index), y: bottomY))
             context.stroke(line, with: .color(.secondary.opacity(0.2)), style: StrokeStyle(lineWidth: 1, dash: [3, 3]))
             context.draw(Text(axisLabel(for: points[index].date)).font(.caption2).foregroundStyle(.secondary), at: CGPoint(x: x(index), y: 12))
+        }
+
+        for index in points.indices {
+            guard let symbolName = sunSymbolName(for: points[index].id) else { continue }
+            var marker = Path(); marker.move(to: CGPoint(x: x(index), y: wind.minY)); marker.addLine(to: CGPoint(x: x(index), y: bottomY))
+            context.stroke(marker, with: .color(.orange.opacity(0.55)), style: StrokeStyle(lineWidth: 1, dash: [2, 2]))
+            context.draw(
+                Text(Image(systemName: symbolName)).font(.caption).foregroundStyle(.orange),
+                at: CGPoint(x: x(index), y: wind.minY - 8)
+            )
         }
 
         var gustArea = smoothPath(points.map(\.gust), x: x, y: windY)
@@ -196,5 +201,17 @@ public struct ForecastGraphCanvas: View {
 
     private func comparisonColor(for index: Int) -> Color {
         [.purple, .orange, .pink, .teal, .indigo][index % 5]
+    }
+
+    private func sunSymbolName(for id: String) -> String? {
+        guard id.hasPrefix("sun:") else { return nil }
+        let parts = id.split(separator: ":", omittingEmptySubsequences: false).map(String.init)
+        return parts.count == 4 ? parts[1] : nil
+    }
+
+    private func realID(for id: String) -> String {
+        guard id.hasPrefix("sun:") else { return id }
+        let parts = id.split(separator: ":", omittingEmptySubsequences: false).map(String.init)
+        return parts.count == 4 ? parts[2] : id
     }
 }

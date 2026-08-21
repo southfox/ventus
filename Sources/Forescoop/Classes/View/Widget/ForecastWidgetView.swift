@@ -155,9 +155,16 @@ public struct ForecastWidgetView: View {
 
     private var smallWidgetContent: some View {
         VStack(alignment: .leading, spacing: 4) {
+#if !os(watchOS)
             ForecastLocationHeader(locationName: entry.locationName)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
+#else
+            Text(entry.locationName)
+                .font(.headline)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+#endif
 
             HStack(spacing: 8) {
                 Image(systemName: entry.symbolName)
@@ -436,6 +443,7 @@ public struct ForecastWidgetView: View {
                 .font(.body)
                 .foregroundStyle(.secondary)
                 .frame(width: 16, alignment: .center)
+#if !os(watchOS)
             if displayedFamily != .systemSmall {
                 Text(title)
                     .font(.caption2)
@@ -444,6 +452,7 @@ public struct ForecastWidgetView: View {
                     .minimumScaleFactor(0.7)
                     .layoutPriority(1)
             }
+#endif
             Text(value)
                 .font(.subheadline.weight(.semibold))
                 .lineLimit(1)

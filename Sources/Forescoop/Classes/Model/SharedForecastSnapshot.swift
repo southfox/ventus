@@ -206,9 +206,10 @@ public extension SharedForecastSnapshot {
         return forecast.insertingDaylightEvents(
             into: items,
             date: { $0.date },
-            temperatureCelsius: { $0.celsius },
-            make: { label, symbolName, celsius in
-                (date: .distantPast, celsius: celsius, hour: Hour(label: label, symbolName: symbolName, temperature: temperatureText(celsius, unit: unit)))
+            make: { previous, next, eventDate, symbolName in
+                let celsius = (previous.celsius + next.celsius) / 2
+                let label = eventDate.formatted(.dateTime.hour(.defaultDigits(amPM: .abbreviated)).minute())
+                return (date: eventDate, celsius: celsius, hour: Hour(label: label, symbolName: symbolName, temperature: temperatureText(celsius, unit: unit)))
             }
         ).map(\.hour)
     }

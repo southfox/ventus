@@ -140,6 +140,16 @@ public struct WindguruForecastGridView: View {
         forecast.steppedForecastHours(anchorHour: forecast.currentForecastHour, step: gridHourStep)
     }
 
+    private var displayedHours: [String] {
+        forecast.insertingDaylightEvents(
+            into: hours,
+            date: { forecast.forecastDate(hour: $0) ?? .distantPast },
+            make: { previous, next, _, symbolName in
+                SunEventKey(symbolName: symbolName, previousHour: previous, nextHour: next).encoded
+            }
+        )
+    }
+
     private var weather: Forecast? { forecast.forecast }
     private var hasWaveData: Bool {
         hours.contains { weather?.waveHeight(hh: $0) != nil }
@@ -196,7 +206,7 @@ public struct WindguruForecastGridView: View {
                 ScrollView(.horizontal) {
                     LazyVStack(alignment: .leading, spacing: 0) {
                         LazyHStack(alignment: .top, spacing: 0) {
-                            ForEach(hours, id: \.self) { hour in
+                            ForEach(displayedHours, id: \.self) { hour in
                                 forecastColumn(for: hour, includesHeader: includesHeader)
                                     .id(hour)
                             }
@@ -310,17 +320,17 @@ public struct WindguruForecastGridView: View {
 
     private var timeHeader: some View {
         ForecastGridHourHeader(
-            hours: hours,
+            hours: displayedHours,
             columnWidth: columnWidth,
             columnSpacing: 0,
             height: gridHeaderHeight,
             day: day(for:),
             time: time(for:),
-            weatherSymbols: forecast.weatherSymbolNames(hour:),
+            weatherSymbols: weatherSymbols(for:),
             daylightSymbol: daylightSymbol(for:),
             daylightOverlay: daylightColumnOverlay(for:),
             selectedHour: viewModel.selectedHour,
-            onSelectHour: onSelectHour
+            onSelectHour: selectHour
         )
     }
 
@@ -351,6 +361,23 @@ public struct WindguruForecastGridView: View {
     private enum GridColumn {
         case labels
         case value(String)
+    }
+
+    private struct SunEventKey {
+        let symbolName: String
+        let previousHour: String
+        let nextHour: String
+
+        private static let prefix = "sun:"
+
+        var encoded: String { "\(Self.prefix)\(symbolName):\(previousHour):\(nextHour)" }
+
+        static func decode(_ key: String) -> SunEventKey? {
+            guard key.hasPrefix(prefix) else { return nil }
+            let parts = key.dropFirst(prefix.count).split(separator: ":", omittingEmptySubsequences: false).map(String.init)
+            guard parts.count == 3 else { return nil }
+            return SunEventKey(symbolName: parts[0], previousHour: parts[1], nextHour: parts[2])
+        }
     }
 
     private enum ModelComparisonMode {
@@ -552,11 +579,11 @@ public struct WindguruForecastGridView: View {
                     height: gridHeaderHeight,
                     day: day(for:),
                     time: time(for:),
-                    weatherSymbols: forecast.weatherSymbolNames(hour:),
+                    weatherSymbols: weatherSymbols(for:),
                     daylightSymbol: daylightSymbol(for:),
                     daylightOverlay: daylightColumnOverlay(for:),
                     isSelected: viewModel.selectedHour == hour,
-                    onSelect: onSelectHour
+                    onSelect: selectHour
                 )
             }
             hourColumn(for: hour)
@@ -577,7 +604,7 @@ public struct WindguruForecastGridView: View {
     ) -> some View {
         let cell = values(hour)
         return Button {
-            onSelectHour(hour)
+            selectHour(hour)
         } label: {
             Text(cell.text)
                 .font(cell.isDirection ? .body : (cell.isSnow ? .caption.bold() : .caption))
@@ -685,47 +712,69 @@ public struct WindguruForecastGridView: View {
         }
     }
 
+    private func displayDate(for hour: String) -> Date? {
+        if let event = SunEventKey.decode(hour) {
+            guard let start = forecast.forecastDate(hour: event.previousHour) else { return nil }
+            return event.symbolName == "sunrise.fill" ? forecast.sunriseDate(on: start) : forecast.sunsetDate(on: start)
+        }
+        return forecast.forecastDate(hour: hour)
+    }
+
     private func day(for hour: String) -> String {
-        guard let date = forecast.forecastDate(hour: hour) else { return "" }
+        guard let date = displayDate(for: hour) else { return "" }
         return date.formatted(.dateTime.weekday(.abbreviated).day())
     }
 
     private func time(for hour: String) -> String {
-        guard let date = forecast.forecastDate(hour: hour) else { return hour }
+        guard let date = displayDate(for: hour) else { return hour }
         let formatter = DateFormatter()
         formatter.locale = .autoupdatingCurrent
-        formatter.setLocalizedDateFormatFromTemplate("j")
+        // Sunrise/sunset rarely land on the hour, so those columns need
+        // minute precision ("jm") — real forecast hours are always on the
+        // hour, so "j" alone is enough for them.
+        formatter.setLocalizedDateFormatFromTemplate(SunEventKey.decode(hour) != nil ? "jm" : "j")
         let timeString = formatter.string(from: date)
         return formatter.dateFormat.contains("a") ? timeString : "\(timeString)h"
     }
 
     private func daylightColumnOverlay(for hour: String) -> Color {
-        guard let date = forecast.forecastDate(hour: hour) else { return .clear }
+        guard SunEventKey.decode(hour) == nil, let date = forecast.forecastDate(hour: hour) else { return .clear }
         switch forecast.daylightPhase(at: date) {
         case .night:
-            return .black.opacity(theme.usesMaterial ? 0.42 : 0.50)
+            return .black.opacity(theme.usesMaterial ? 0.22 : 0.30)
         case .daylight:
             return .clear
         }
     }
 
     private func daylightSymbol(for hour: String) -> String? {
-        guard let index = hours.firstIndex(of: hour),
-              let start = forecast.forecastDate(hour: hour) else { return nil }
-        let end = hours.indices.contains(index + 1)
-            ? forecast.forecastDate(hour: hours[index + 1]) ?? start.addingTimeInterval(3_600)
-            : start.addingTimeInterval(3_600)
+        SunEventKey.decode(hour)?.symbolName
+    }
 
-        switch forecast.daylightTransition(from: start, until: end) {
-        case .sunrise: return "sunrise.fill"
-        case .sunset: return "sunset.fill"
-        case nil: return nil
+    private func weatherSymbols(for hour: String) -> [String] {
+        guard SunEventKey.decode(hour) == nil else { return [] }
+        return forecast.weatherSymbolNames(hour: hour)
+    }
+
+    private func selectHour(_ hour: String) {
+        if let event = SunEventKey.decode(hour) {
+            onSelectHour(event.previousHour)
+        } else {
+            onSelectHour(hour)
         }
     }
 
+    private func averagedRaw(_ hour: String, source: SpotForecast?, raw: (String) -> Double?) -> Double? {
+        if let event = SunEventKey.decode(hour) {
+            guard let a = raw(hh(event.previousHour, source: source)), let b = raw(hh(event.nextHour, source: source)) else { return nil }
+            return (a + b) / 2
+        }
+        return raw(hh(hour, source: source))
+    }
+
     private func windSpeed(_ hour: String, source: SpotForecast? = nil) -> GridCell {
-        let hour = hh(hour, source: source)
-        guard let value = weather(for: source)?.windSpeed(hh: hour), let converted = Knots(value).value(in: viewModel.windSpeedUnit) else { return .empty }
+        guard let value = averagedRaw(hour, source: source, raw: { weather(for: source)?.windSpeed(hh: $0) }),
+              let converted = Knots(value).value(in: viewModel.windSpeedUnit) else { return .empty }
         return GridCell(value: converted, text: number(converted), colorValue: value * 1.852)
     }
 
@@ -736,73 +785,75 @@ public struct WindguruForecastGridView: View {
     }
 
     private func windDirection(_ hour: String, source: SpotForecast? = nil) -> GridCell {
-        let hour = hh(hour, source: source)
-        guard let direction = weather(for: source)?.windDirection(hh: hour) else { return .empty }
+        guard let direction = averagedRaw(hour, source: source, raw: { weather(for: source)?.windDirection(hh: $0) }) else { return .empty }
         return GridCell(value: direction, text: windDirectionText(direction), isDirection: windDirectionDisplayMode == .arrow)
     }
 
     private func temperature(_ hour: String, source: SpotForecast? = nil) -> GridCell {
-        let hour = hh(hour, source: source)
-        guard let value = weather(for: source)?.temperature(hh: hour) else { return .empty }
+        guard let value = averagedRaw(hour, source: source, raw: { weather(for: source)?.temperature(hh: $0) }) else { return .empty }
         let converted = Temperature(celsius: value).value(in: viewModel.temperatureUnit)
         return GridCell(value: converted, text: number(converted), colorValue: value)
     }
 
     private func temperatureReal(_ hour: String, source: SpotForecast? = nil) -> GridCell {
-        let hour = hh(hour, source: source)
-        guard let value = weather(for: source)?.temperatureReal(hh: hour) else { return .empty }
+        guard let value = averagedRaw(hour, source: source, raw: { weather(for: source)?.temperatureReal(hh: $0) }) else { return .empty }
         let converted = Temperature(celsius: value).value(in: viewModel.temperatureUnit)
         return GridCell(value: converted, text: number(converted), colorValue: value)
     }
 
     private func windChill(_ hour: String, source: SpotForecast? = nil) -> GridCell {
-        let hour = hh(hour, source: source)
-        guard let value = weather(for: source)?.windChill(hh: hour) else { return .empty }
+        guard let value = averagedRaw(hour, source: source, raw: { weather(for: source)?.windChill(hh: $0) }) else { return .empty }
         let converted = Temperature(celsius: value).value(in: viewModel.temperatureUnit)
         return GridCell(value: converted, text: number(converted), colorValue: value)
     }
 
     private func freezingLevel(_ hour: String, source: SpotForecast? = nil) -> GridCell {
-        let hour = hh(hour, source: source)
-        guard let value = weather(for: source)?.freezingLevelHeightInMeters(hh: hour) else { return .empty }
+        guard let value = averagedRaw(hour, source: source, raw: { weather(for: source)?.freezingLevelHeightInMeters(hh: $0) }) else { return .empty }
         let converted = FreezingLevel(meters: value).value(in: viewModel.freezingLevelUnit)
         return GridCell(value: converted, text: number(converted, precision: 0))
     }
 
     private func cloudCover(_ hour: String, source: SpotForecast? = nil) -> GridCell {
-        let hour = hh(hour, source: source)
-        guard let value = weather(for: source)?.cloudCoverTotal(hh: hour) else { return .empty }
-        return GridCell(value: Double(value), text: "\(value)")
+        guard let value = averagedRaw(hour, source: source, raw: { weather(for: source)?.cloudCoverTotal(hh: $0).map(Double.init) }) else { return .empty }
+        return GridCell(value: value, text: "\(Int(value.rounded()))")
     }
 
     private func cloudCoverHigh(_ hour: String, source: SpotForecast? = nil) -> GridCell {
-        let hour = hh(hour, source: source)
-        return cloudCover(weather(for: source)?.cloudCoverHigh(hh: hour))
+        guard let value = averagedRaw(hour, source: source, raw: { weather(for: source)?.cloudCoverHigh(hh: $0).map(Double.init) }) else { return .empty }
+        return GridCell(value: value, text: "\(Int(value.rounded()))")
     }
 
     private func cloudCoverMid(_ hour: String, source: SpotForecast? = nil) -> GridCell {
-        let hour = hh(hour, source: source)
-        return cloudCover(weather(for: source)?.cloudCoverMid(hh: hour))
+        guard let value = averagedRaw(hour, source: source, raw: { weather(for: source)?.cloudCoverMid(hh: $0).map(Double.init) }) else { return .empty }
+        return GridCell(value: value, text: "\(Int(value.rounded()))")
     }
 
     private func cloudCoverLow(_ hour: String, source: SpotForecast? = nil) -> GridCell {
-        let hour = hh(hour, source: source)
-        return cloudCover(weather(for: source)?.cloudCoverLow(hh: hour))
-    }
-
-    private func cloudCover(_ value: Int?) -> GridCell {
-        guard let value else { return .empty }
-        return GridCell(value: Double(value), text: "\(value)")
+        guard let value = averagedRaw(hour, source: source, raw: { weather(for: source)?.cloudCoverLow(hh: $0).map(Double.init) }) else { return .empty }
+        return GridCell(value: value, text: "\(Int(value.rounded()))")
     }
 
     private func precipitation(_ hour: String, source: SpotForecast? = nil) -> GridCell {
-        let hour = hh(hour, source: source)
+        if let event = SunEventKey.decode(hour) {
+            let a = precipitation(event.previousHour, source: source)
+            let b = precipitation(event.nextHour, source: source)
+            guard let av = a.value, let bv = b.value else { return .empty }
+            let averaged = (av + bv) / 2
+            return GridCell(
+                value: averaged,
+                text: number(averaged),
+                colorValue: ((a.colorValue ?? av) + (b.colorValue ?? bv)) / 2,
+                isSnow: a.isSnow || b.isSnow,
+                usesAccumulatedPrecipitation: a.usesAccumulatedPrecipitation || b.usesAccumulatedPrecipitation
+            )
+        }
+        let resolvedHour = hh(hour, source: source)
         let sourceWeather = weather(for: source)
-        let accumulatedPrecipitation = sourceWeather?.precipitation(hh: hour)
-        let millimeters = accumulatedPrecipitation ?? sourceWeather?.precipitation1(hh: hour)
+        let accumulatedPrecipitation = sourceWeather?.precipitation(hh: resolvedHour)
+        let millimeters = accumulatedPrecipitation ?? sourceWeather?.precipitation1(hh: resolvedHour)
         guard let millimeters else { return .empty }
         let converted = Precipitation(millimeters: millimeters).value(in: viewModel.precipitationUnit)
-        let temperature = sourceWeather?.temperatureReal(hh: hour) ?? sourceWeather?.temperature(hh: hour)
+        let temperature = sourceWeather?.temperatureReal(hh: resolvedHour) ?? sourceWeather?.temperature(hh: resolvedHour)
         return GridCell(
             value: converted,
             text: number(converted),
@@ -813,34 +864,29 @@ public struct WindguruForecastGridView: View {
     }
 
     private func pressure(_ hour: String, source: SpotForecast? = nil) -> GridCell {
-        let hour = hh(hour, source: source)
-        guard let value = weather(for: source)?.seaLevelPressure(hh: hour) else { return .empty }
+        guard let value = averagedRaw(hour, source: source, raw: { weather(for: source)?.seaLevelPressure(hh: $0) }) else { return .empty }
         let converted = AtmosphericPressure(hectopascals: value).value(in: viewModel.pressureUnit)
         return GridCell(value: converted, text: number(converted, precision: 0))
     }
 
     private func humidity(_ hour: String, source: SpotForecast? = nil) -> GridCell {
-        let hour = hh(hour, source: source)
-        guard let value = weather(for: source)?.relativeHumidity(hh: hour) else { return .empty }
-        return GridCell(value: Double(value), text: "\(value)")
+        guard let value = averagedRaw(hour, source: source, raw: { weather(for: source)?.relativeHumidity(hh: $0).map(Double.init) }) else { return .empty }
+        return GridCell(value: value, text: "\(Int(value.rounded()))")
     }
 
     private func waveHeight(_ hour: String, source: SpotForecast? = nil) -> GridCell {
-        let hour = hh(hour, source: source)
-        guard let value = weather(for: source)?.waveHeight(hh: hour) else { return .empty }
+        guard let value = averagedRaw(hour, source: source, raw: { weather(for: source)?.waveHeight(hh: $0) }) else { return .empty }
         let converted = WaveHeight(meters: value).value(in: viewModel.waveHeightUnit)
         return GridCell(value: converted, text: number(converted))
     }
 
     private func wavePeriod(_ hour: String, source: SpotForecast? = nil) -> GridCell {
-        let hour = hh(hour, source: source)
-        guard let value = weather(for: source)?.wavePeriod(hh: hour) else { return .empty }
+        guard let value = averagedRaw(hour, source: source, raw: { weather(for: source)?.wavePeriod(hh: $0) }) else { return .empty }
         return GridCell(value: value, text: number(value))
     }
 
     private func waveDirection(_ hour: String, source: SpotForecast? = nil) -> GridCell {
-        let hour = hh(hour, source: source)
-        guard let value = weather(for: source)?.waveDirection(hh: hour) else { return .empty }
+        guard let value = averagedRaw(hour, source: source, raw: { weather(for: source)?.waveDirection(hh: $0) }) else { return .empty }
         return GridCell(value: value, text: arrow(value), isDirection: true)
     }
 

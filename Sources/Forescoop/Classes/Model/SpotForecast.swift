@@ -147,15 +147,10 @@ public extension SpotForecast {
         return (low, high)
     }
 
-    /// Inserts a sunrise/sunset marker between two chronologically adjacent
-    /// items whenever the transition falls between them. There's no
-    /// forecast value exactly at sunrise/sunset, so its temperature is the
-    /// average of the two neighboring items.
     func insertingDaylightEvents<Item>(
         into items: [Item],
         date: (Item) -> Date,
-        temperatureCelsius: (Item) -> Double,
-        make: (_ label: String, _ symbolName: String, _ temperatureCelsius: Double) -> Item
+        make: (_ previous: Item, _ next: Item, _ eventDate: Date, _ symbolName: String) -> Item
     ) -> [Item] {
         guard items.count > 1 else { return items }
         var result = [Item]()
@@ -169,9 +164,7 @@ public extension SpotForecast {
             let end = date(next)
             guard start < end else { continue }
             for event in daylightEvents(from: start, until: end) {
-                let label = event.date.formatted(.dateTime.hour(.defaultDigits(amPM: .abbreviated)).minute())
-                let averageCelsius = (temperatureCelsius(item) + temperatureCelsius(next)) / 2
-                result.append(make(label, event.symbolName, averageCelsius))
+                result.append(make(item, next, event.date, event.symbolName))
             }
         }
         return result
