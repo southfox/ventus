@@ -64,12 +64,15 @@ struct ForecastGridHourCell: View {
                 Text(day(hour)).font(.caption2)
                 Text(time(hour)).font(.caption.bold())
                 HStack(spacing: 2) {
-                    if let daylightSymbol = daylightSymbol(hour), !hasPrecipitation(hour) {
+                    if let daylightSymbol = daylightSymbol(hour) {
                         Image(systemName: daylightSymbol)
+                            .font(.title3)
                             .foregroundStyle(.orange)
                     } else {
+                        let n = weatherSymbols(hour).count
                         ForEach(weatherSymbols(hour).prefix(3), id: \.self) { symbol in
                             Image(systemName: symbol)
+                                .font(n == 1 ? .title3 : .caption)
                         }
                     }
                 }
