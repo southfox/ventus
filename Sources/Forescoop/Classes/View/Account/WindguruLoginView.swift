@@ -17,6 +17,7 @@ public struct WindguruLoginView: View {
     let onProfileLoaded: (User) -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.appEnvironment) private var environment
     @State private var enteredUsername = ""
     @State private var password = ""
     @State private var showsPassword = false
@@ -109,7 +110,7 @@ public struct WindguruLoginView: View {
             }
             .onAppear {
                 enteredUsername = username
-                password = WindguruAccount(username: username).password ?? ""
+                password = environment.windguruCredentialStore.password(for: username) ?? ""
                 if !enteredUsername.isEmpty, !password.isEmpty {
                     Task { await loadProfile() }
                 }
@@ -128,7 +129,7 @@ public struct WindguruLoginView: View {
             guard let user = try await loginHandler(enteredUsername, password) else {
                 throw LoginError.loginFailed
             }
-            try WindguruCredentialStore.save(password: password, for: enteredUsername)
+            try environment.windguruCredentialStore.save(password: password, for: enteredUsername)
             loggedInUser = user
             onProfileLoaded(user)
             onLoggedIn(enteredUsername, user.isPro)
@@ -154,7 +155,7 @@ public struct WindguruLoginView: View {
     }
 
     private func signOut() {
-        WindguruCredentialStore.removePassword(for: enteredUsername)
+        environment.windguruCredentialStore.removePassword(for: enteredUsername)
         loggedInUser = nil
         password = ""
         onLoggedIn("", false)
@@ -194,7 +195,7 @@ public struct WindguruLoginView: View {
 
         enteredUsername = previewUsername
         password = previewPassword
-        try? WindguruCredentialStore.save(password: previewPassword, for: previewUsername)
+        try? environment.windguruCredentialStore.save(password: previewPassword, for: previewUsername)
         loggedInUser = user
         onProfileLoaded(user)
         onLoggedIn(previewUsername, isProUser)

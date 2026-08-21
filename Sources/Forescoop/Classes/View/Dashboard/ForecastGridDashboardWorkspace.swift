@@ -12,19 +12,22 @@ import SwiftUI
 struct ForecastGridDashboardWorkspace<GridContent: View, DashboardContent: View>: View {
     private let gridContent: () -> GridContent
     private let dashboardContent: () -> DashboardContent
+    private let workspaceSplitStore: ForecastWorkspaceSplitStoring
     @State private var wideSplitFraction: CGFloat
     @State private var tallSplitFraction: CGFloat
     @GestureState private var splitDragTranslation: CGSize = .zero
     @Environment(\.displayScale) private var displayScale
 
     init(
+        environment: AppEnvironment,
         @ViewBuilder grid: @escaping () -> GridContent,
         @ViewBuilder dashboard: @escaping () -> DashboardContent
     ) {
         gridContent = grid
         dashboardContent = dashboard
-        _wideSplitFraction = State(initialValue: ForecastWorkspaceSplitStore.load(isWide: true))
-        _tallSplitFraction = State(initialValue: ForecastWorkspaceSplitStore.load(isWide: false))
+        workspaceSplitStore = environment.forecastWorkspaceSplitStore
+        _wideSplitFraction = State(initialValue: environment.forecastWorkspaceSplitStore.load(isWide: true))
+        _tallSplitFraction = State(initialValue: environment.forecastWorkspaceSplitStore.load(isWide: false))
     }
 
     var body: some View {
@@ -130,13 +133,13 @@ struct ForecastGridDashboardWorkspace<GridContent: View, DashboardContent: View>
         } else {
             tallSplitFraction = fraction
         }
-        ForecastWorkspaceSplitStore.save(fraction, isWide: isWide)
+        workspaceSplitStore.save(fraction, isWide: isWide)
     }
 }
 
 #if DEBUG
 #Preview("Forecast grid and dashboard workspace") {
-    ForecastGridDashboardWorkspace {
+    ForecastGridDashboardWorkspace(environment: .preview) {
         ContentUnavailableView("Forecast grid", systemImage: "tablecells")
     } dashboard: {
         ContentUnavailableView("Forecast dashboard", systemImage: "rectangle.3.group")

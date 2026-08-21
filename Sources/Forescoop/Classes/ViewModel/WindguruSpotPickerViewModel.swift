@@ -22,7 +22,7 @@ final class WindguruSpotPickerViewModel: ObservableObject {
     @Published var favoritesErrorMessage: String?
     @Published var favoriteIDsBeingRemoved = Set<String>()
     @Published var favoriteIDsBeingAdded = Set<String>()
-    @Published var savedLocations = SavedMapLocationStore.load()
+    @Published var savedLocations: [SavedMapLocation]
 
     private let searchRequest: @MainActor (String) async throws -> SpotResult?
     private let spotInfoRequest: @MainActor (String) async throws -> SpotInfo?
@@ -30,14 +30,17 @@ final class WindguruSpotPickerViewModel: ObservableObject {
     private let removeFavoriteRequest: @MainActor (String, String, String) async throws -> WGSuccess?
     private let addFavoriteRequest: @MainActor (String, String, String) async throws -> WGSuccess?
     private let analytics: AnalyticsLogging
+    private let savedMapLocationStore: SavedMapLocationStoring
 
-    init(forecastService: ForecastWindguruProtocol, analytics: AnalyticsLogging) {
+    init(forecastService: ForecastWindguruProtocol, environment: AppEnvironment) {
         searchRequest = { try await forecastService.searchSpots(byLocation: $0) }
         spotInfoRequest = { try await forecastService.spotInfo(bySpotId: $0) }
         favoritesRequest = { try await forecastService.favoriteSpots(withUsername: $0, password: $1) }
         removeFavoriteRequest = { try await forecastService.removeFavoriteSpot(withSpotId: $0, username: $1, password: $2) }
         addFavoriteRequest = { try await forecastService.addFavoriteSpot(withSpotId: $0, username: $1, password: $2) }
-        self.analytics = analytics
+        self.analytics = environment.analytics
+        self.savedMapLocationStore = environment.savedMapLocationStore
+        savedLocations = environment.savedMapLocationStore.load()
     }
 
     func searchSpots(_ query: String) async throws -> SpotResult? { try await searchRequest(query) }
@@ -53,8 +56,8 @@ final class WindguruSpotPickerViewModel: ObservableObject {
     }
 
     func saveLocations() {
-        SavedMapLocationStore.save(savedLocations)
-        savedLocations = SavedMapLocationStore.load()
+        savedMapLocationStore.save(savedLocations)
+        savedLocations = savedMapLocationStore.load()
     }
 }
 #endif

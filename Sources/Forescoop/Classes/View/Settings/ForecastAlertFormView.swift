@@ -17,7 +17,7 @@ struct ForecastAlertFormView: View {
     private let spotInfoLoader: @MainActor (String) async throws -> SpotInfo?
 
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.analytics) private var analytics
+    @Environment(\.appEnvironment) private var environment
     @State private var draft: ForecastAlert
     @State private var isPresentingSpotPicker = false
     @State private var isPresentingModelPicker = false
@@ -145,9 +145,9 @@ struct ForecastAlertFormView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        ForecastAlertStore.save(draft)
+                        environment.forecastAlertStore.save(draft)
                         if existingAlert == nil {
-                            analytics.log(.alertCreated(condition: draft.conditionsSummary))
+                            environment.analytics.log(.alertCreated(condition: draft.conditionsSummary))
                         }
                         dismiss()
                     }
@@ -158,7 +158,7 @@ struct ForecastAlertFormView: View {
                 WindguruSpotPicker(
                     forecastService: forecastService,
                     account: account,
-                    analytics: analytics,
+                    environment: environment,
                     onSpotSelected: { spot in
                         selectSpot(id: spot.identifier, name: spot.displayName)
                         isPresentingSpotPicker = false
@@ -248,7 +248,7 @@ struct ForecastAlertFormView: View {
 
 #if DEBUG
 #Preview("Add alert") {
-    ForecastAlertFormView(forecastService: ForecastWindguruMockup(), account: WindguruAccount(), alert: nil)
+    ForecastAlertFormView(forecastService: ForecastWindguruMockup(), account: WindguruAccount(credentialStore: AppEnvironment.preview.windguruCredentialStore), alert: nil)
 }
 #endif
 #endif

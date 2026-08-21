@@ -54,13 +54,14 @@ public struct MapLocationPicker: View {
         favoriteLocations: [SavedMapLocation] = [],
         forecast: SpotForecast? = nil,
         selectedForecastHour: String? = nil,
+        environment: AppEnvironment,
         onSelection: @escaping (CLLocationCoordinate2D) -> Void
     ) {
         self.initialCoordinate = initialCoordinate
         self.isSelectionEnabled = isSelectionEnabled
-        self.savedLocations = savedLocations ?? SavedMapLocationStore.load()
+        self.savedLocations = savedLocations ?? environment.savedMapLocationStore.load()
         self.favoriteLocations = favoriteLocations.filter { favorite in
-            !(savedLocations ?? SavedMapLocationStore.load()).contains {
+            !(savedLocations ?? environment.savedMapLocationStore.load()).contains {
                 SavedMapLocationStore.isSameLocation($0, favorite)
             }
         }
@@ -165,6 +166,6 @@ public struct MapLocationPicker: View {
 }
 
 #Preview("Map location picker") {
-    MapLocationPicker(initialCoordinate: CLLocationCoordinate2D(latitude: -41.13, longitude: -71.31), onSelection: { _ in })
+    MapLocationPicker(initialCoordinate: CLLocationCoordinate2D(latitude: -41.13, longitude: -71.31), environment: .preview, onSelection: { _ in })
 }
 #endif

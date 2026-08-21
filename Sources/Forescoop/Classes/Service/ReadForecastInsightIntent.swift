@@ -20,14 +20,15 @@ public struct ReadForecastInsightIntent: AppIntent {
 
     public init() {}
 
+    @MainActor
     public func perform() async throws -> some IntentResult & ProvidesDialog {
-        let analytics = VentusFirebase()
-        analytics.configure()
-        analytics.log(.siriInsightRequested)
-        let spotID = SelectedWindguruSpotStore.load()
-        let username = WindguruCredentialStore.activeUsername()
-        let isProUser = WindguruCredentialStore.activeProUser()
-        let password = username.flatMap(WindguruCredentialStore.password(for:))
+        let environment = AppEnvironment()
+        environment.analytics.configure()
+        environment.analytics.log(.siriInsightRequested)
+        let spotID = environment.selectedSpotStore.load()
+        let username = environment.windguruCredentialStore.activeUsername()
+        let isProUser = environment.windguruCredentialStore.activeProUser()
+        let password = username.flatMap(environment.windguruCredentialStore.password(for:))
         let service = ForecastWindguruService()
 
         guard let forecast = try? await service.bestForecast(
@@ -39,7 +40,7 @@ public struct ReadForecastInsightIntent: AppIntent {
             return .result(dialog: IntentDialog(stringLiteral: "I couldn't load the forecast right now.".localized))
         }
 
-        let units = VentusForecastUnitStore.load()
+        let units = environment.ventusForecastUnitStore.load(fallback: DeviceForecastPreferenceProvider().forecastUnitPreferences)
         let insight = ForecastIntelligenceText.summary(
             forecast: forecast,
             hour: forecast.currentForecastHour,

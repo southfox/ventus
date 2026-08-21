@@ -30,6 +30,7 @@ public struct ForecastDashboardView: View {
     }
 
     private let forecastService: ForecastWindguruProtocol
+    private let environment: AppEnvironment
     private let analytics: AnalyticsLogging
     private let spotSearch: @MainActor (String) async throws -> SpotResult?
     private let favoriteSpotsLoader: @MainActor (String, String) async throws -> SpotResult?
@@ -43,13 +44,13 @@ public struct ForecastDashboardView: View {
     @StateObject private var account: WindguruAccount
     @StateObject private var viewModel: ForecastDashboardViewModel
     @State private var windDirectionDisplayMode: WindDirectionDisplayMode = .arrow
-    @State private var gridHourStep = GridHourStepStore.load()
+    @State private var gridHourStep: Int
     @State private var activeSheet: DashboardSheet?
     @State private var content: ForecastViewMode
     @State private var weatherBackgroundStyle: WeatherBackgroundStyle
     @State private var theme: VentusTheme
-    @State private var appLanguage: AppLanguage = AppLanguageStore.load()
-    @State private var appAppearanceMode: AppAppearanceMode = AppAppearanceModeStore.load()
+    @State private var appLanguage: AppLanguage
+    @State private var appAppearanceMode: AppAppearanceMode
     @State private var showsDashboardModelComparison = false
     @State private var iPadMapPosition: MapCameraPosition = .automatic
     @State private var selectedMapLocationID: SavedMapLocation.ID?
@@ -61,25 +62,29 @@ public struct ForecastDashboardView: View {
         initialWeatherBackgroundStyle: WeatherBackgroundStyle? = nil,
         previewForecast: SpotForecast? = nil,
         previewModelForecasts: [SpotForecast] = [],
-        analytics: AnalyticsLogging
+        environment: AppEnvironment
     ) {
         self.forecastService = forecastService
-        self.analytics = analytics
+        self.environment = environment
+        self.analytics = environment.analytics
         usesPreviewForecast = previewForecast != nil
-        let initialSpotID = previewForecast?.identifier ?? SelectedWindguruSpotStore.load()
+        let initialSpotID = previewForecast?.identifier ?? environment.selectedSpotStore.load()
         _selectedSpotID = State(initialValue: initialSpotID)
         _weatherBackgroundStyle = State(
-            initialValue: initialWeatherBackgroundStyle ?? WeatherBackgroundStyleStore.load()
+            initialValue: initialWeatherBackgroundStyle ?? environment.weatherBackgroundStyleStore.load()
         )
-        _theme = State(initialValue: VentusThemeStore.load())
-        _content = State(initialValue: initialViewMode ?? ForecastViewModeStore.load())
-        let viewModel = ForecastDashboardViewModel(forecastService: forecastService, analytics: analytics)
+        _theme = State(initialValue: environment.ventusThemeStore.load())
+        _content = State(initialValue: initialViewMode ?? environment.forecastViewModeStore.load())
+        _gridHourStep = State(initialValue: environment.gridHourStepStore.load())
+        _appLanguage = State(initialValue: environment.appLanguageStore.load())
+        _appAppearanceMode = State(initialValue: environment.appAppearanceModeStore.load())
+        let viewModel = ForecastDashboardViewModel(forecastService: forecastService, environment: environment)
         if let previewForecast {
             viewModel.usePreviewForecast(previewForecast, spotID: initialSpotID, modelForecasts: previewModelForecasts)
         }
         _viewModel = StateObject(wrappedValue: viewModel)
         _showsDashboardModelComparison = State(initialValue: false)
-        _account = StateObject(wrappedValue: WindguruAccount())
+        _account = StateObject(wrappedValue: WindguruAccount(credentialStore: environment.windguruCredentialStore))
         spotSearch = { try await forecastService.searchSpots(byLocation: $0) }
         favoriteSpotsLoader = { try await forecastService.favoriteSpots(withUsername: $0, password: $1) }
         spotInfoLoader = { try await forecastService.spotInfo(bySpotId: $0) }
@@ -285,8 +290,8 @@ public struct ForecastDashboardView: View {
                 await loadFavoriteMapLocations()
                 await loadPreferredForecast()
             }
-            .onChange(of: selectedSpotID) { _, spotID in SelectedWindguruSpotStore.save(spotID) }
-            .onChange(of: content) { _, mode in ForecastViewModeStore.save(mode) }
+            .onChange(of: selectedSpotID) { _, spotID in environment.selectedSpotStore.save(spotID) }
+            .onChange(of: content) { _, mode in environment.forecastViewModeStore.save(mode) }
             .sheet(isPresented: sheetBinding(.spotPicker), onDismiss: {
                 refreshSavedMapLocations()
                 Task { await loadFavoriteMapLocations() }
@@ -294,7 +299,7 @@ public struct ForecastDashboardView: View {
                 WindguruSpotPicker(
                     forecastService: forecastService,
                     account: account,
-                    analytics: analytics,
+                    environment: environment,
                     onSpotSelected: { spot in
                         guard let spotId = spot.identifier else { return }
                         activeSheet = nil
@@ -372,7 +377,8 @@ public struct ForecastDashboardView: View {
                     appAppearanceMode: $appAppearanceMode,
                     gridHourStep: $gridHourStep,
                     forecastService: forecastService,
-                    account: account
+                    account: account,
+                    environment: environment
                 )
             }
             .sheet(isPresented: sheetBinding(.help)) {
@@ -392,6 +398,7 @@ public struct ForecastDashboardView: View {
                     favoriteLocations: favoriteMapLocations,
                     forecast: forecast,
                     selectedForecastHour: selectedHour,
+                    environment: environment,
                     onSelection: { _ in }
                 )
             }
@@ -401,7 +408,7 @@ public struct ForecastDashboardView: View {
         .appLanguage(appLanguage)
         .appAppearance(appAppearanceMode)
         .id(appLanguage)
-        .environment(\.analytics, analytics)
+        .environment(\.appEnvironment, environment)
         .forecastAccessibilityContainer(
             "Ventus forecast dashboard",
             hint: "Choose a location, forecast hour, view mode, or settings.",
@@ -429,7 +436,7 @@ public struct ForecastDashboardView: View {
 #endif
 
     private func steppedHours(for forecast: SpotForecast) -> [String] {
-        forecast.steppedForecastHours(anchorHour: forecast.currentForecastHour, step: GridHourStepStore.load(), includingPast: false)
+        forecast.steppedForecastHours(anchorHour: forecast.currentForecastHour, step: environment.gridHourStepStore.load(), includingPast: false)
     }
 
     private func moveSelectedHour(by offset: Int, in forecast: SpotForecast) {
@@ -605,7 +612,7 @@ public struct ForecastDashboardView: View {
     }
 
     private func forecastWorkspaceContent(for forecast: SpotForecast) -> some View {
-        ForecastGridDashboardWorkspace {
+        ForecastGridDashboardWorkspace(environment: environment) {
             forecastGridContent(for: forecast)
         } dashboard: {
             forecastContent(
@@ -652,7 +659,7 @@ public struct ForecastDashboardView: View {
     }
 
     private func refreshSavedMapLocations() {
-        savedMapLocations = SavedMapLocationStore.load()
+        savedMapLocations = environment.savedMapLocationStore.load()
     }
 
     private var favoriteLocationsNotSaved: [SavedMapLocation] {
@@ -776,7 +783,7 @@ public struct ForecastDashboardView: View {
 
     @MainActor
     private func loadPreferredForecast() async {
-        guard !SelectedWindguruSpotStore.hasSavedSelection else {
+        guard !environment.selectedSpotStore.hasSavedSelection else {
             await loadForecast(spotId: selectedSpotID, modelIDs: [])
             return
         }
@@ -856,7 +863,7 @@ public struct ForecastDashboardView: View {
         initialWeatherBackgroundStyle: .animated,
         previewForecast: mockup.dashboardPreviewForecast,
         previewModelForecasts: mockup.dashboardPreviewForecasts,
-        analytics: NoOpAnalyticsLogger()
+        environment: .preview
     )
 }
 #endif

@@ -437,12 +437,12 @@ class ModelTests: XCTestCase {
         let units = ForecastUnitPreferences(temperatureUnit: .celsius, windSpeedUnit: .knots, waveHeightUnit: .meters, pressureUnit: .hectopascals, precipitationUnit: .millimeters, freezingLevelUnit: .meters)
 
         let rainedEarlier = try todayForecast(precipitationByHour: [pastHour: 2.0])
-        let pastRainSnapshot = SharedForecastSnapshot.make(from: rainedEarlier!, units: units)
+        let pastRainSnapshot = SharedForecastSnapshot.make(from: rainedEarlier!, units: units, gridHourStepStore: AppEnvironment.preview.gridHourStepStore)
         let todaySymbol = try XCTUnwrap(pastRainSnapshot.daily.first?.symbolName)
         XCTAssertFalse(todaySymbol.contains("rain") || todaySymbol.contains("drizzle"), "Rain that already happened shouldn't make \"today\" show a rain icon while the remaining hours are dry: got \(todaySymbol)")
 
         let rainStillAhead = try todayForecast(precipitationByHour: [futureHour: 2.0])
-        let futureRainSnapshot = SharedForecastSnapshot.make(from: rainStillAhead!, units: units)
+        let futureRainSnapshot = SharedForecastSnapshot.make(from: rainStillAhead!, units: units, gridHourStepStore: AppEnvironment.preview.gridHourStepStore)
         let aheadSymbol = try XCTUnwrap(futureRainSnapshot.daily.first?.symbolName)
         XCTAssertTrue(aheadSymbol.contains("rain") || aheadSymbol.contains("drizzle"), "Rain still ahead today should be reflected in \"today\"'s icon: got \(aheadSymbol)")
     }

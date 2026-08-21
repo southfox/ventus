@@ -10,7 +10,6 @@
 import Foundation
 import SwiftData
 
-/// A forecast field an alert condition can compare against.
 public enum ForecastAlertVariable: String, CaseIterable, Identifiable, Sendable, Codable {
     case temperature
     case windSpeed
@@ -45,7 +44,6 @@ public enum ForecastAlertVariable: String, CaseIterable, Identifiable, Sendable,
         }
     }
 
-    /// Reads this variable's value for a given forecast hour.
     func value(in forecast: Forecast, hour: String?) -> Double? {
         switch self {
         case .temperature: forecast.temperatureReal(hh: hour) ?? forecast.temperature(hh: hour)
@@ -59,7 +57,6 @@ public enum ForecastAlertVariable: String, CaseIterable, Identifiable, Sendable,
     }
 }
 
-/// How an alert condition's value is compared against the forecast.
 public enum ForecastAlertComparator: String, CaseIterable, Identifiable, Sendable, Codable {
     case greaterThanOrEqual
     case lessThanOrEqual
@@ -81,8 +78,6 @@ public enum ForecastAlertComparator: String, CaseIterable, Identifiable, Sendabl
     }
 }
 
-/// A single "variable comparator value" row, e.g. "Wind speed ≥ 25 knots".
-/// All of an alert's conditions must be satisfied by the same forecast hour.
 public struct ForecastAlertCondition: Codable, Equatable, Identifiable, Sendable {
     public var id = UUID()
     public var variable: ForecastAlertVariable
@@ -102,8 +97,6 @@ public struct ForecastAlertCondition: Codable, Equatable, Identifiable, Sendable
     }
 }
 
-/// A user-defined push alert for a spot: which models, which conditions, and
-/// over what time window they must hold.
 public struct ForecastAlert: Codable, Equatable, Identifiable, Sendable {
     public var id: UUID
     public var name: String
@@ -112,7 +105,6 @@ public struct ForecastAlert: Codable, Equatable, Identifiable, Sendable {
     public var modelIDs: [String]
     public var conditions: [ForecastAlertCondition]
     public var considerForecastUpToDay: Int
-    /// Weekday numbers using `Calendar.component(.weekday, from:)`, 1 = Sunday...7 = Saturday. Empty means every day.
     public var weekdays: Set<Int>
     public var pushNotificationEnabled: Bool
     public var isActive: Bool
@@ -141,7 +133,6 @@ public struct ForecastAlert: Codable, Equatable, Identifiable, Sendable {
         self.isActive = isActive
     }
 
-    /// "bariloche alert, Bariloche" style summary for the alert list.
     public var displayTitle: String {
         name.isEmpty ? spotDisplayName : "\(name), \(spotDisplayName)"
     }
@@ -157,7 +148,7 @@ public struct ForecastAlert: Codable, Equatable, Identifiable, Sendable {
 }
 
 @Model
-private final class ForecastAlertRecord {
+final class ForecastAlertRecord {
     @Attribute(.unique) var id: UUID
     var name: String
     var spotID: String
@@ -210,29 +201,26 @@ private final class ForecastAlertRecord {
     }
 }
 
-/// Persists the user's custom forecast alerts, independent of any Windguru
-/// account session.
-public enum ForecastAlertStore {
-    /// See the matching comment on `SavedMapLocationStore.container`: this
-    /// needs its own uniquely named file so it doesn't collide with that
-    /// container's "default.store" in the shared App Group.
-    private static let container: ModelContainer = {
-        let schema = Schema([ForecastAlertRecord.self])
-        let configuration: ModelConfiguration
-        if let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.org.forescoop.shared") {
-            configuration = ModelConfiguration(schema: schema, url: groupURL.appending(path: "ForecastAlerts.store"))
-        } else {
-            configuration = ModelConfiguration(schema: schema)
-        }
-        return try! ModelContainer(for: schema, configurations: configuration)
-    }()
+public protocol ForecastAlertStoring: Sendable {
+    func load() -> [ForecastAlert]
+    func save(_ alert: ForecastAlert)
+    func remove(_ alert: ForecastAlert)
+    func setActive(_ isActive: Bool, for alertID: UUID)
+}
 
-    public static func load() -> [ForecastAlert] {
+public final class ForecastAlertStore: ForecastAlertStoring {
+    private let container: ModelContainer
+
+    public init(container: ModelContainer) {
+        self.container = container
+    }
+
+    public func load() -> [ForecastAlert] {
         let context = ModelContext(container)
         return (try? context.fetch(FetchDescriptor<ForecastAlertRecord>()))?.map(\.alert) ?? []
     }
 
-    public static func save(_ alert: ForecastAlert) {
+    public func save(_ alert: ForecastAlert) {
         let context = ModelContext(container)
         if let record = (try? context.fetch(FetchDescriptor<ForecastAlertRecord>()))?.first(where: { $0.id == alert.id }) {
             record.update(with: alert)
@@ -242,14 +230,14 @@ public enum ForecastAlertStore {
         try? context.save()
     }
 
-    public static func remove(_ alert: ForecastAlert) {
+    public func remove(_ alert: ForecastAlert) {
         let context = ModelContext(container)
         guard let record = (try? context.fetch(FetchDescriptor<ForecastAlertRecord>()))?.first(where: { $0.id == alert.id }) else { return }
         context.delete(record)
         try? context.save()
     }
 
-    public static func setActive(_ isActive: Bool, for alertID: UUID) {
+    public func setActive(_ isActive: Bool, for alertID: UUID) {
         let context = ModelContext(container)
         guard let record = (try? context.fetch(FetchDescriptor<ForecastAlertRecord>()))?.first(where: { $0.id == alertID }) else { return }
         record.isActive = isActive

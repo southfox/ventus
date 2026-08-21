@@ -14,10 +14,17 @@ import SwiftUI
 
 struct WatchForecastAlertsListView: View {
     nonisolated(unsafe) let forecastService: ForecastWindguruProtocol
+    private let environment: AppEnvironment
 
-    @State private var alerts = ForecastAlertStore.load()
+    @State private var alerts: [ForecastAlert]
     @State private var editingAlert: ForecastAlert?
     @State private var isPresentingNewAlert = false
+
+    init(forecastService: ForecastWindguruProtocol, environment: AppEnvironment) {
+        self.forecastService = forecastService
+        self.environment = environment
+        _alerts = State(initialValue: environment.forecastAlertStore.load())
+    }
 
     var body: some View {
         List {
@@ -69,26 +76,26 @@ struct WatchForecastAlertsListView: View {
         Binding(
             get: { alert.isActive },
             set: { newValue in
-                ForecastAlertStore.setActive(newValue, for: alert.id)
+                environment.forecastAlertStore.setActive(newValue, for: alert.id)
                 reload()
             }
         )
     }
 
     private func remove(_ alert: ForecastAlert) {
-        ForecastAlertStore.remove(alert)
+        environment.forecastAlertStore.remove(alert)
         reload()
     }
 
     private func reload() {
-        alerts = ForecastAlertStore.load()
+        alerts = environment.forecastAlertStore.load()
     }
 }
 
 #if DEBUG
 #Preview("Watch forecast alerts") {
     NavigationStack {
-        WatchForecastAlertsListView(forecastService: ForecastWindguruMockup())
+        WatchForecastAlertsListView(forecastService: ForecastWindguruMockup(), environment: .preview)
     }
 }
 #endif

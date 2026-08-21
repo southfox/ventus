@@ -17,11 +17,12 @@ struct WatchForecastHoursView: View {
     let precipitationUnit: PrecipitationUnit
     let onHourSelected: () -> Void
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.appEnvironment) private var environment
 
     var body: some View {
         List {
             if let forecast, let weather = forecast.forecast {
-                ForEach(forecast.steppedForecastHours(anchorHour: forecast.currentForecastHour, step: GridHourStepStore.load(), includingPast: false), id: \.self) { hour in
+                ForEach(forecast.steppedForecastHours(anchorHour: forecast.currentForecastHour, step: environment.gridHourStepStore.load(), includingPast: false), id: \.self) { hour in
                     Button {
                         selectedHour = hour
                         onHourSelected()

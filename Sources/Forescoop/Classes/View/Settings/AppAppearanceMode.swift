@@ -46,14 +46,24 @@ public extension View {
     }
 }
 
-public enum AppAppearanceModeStore {
-    private static let key = "appAppearanceMode"
+public protocol AppAppearanceModeStoring: Sendable {
+    func load() -> AppAppearanceMode
+    func save(_ mode: AppAppearanceMode)
+}
 
-    public static func load() -> AppAppearanceMode {
-        UserDefaults.standard.string(forKey: key).flatMap(AppAppearanceMode.init(rawValue:)) ?? .system
+public final class AppAppearanceModeStore: AppAppearanceModeStoring, @unchecked Sendable {
+    private static let key = "appAppearanceMode"
+    private let defaults: UserDefaults
+
+    public init(defaults: UserDefaults) {
+        self.defaults = defaults
     }
 
-    public static func save(_ mode: AppAppearanceMode) {
-        UserDefaults.standard.set(mode.rawValue, forKey: key)
+    public func load() -> AppAppearanceMode {
+        defaults.string(forKey: Self.key).flatMap(AppAppearanceMode.init(rawValue:)) ?? .system
+    }
+
+    public func save(_ mode: AppAppearanceMode) {
+        defaults.set(mode.rawValue, forKey: Self.key)
     }
 }

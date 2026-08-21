@@ -25,7 +25,7 @@ public struct ForecastWidgetView: View {
 
     public init(
         entry: ForecastWidgetEntry,
-        theme: VentusTheme = VentusThemeStore.load(),
+        theme: VentusTheme,
         previewFamily: WidgetFamily? = nil,
         onSelectLocation: @escaping () -> Void = {},
         onShowMap: @escaping () -> Void = {}

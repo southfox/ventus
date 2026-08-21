@@ -13,10 +13,11 @@ public enum ForecastWidgetEntryBuilder {
     public static func entry(
         from forecast: SpotForecast,
         coordinateLocationName: String?,
-        useDetailedInsight: Bool = false
+        useDetailedInsight: Bool = false,
+        environment: AppEnvironment
     ) -> ForecastWidgetEntry {
         let hour = forecast.currentForecastHour
-        let units = VentusForecastUnitStore.load()
+        let units = environment.ventusForecastUnitStore.load(fallback: DeviceForecastPreferenceProvider().forecastUnitPreferences)
         let temperature = forecast.forecast?.temperature(hh: hour) ?? forecast.forecast?.temperatureReal(hh: hour) ?? 0
         let rawTemperature = forecast.forecast?.temperature(hh: hour)
         let realTemperature = forecast.forecast?.temperatureReal(hh: hour)
@@ -27,7 +28,7 @@ public enum ForecastWidgetEntryBuilder {
         let cloudCover = forecast.forecast?.cloudCoverTotal(hh: hour) ?? 0
         let pressure = forecast.forecast?.seaLevelPressure(hh: hour) ?? 0
         let wave = forecast.forecast?.waveHeight(hh: hour)
-        let hourly = hourlyForecast(for: forecast, currentHour: hour, unit: units.temperatureUnit)
+        let hourly = hourlyForecast(for: forecast, currentHour: hour, unit: units.temperatureUnit, environment: environment)
         let daily = dailyForecast(for: forecast, unit: units.temperatureUnit)
         let today = daily.first
         let dailyRange = forecast.dailyTemperatureRange(hour: hour)
@@ -115,9 +116,9 @@ public enum ForecastWidgetEntryBuilder {
         )
     }
 
-    private static func hourlyForecast(for forecast: SpotForecast, currentHour: String?, unit: TemperatureUnit) -> [ForecastWidgetHour] {
+    private static func hourlyForecast(for forecast: SpotForecast, currentHour: String?, unit: TemperatureUnit, environment: AppEnvironment) -> [ForecastWidgetHour] {
         let currentOffset = Int(currentHour ?? "") ?? 0
-        return forecast.steppedForecastHours(anchorHour: currentHour, step: GridHourStepStore.load())
+        return forecast.steppedForecastHours(anchorHour: currentHour, step: environment.gridHourStepStore.load())
             .compactMap { hour -> (hour: String, offset: Int)? in Int(hour).map { (hour, $0) } }
             .filter { $0.offset >= currentOffset }
             .sorted { $0.offset < $1.offset }

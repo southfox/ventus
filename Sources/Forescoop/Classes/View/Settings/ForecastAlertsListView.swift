@@ -14,17 +14,18 @@ struct ForecastAlertsListView: View {
     let account: WindguruAccount
     private let modelInfoLoader: @MainActor () async throws -> Models?
 
-    @Environment(\.analytics) private var analytics
+    @Environment(\.appEnvironment) private var environment
 
-    @State private var alerts = ForecastAlertStore.load()
+    @State private var alerts: [ForecastAlert]
     @State private var modelNamesByID = [String: String]()
     @State private var editingAlert: ForecastAlert?
     @State private var isPresentingNewAlert = false
 
-    init(forecastService: ForecastWindguruProtocol, account: WindguruAccount) {
+    init(forecastService: ForecastWindguruProtocol, account: WindguruAccount, environment: AppEnvironment) {
         self.forecastService = forecastService
         self.account = account
         modelInfoLoader = { try await forecastService.modelInfo(onlyModelId: nil) }
+        _alerts = State(initialValue: environment.forecastAlertStore.load())
     }
 
     var body: some View {
@@ -93,20 +94,20 @@ struct ForecastAlertsListView: View {
         Binding(
             get: { alert.isActive },
             set: { newValue in
-                ForecastAlertStore.setActive(newValue, for: alert.id)
+                environment.forecastAlertStore.setActive(newValue, for: alert.id)
                 reload()
             }
         )
     }
 
     private func remove(_ alert: ForecastAlert) {
-        ForecastAlertStore.remove(alert)
+        environment.forecastAlertStore.remove(alert)
         reload()
-        analytics.log(.alertDeleted)
+        environment.analytics.log(.alertDeleted)
     }
 
     private func reload() {
-        alerts = ForecastAlertStore.load()
+        alerts = environment.forecastAlertStore.load()
     }
 
     private func loadModelNames() async {
@@ -120,7 +121,7 @@ struct ForecastAlertsListView: View {
 #if DEBUG
 #Preview("Forecast alerts") {
     NavigationStack {
-        ForecastAlertsListView(forecastService: ForecastWindguruMockup(), account: WindguruAccount())
+        ForecastAlertsListView(forecastService: ForecastWindguruMockup(), account: WindguruAccount(credentialStore: AppEnvironment.preview.windguruCredentialStore), environment: .preview)
     }
 }
 #endif

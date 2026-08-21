@@ -11,6 +11,7 @@ import SwiftUI
 
 public struct WatchForecastView: View {
     nonisolated(unsafe) private let forecastService: ForecastWindguruProtocol
+    private let environment: AppEnvironment
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("watchSelectedWindguruSpotID") private var selectedSpotID = "64141"
     @AppStorage("watchTemperatureUnit") private var temperatureUnitRaw = DeviceForecastPreferences.temperatureUnit.rawValue
@@ -19,17 +20,21 @@ public struct WatchForecastView: View {
     @AppStorage("watchPressureUnit") private var pressureUnitRaw = DeviceForecastPreferences.pressureUnit.rawValue
     @AppStorage("watchPrecipitationUnit") private var precipitationUnitRaw = DeviceForecastPreferences.precipitationUnit.rawValue
     @AppStorage("watchFreezingLevelUnit") private var freezingLevelUnitRaw = DeviceForecastPreferences.freezingLevelUnit.rawValue
-    @State private var locations = WatchLocationStore.load()
+    @State private var locations: [WatchLocation]
     @State private var forecast: SpotForecast?
     @State private var errorMessage: String?
     @State private var selectedHour: String?
     @State private var selectedModelID: String?
     @State private var navigationPath = NavigationPath()
-    @State private var theme = VentusThemeStore.load()
-    @State private var appLanguage = AppLanguageStore.load()
+    @State private var theme: VentusTheme
+    @State private var appLanguage: AppLanguage
 
-    public init(forecastService: ForecastWindguruProtocol = ForecastWindguruService()) {
+    public init(forecastService: ForecastWindguruProtocol = ForecastWindguruService(), environment: AppEnvironment) {
         self.forecastService = forecastService
+        self.environment = environment
+        _locations = State(initialValue: environment.watchLocationStore.load())
+        _theme = State(initialValue: environment.ventusThemeStore.load())
+        _appLanguage = State(initialValue: environment.appLanguageStore.load())
     }
 
     public var body: some View {
@@ -72,11 +77,11 @@ public struct WatchForecastView: View {
         .onChange(of: selectedSpotID) { _, _ in Task { await loadForecast() } }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
-                theme = VentusThemeStore.load()
+                theme = environment.ventusThemeStore.load()
             }
         }
         .onChange(of: appLanguage) { _, appLanguage in
-            AppLanguageStore.save(appLanguage)
+            environment.appLanguageStore.save(appLanguage)
         }
         .id(appLanguage)
     }
@@ -86,13 +91,13 @@ public struct WatchForecastView: View {
         let weather = forecast.forecast
         return ScrollView {
             VStack(spacing: 10) {
-                if let severeWeatherAlert = ForecastSevereWeatherNotifier.evaluate(forecast) {
+                if let severeWeatherAlert = environment.severeWeatherNotifier.evaluate(forecast) {
                     Label(severeWeatherAlert.title, systemImage: "exclamationmark.triangle.fill")
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(.red)
                         .multilineTextAlignment(.center)
                 }
-                let _ = ForecastSevereWeatherNotifier.evaluateCustomAlerts(forecast)
+                let _ = environment.severeWeatherNotifier.evaluateCustomAlerts(forecast)
                 HStack(spacing: 8) {
                 NavigationLink(value: WatchDestination.locations) { Image(systemName: "mappin.circle.fill") }.accessibilityLabel("Choose location")
                 NavigationLink(value: WatchDestination.settings) { Image(systemName: "gearshape") }.accessibilityLabel("Settings")
@@ -172,8 +177,8 @@ public struct WatchForecastView: View {
             selectedHour = forecast?.currentForecastHour
             selectedModelID = forecast?.model
             if let forecast {
-                _ = ForecastSevereWeatherNotifier.evaluate(forecast)
-                ForecastSevereWeatherNotifier.evaluateCustomAlerts(forecast)
+                _ = environment.severeWeatherNotifier.evaluate(forecast)
+                environment.severeWeatherNotifier.evaluateCustomAlerts(forecast)
             }
         } catch {
             errorMessage = error.localizedDescription
@@ -185,7 +190,7 @@ public struct WatchForecastView: View {
     private func add(_ location: WatchLocation) {
         if !locations.contains(where: { $0.spotID == location.spotID }) {
             locations.append(location)
-            WatchLocationStore.save(locations)
+            environment.watchLocationStore.save(locations)
         }
         selectedSpotID = location.spotID
     }
@@ -283,7 +288,7 @@ enum WatchForecastFormatting {
 
 #if DEBUG
 #Preview("Watch forecast dashboard") {
-    WatchForecastView(forecastService: ForecastWindguruMockup())
+    WatchForecastView(forecastService: ForecastWindguruMockup(), environment: .preview)
 }
 #endif
 

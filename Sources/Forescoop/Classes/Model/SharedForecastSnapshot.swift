@@ -127,7 +127,7 @@ public struct SharedForecastSnapshot: Codable, Sendable {
 }
 
 public extension SharedForecastSnapshot {
-    static func make(from forecast: SpotForecast, units: ForecastUnitPreferences) -> SharedForecastSnapshot {
+    static func make(from forecast: SpotForecast, units: ForecastUnitPreferences, gridHourStepStore: GridHourStepStoring) -> SharedForecastSnapshot {
         let hour = forecast.currentForecastHour
         let temperature = forecast.forecast?.temperature(hh: hour) ?? forecast.forecast?.temperatureReal(hh: hour) ?? 0
         let rawTemperature = forecast.forecast?.temperature(hh: hour)
@@ -139,7 +139,7 @@ public extension SharedForecastSnapshot {
         let cloudCover = forecast.forecast?.cloudCoverTotal(hh: hour) ?? 0
         let pressure = forecast.forecast?.seaLevelPressure(hh: hour) ?? 0
         let wave = forecast.forecast?.waveHeight(hh: hour)
-        let hourly = hourlyForecast(for: forecast, currentHour: hour, unit: units.temperatureUnit)
+        let hourly = hourlyForecast(for: forecast, currentHour: hour, unit: units.temperatureUnit, gridHourStepStore: gridHourStepStore)
         let daily = dailyForecast(for: forecast, unit: units.temperatureUnit)
         let today = daily.first
         let dailyRange = forecast.dailyTemperatureRange(hour: hour)
@@ -182,9 +182,9 @@ public extension SharedForecastSnapshot {
         )
     }
 
-    private static func hourlyForecast(for forecast: SpotForecast, currentHour: String?, unit: TemperatureUnit) -> [Hour] {
+    private static func hourlyForecast(for forecast: SpotForecast, currentHour: String?, unit: TemperatureUnit, gridHourStepStore: GridHourStepStoring) -> [Hour] {
         let currentOffset = Int(currentHour ?? "") ?? 0
-        return forecast.steppedForecastHours(anchorHour: currentHour, step: GridHourStepStore.load())
+        return forecast.steppedForecastHours(anchorHour: currentHour, step: gridHourStepStore.load())
             .compactMap { hour -> (hour: String, offset: Int)? in Int(hour).map { (hour, $0) } }
             .filter { $0.offset >= currentOffset }
             .sorted { $0.offset < $1.offset }
@@ -283,16 +283,23 @@ public extension SharedForecastSnapshot {
     }
 }
 
-public enum SharedForecastSnapshotStore {
+public protocol SharedForecastSnapshotStoring: Sendable {
+    func save(_ snapshot: SharedForecastSnapshot)
+    func load() -> SharedForecastSnapshot?
+}
+
+public final class SharedForecastSnapshotStore: SharedForecastSnapshotStoring {
     private static let appGroupIdentifier = "group.org.forescoop.shared"
     private static let fileName = "CurrentForecastSnapshot.json"
 
-    private static var fileURL: URL? {
-        FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier)?
-            .appending(path: fileName)
+    public init() {}
+
+    private var fileURL: URL? {
+        FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: Self.appGroupIdentifier)?
+            .appending(path: Self.fileName)
     }
 
-    public static func save(_ snapshot: SharedForecastSnapshot) {
+    public func save(_ snapshot: SharedForecastSnapshot) {
         guard let fileURL, let data = try? JSONEncoder().encode(snapshot) else { return }
         try? data.write(to: fileURL, options: .atomic)
 #if canImport(WidgetKit)
@@ -300,7 +307,7 @@ public enum SharedForecastSnapshotStore {
 #endif
     }
 
-    public static func load() -> SharedForecastSnapshot? {
+    public func load() -> SharedForecastSnapshot? {
         guard let fileURL, let data = try? Data(contentsOf: fileURL) else { return nil }
         return try? JSONDecoder().decode(SharedForecastSnapshot.self, from: data)
     }

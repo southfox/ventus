@@ -200,7 +200,7 @@ public struct ForecastWidgetDay: Identifiable, Sendable {
 
 #if DEBUG
 #Preview("Placeholder entry") {
-    ForecastWidgetView(entry: .placeholder)
+    ForecastWidgetView(entry: .placeholder, theme: .system)
         .frame(width: 320, height: 150)
         .padding()
         .background(.blue.gradient)

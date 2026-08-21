@@ -12,6 +12,8 @@ import SwiftUI
 import WidgetKit
 
 public struct ForecastWidgetProvider: TimelineProvider, Sendable {
+    private let environment = AppEnvironment()
+
     public init() {}
 
     public func placeholder(in context: Context) -> ForecastWidgetEntry { .placeholder }
@@ -39,24 +41,24 @@ public struct ForecastWidgetProvider: TimelineProvider, Sendable {
     private static let snapshotFreshnessWindow: TimeInterval = 3 * 3_600
 
     private func currentEntry() async -> ForecastWidgetEntry {
-        if let snapshot = SharedForecastSnapshotStore.load(),
+        if let snapshot = environment.sharedForecastSnapshotStore.load(),
            Date().timeIntervalSince(snapshot.date) < Self.snapshotFreshnessWindow {
             return entry(from: snapshot)
         }
         if let liveEntry = await fetchLiveEntry() {
             return liveEntry
         }
-        if let snapshot = SharedForecastSnapshotStore.load() {
+        if let snapshot = environment.sharedForecastSnapshotStore.load() {
             return entry(from: snapshot)
         }
         return .needsUpdate
     }
 
     private func fetchLiveEntry() async -> ForecastWidgetEntry? {
-        let spotID = SelectedWindguruSpotStore.load()
-        let username = WindguruCredentialStore.activeUsername()
-        let isProUser = WindguruCredentialStore.activeProUser()
-        let password = username.flatMap(WindguruCredentialStore.password(for:))
+        let spotID = environment.selectedSpotStore.load()
+        let username = environment.windguruCredentialStore.activeUsername()
+        let isProUser = environment.windguruCredentialStore.activeProUser()
+        let password = username.flatMap(environment.windguruCredentialStore.password(for:))
 
         return await withTimeout(seconds: 12) {
             let service = ForecastWindguruService()
@@ -88,7 +90,7 @@ public struct ForecastWidgetProvider: TimelineProvider, Sendable {
     }
 
     private func entry(from forecast: SpotForecast, coordinateLocationName: String?) -> ForecastWidgetEntry {
-        ForecastWidgetEntryBuilder.entry(from: forecast, coordinateLocationName: coordinateLocationName)
+        ForecastWidgetEntryBuilder.entry(from: forecast, coordinateLocationName: coordinateLocationName, environment: environment)
     }
 
     private func entry(from snapshot: SharedForecastSnapshot) -> ForecastWidgetEntry {
@@ -98,7 +100,7 @@ public struct ForecastWidgetProvider: TimelineProvider, Sendable {
 
 #if DEBUG
 #Preview("Provider result") {
-    ForecastWidgetView(entry: .placeholder)
+    ForecastWidgetView(entry: .placeholder, theme: .system)
         .frame(width: 320, height: 150)
         .padding()
         .background(.blue.gradient)

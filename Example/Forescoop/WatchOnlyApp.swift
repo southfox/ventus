@@ -17,16 +17,16 @@ struct ForescoopWatchOnlyApp: App {
 
     var body: some Scene {
         WindowGroup {
-            WatchForecastView()
+            WatchForecastView(environment: appDelegate.environment)
         }
     }
 }
 
 class WatchExtensionDelegate: NSObject, WKApplicationDelegate {
-    let analytics = VentusFirebase()
+    let environment = AppEnvironment()
 
     func applicationDidFinishLaunching() {
-        analytics.configure()
+        environment.analytics.configure()
         ForecastAlertWatchBackgroundRefresh.schedule()
     }
 
@@ -39,7 +39,7 @@ class WatchExtensionDelegate: NSObject, WKApplicationDelegate {
 
 #if DEBUG
 #Preview {
-    WatchForecastView(forecastService: ForecastWindguruMockup())
+    WatchForecastView(forecastService: ForecastWindguruMockup(), environment: .preview)
 }
 #endif
 

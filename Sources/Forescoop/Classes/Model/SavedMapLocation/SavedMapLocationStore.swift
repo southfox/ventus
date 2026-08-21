@@ -12,17 +12,14 @@ import SwiftData
 import UIKit
 #endif
 
-public enum SavedMapLocationStore {
-    static let container: ModelContainer = {
-        let schema = Schema([SavedMapLocationRecord.self, VentusPreferenceRecord.self])
-        let configuration: ModelConfiguration
-        if let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.org.forescoop.shared") {
-            configuration = ModelConfiguration(schema: schema, url: groupURL.appending(path: "SavedMapLocations.store"))
-        } else {
-            configuration = ModelConfiguration(schema: schema)
-        }
-        return try! ModelContainer(for: schema, configurations: configuration)
-    }()
+public protocol SavedMapLocationStoring: Sendable {
+    func load() -> [SavedMapLocation]
+    func save(_ locations: [SavedMapLocation])
+    func removeAll()
+    func clearSessionData() -> [SavedMapLocation]
+}
+
+public final class SavedMapLocationStore: SavedMapLocationStoring {
     public static let primarySpotID = "64141"
     private static let primaryLocation = SavedMapLocation(
         id: UUID(uuidString: "64141000-0000-4000-8000-000000000000")!,
@@ -32,35 +29,43 @@ public enum SavedMapLocationStore {
         placeDescription: "Argentina"
     )
 
-    public static func load() -> [SavedMapLocation] {
+    private let container: ModelContainer
+    private let selectedSpotStore: SelectedWindguruSpotStoring
+
+    public init(container: ModelContainer, selectedSpotStore: SelectedWindguruSpotStoring) {
+        self.container = container
+        self.selectedSpotStore = selectedSpotStore
+    }
+
+    public func load() -> [SavedMapLocation] {
         let context = ModelContext(container)
         let locations = (try? context.fetch(FetchDescriptor<SavedMapLocationRecord>()))?.map(\.location) ?? []
         return normalized(locations)
     }
 
-    public static func save(_ locations: [SavedMapLocation]) {
+    public func save(_ locations: [SavedMapLocation]) {
         let context = ModelContext(container)
         (try? context.fetch(FetchDescriptor<SavedMapLocationRecord>()))?.forEach { context.delete($0) }
         normalized(locations).forEach { context.insert(SavedMapLocationRecord($0)) }
         try? context.save()
     }
 
-    public static func removeAll() {
-        save([primaryLocation])
+    public func removeAll() {
+        save([Self.primaryLocation])
     }
 
-    public static func clearSessionData() -> [SavedMapLocation] {
+    public func clearSessionData() -> [SavedMapLocation] {
         removeAll()
-        SelectedWindguruSpotStore.clear()
+        selectedSpotStore.clear()
         return load()
     }
 
-    private static func normalized(_ locations: [SavedMapLocation]) -> [SavedMapLocation] {
-        let primary = locations.first(where: \.isPrimaryLocation) ?? primaryLocation
+    private func normalized(_ locations: [SavedMapLocation]) -> [SavedMapLocation] {
+        let primary = locations.first(where: \.isPrimaryLocation) ?? Self.primaryLocation
         return locations
             .filter { !$0.isPrimaryLocation }
             .reduce(into: [primary]) { unique, location in
-                guard !unique.contains(where: { isSameLocation($0, location) }) else { return }
+                guard !unique.contains(where: { Self.isSameLocation($0, location) }) else { return }
                 unique.append(location)
             }
     }

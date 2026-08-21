@@ -15,15 +15,19 @@ public final class WindguruAccount: ObservableObject {
     @Published public private(set) var isProUser: Bool
     @Published public private(set) var profile: User?
 
-    public var password: String? { WindguruCredentialStore.password(for: username) }
+    private let credentialStore: WindguruCredentialStoring
+
+    public var password: String? { credentialStore.password(for: username) }
     public var isAuthenticated: Bool { !username.isEmpty && password != nil }
 
-    public init() {
-        username = WindguruCredentialStore.activeUsername() ?? ""
-        isProUser = WindguruCredentialStore.activeProUser()
+    public init(credentialStore: WindguruCredentialStoring) {
+        self.credentialStore = credentialStore
+        username = credentialStore.activeUsername() ?? ""
+        isProUser = credentialStore.activeProUser()
     }
 
-    public init(username: String, isProUser: Bool = false) {
+    public init(username: String, isProUser: Bool = false, credentialStore: WindguruCredentialStoring) {
+        self.credentialStore = credentialStore
         self.username = username
         self.isProUser = isProUser
     }
@@ -31,22 +35,22 @@ public final class WindguruAccount: ObservableObject {
     public func signIn(username: String, isProUser: Bool) {
         self.username = username
         self.isProUser = isProUser
-        try? WindguruCredentialStore.saveActiveUsername(username)
-        try? WindguruCredentialStore.saveActiveProUser(isProUser)
+        try? credentialStore.saveActiveUsername(username)
+        try? credentialStore.saveActiveProUser(isProUser)
     }
 
     public func update(profile: User) {
         self.profile = profile
         isProUser = profile.isPro
-        try? WindguruCredentialStore.saveActiveProUser(profile.isPro)
+        try? credentialStore.saveActiveProUser(profile.isPro)
     }
 
     public func signOut() {
-        WindguruCredentialStore.removePassword(for: username)
+        credentialStore.removePassword(for: username)
         username = ""
         isProUser = false
         profile = nil
-        WindguruCredentialStore.removeActiveUsername()
-        WindguruCredentialStore.removeActiveProUser()
+        credentialStore.removeActiveUsername()
+        credentialStore.removeActiveProUser()
     }
 }

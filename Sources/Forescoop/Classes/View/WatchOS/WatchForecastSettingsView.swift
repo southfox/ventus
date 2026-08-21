@@ -20,6 +20,7 @@ struct WatchForecastSettingsView: View {
     @Binding var freezingLevelUnitRaw: String
     @Binding var appLanguage: AppLanguage
     @Environment(\.locale) private var locale
+    @Environment(\.appEnvironment) private var environment
 
     var body: some View {
         Form {
@@ -54,7 +55,7 @@ struct WatchForecastSettingsView: View {
 
             Section {
                 NavigationLink {
-                    WatchForecastAlertsListView(forecastService: forecastService)
+                    WatchForecastAlertsListView(forecastService: forecastService, environment: environment)
                 } label: {
                     Label("Forecast Alerts", systemImage: "bell.badge")
                 }

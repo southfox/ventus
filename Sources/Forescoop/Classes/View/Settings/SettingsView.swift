@@ -11,13 +11,13 @@ import SwiftUI
 public struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
-    @Environment(\.analytics) private var analytics
+    @Environment(\.appEnvironment) private var environment
     @Binding private var weatherBackgroundStyle: WeatherBackgroundStyle
     @Binding private var forecastViewMode: ForecastViewMode
     @Binding private var theme: VentusTheme
     @Binding private var appLanguage: AppLanguage
     @Binding private var appAppearanceMode: AppAppearanceMode
-    @State private var notificationsEnabled = ForecastSevereWeatherNotificationsStore.load()
+    @State private var notificationsEnabled: Bool
 #if !os(watchOS)
     @Binding private var gridHourStep: Int
     private let forecastService: ForecastWindguruProtocol
@@ -33,7 +33,8 @@ public struct SettingsView: View {
         appAppearanceMode: Binding<AppAppearanceMode>,
         gridHourStep: Binding<Int>,
         forecastService: ForecastWindguruProtocol,
-        account: WindguruAccount
+        account: WindguruAccount,
+        environment: AppEnvironment
     ) {
         _weatherBackgroundStyle = weatherBackgroundStyle
         _forecastViewMode = forecastViewMode
@@ -43,6 +44,7 @@ public struct SettingsView: View {
         _gridHourStep = gridHourStep
         self.forecastService = forecastService
         self.account = account
+        _notificationsEnabled = State(initialValue: environment.forecastSevereWeatherNotificationsStore.load())
     }
 #else
     public init(
@@ -50,13 +52,15 @@ public struct SettingsView: View {
         forecastViewMode: Binding<ForecastViewMode>,
         theme: Binding<VentusTheme>,
         appLanguage: Binding<AppLanguage>,
-        appAppearanceMode: Binding<AppAppearanceMode>
+        appAppearanceMode: Binding<AppAppearanceMode>,
+        environment: AppEnvironment
     ) {
         _weatherBackgroundStyle = weatherBackgroundStyle
         _forecastViewMode = forecastViewMode
         _theme = theme
         _appLanguage = appLanguage
         _appAppearanceMode = appAppearanceMode
+        _notificationsEnabled = State(initialValue: environment.forecastSevereWeatherNotificationsStore.load())
     }
 #endif
 
@@ -160,7 +164,7 @@ public struct SettingsView: View {
                     Toggle("Severe weather alerts".localized, isOn: $notificationsEnabled)
 #if !os(watchOS)
                     NavigationLink {
-                        ForecastAlertsListView(forecastService: forecastService, account: account)
+                        ForecastAlertsListView(forecastService: forecastService, account: account, environment: environment)
                     } label: {
                         Label("Forecast Alerts".localized, systemImage: "bell.badge")
                     }
@@ -180,31 +184,31 @@ public struct SettingsView: View {
             }
         }
         .onChange(of: weatherBackgroundStyle) { _, style in
-            WeatherBackgroundStyleStore.save(style)
-            analytics.log(.weatherBackgroundChanged(style.rawValue))
+            environment.weatherBackgroundStyleStore.save(style)
+            environment.analytics.log(.weatherBackgroundChanged(style.rawValue))
         }
         .onChange(of: forecastViewMode) { _, mode in
-            ForecastViewModeStore.save(mode)
-            analytics.log(.viewModeChanged(mode.rawValue))
+            environment.forecastViewModeStore.save(mode)
+            environment.analytics.log(.viewModeChanged(mode.rawValue))
         }
         .onChange(of: theme) { _, theme in
-            VentusThemeStore.save(theme)
-            analytics.log(.themeChanged(theme.rawValue))
+            environment.ventusThemeStore.save(theme)
+            environment.analytics.log(.themeChanged(theme.rawValue))
         }
         .onChange(of: appLanguage) { _, appLanguage in
-            AppLanguageStore.save(appLanguage)
-            analytics.log(.languageChanged(appLanguage.rawValue))
+            environment.appLanguageStore.save(appLanguage)
+            environment.analytics.log(.languageChanged(appLanguage.rawValue))
         }
         .onChange(of: appAppearanceMode) { _, mode in
-            AppAppearanceModeStore.save(mode)
-            analytics.log(.appearanceModeChanged(mode.rawValue))
+            environment.appAppearanceModeStore.save(mode)
+            environment.analytics.log(.appearanceModeChanged(mode.rawValue))
         }
         .onChange(of: notificationsEnabled) { _, isEnabled in
-            ForecastSevereWeatherNotificationsStore.save(isEnabled)
+            environment.forecastSevereWeatherNotificationsStore.save(isEnabled)
         }
 #if !os(watchOS)
         .onChange(of: gridHourStep) { _, step in
-            GridHourStepStore.save(step)
+            environment.gridHourStepStore.save(step)
         }
 #endif
         .forecastAccessibilityContainer(
@@ -223,7 +227,8 @@ public struct SettingsView: View {
         forecastViewMode: .constant(.dashboard),
         theme: .constant(.system),
         appLanguage: .constant(.system),
-        appAppearanceMode: .constant(.system)
+        appAppearanceMode: .constant(.system),
+        environment: .preview
     )
 }
 #else
@@ -236,7 +241,8 @@ public struct SettingsView: View {
         appAppearanceMode: .constant(.system),
         gridHourStep: .constant(1),
         forecastService: ForecastWindguruMockup(),
-        account: WindguruAccount()
+        account: WindguruAccount(credentialStore: AppEnvironment.preview.windguruCredentialStore),
+        environment: .preview
     )
 }
 #endif

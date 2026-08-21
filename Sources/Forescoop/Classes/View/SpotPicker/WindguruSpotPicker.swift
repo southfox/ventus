@@ -27,6 +27,7 @@ public struct WindguruSpotPicker: View {
     let onFavoriteAdded: () -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.appEnvironment) private var environment
     @StateObject private var viewModel: WindguruSpotPickerViewModel
     @State private var showsMap = false
     @State private var mapCoordinateToShow: CLLocationCoordinate2D?
@@ -39,7 +40,7 @@ public struct WindguruSpotPicker: View {
     public init(
         forecastService: ForecastWindguruProtocol,
         account: WindguruAccount,
-        analytics: AnalyticsLogging,
+        environment: AppEnvironment,
         onSpotSelected: @escaping (SpotOwner) -> Void,
         onSpotIDSelected: @escaping (String) -> Void = { _ in },
         onFavoriteSelected: @escaping (SpotOwner) -> Void = { _ in },
@@ -47,7 +48,7 @@ public struct WindguruSpotPicker: View {
         purpose: Purpose = .chooseLocation,
         onFavoriteAdded: @escaping () -> Void = {}
     ) {
-        _viewModel = StateObject(wrappedValue: WindguruSpotPickerViewModel(forecastService: forecastService, analytics: analytics))
+        _viewModel = StateObject(wrappedValue: WindguruSpotPickerViewModel(forecastService: forecastService, environment: environment))
         self.purpose = purpose
         self.account = account
         self.onSpotSelected = onSpotSelected
@@ -172,6 +173,7 @@ public struct WindguruSpotPicker: View {
             MapLocationPicker(
                 initialCoordinate: mapCoordinateToShow,
                 isSelectionEnabled: false,
+                environment: environment,
                 onSelection: { _ in }
             )
         }
@@ -745,8 +747,8 @@ private enum DeviceLocationError: LocalizedError {
 #Preview("Windguru spot picker") {
     WindguruSpotPicker(
         forecastService: ForecastWindguruMockup(),
-        account: WindguruAccount(),
-        analytics: NoOpAnalyticsLogger(),
+        account: WindguruAccount(credentialStore: AppEnvironment.preview.windguruCredentialStore),
+        environment: .preview,
         onSpotSelected: { _ in },
         onCoordinateSelected: { _, _ in }
     )
@@ -754,7 +756,7 @@ private enum DeviceLocationError: LocalizedError {
 
 #if !os(tvOS)
 #Preview("Map location picker") {
-    MapLocationPicker(onSelection: { _ in })
+    MapLocationPicker(environment: .preview, onSelection: { _ in })
 }
 #endif
 #endif

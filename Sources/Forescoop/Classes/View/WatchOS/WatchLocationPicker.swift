@@ -15,19 +15,30 @@ struct WatchLocation: Codable, Identifiable, Hashable {
     var id: String { spotID }
 }
 
-enum WatchLocationStore {
+protocol WatchLocationStoring: Sendable {
+    func load() -> [WatchLocation]
+    func save(_ locations: [WatchLocation])
+}
+
+final class WatchLocationStore: WatchLocationStoring, @unchecked Sendable {
     private static let key = "watchSavedWindguruLocations"
     private static let defaultLocations = [WatchLocation(spotID: "64141", name: "Bariloche")]
 
-    static func load() -> [WatchLocation] {
-        guard let data = UserDefaults.standard.data(forKey: key),
+    private let defaults: UserDefaults
+
+    init(defaults: UserDefaults) {
+        self.defaults = defaults
+    }
+
+    func load() -> [WatchLocation] {
+        guard let data = defaults.data(forKey: Self.key),
               let locations = try? JSONDecoder().decode([WatchLocation].self, from: data),
-              !locations.isEmpty else { return defaultLocations }
+              !locations.isEmpty else { return Self.defaultLocations }
         return locations
     }
 
-    static func save(_ locations: [WatchLocation]) {
-        UserDefaults.standard.set(try? JSONEncoder().encode(locations), forKey: key)
+    func save(_ locations: [WatchLocation]) {
+        defaults.set(try? JSONEncoder().encode(locations), forKey: Self.key)
     }
 }
 

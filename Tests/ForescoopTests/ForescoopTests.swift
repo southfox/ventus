@@ -35,7 +35,7 @@ final class ForescoopTests: XCTestCase {
         let viewModel = ForecastDashboardViewModel(
             forecastService: ForecastWindguruMockup(),
             preferencesProvider: TestPreferencesProvider(forecastUnitPreferences: expected),
-            analytics: NoOpAnalyticsLogger()
+            environment: .preview
         )
 
         XCTAssertEqual(viewModel.deviceUnitPreferences, expected)
@@ -43,12 +43,10 @@ final class ForescoopTests: XCTestCase {
 
     @MainActor
     func testDashboardSessionCleanupClearsPersistedLocationsAndSelectedSpot() {
-        let originalLocations = SavedMapLocationStore.load()
-        let originalSpotID = SelectedWindguruSpotStore.load()
-        defer {
-            SavedMapLocationStore.save(originalLocations)
-            SelectedWindguruSpotStore.save(originalSpotID)
-        }
+        // Each test gets its own in-memory environment, so there's no
+        // production state to back up/restore around this test the way the
+        // old static-store version needed to.
+        let environment = AppEnvironment.preview
 
         let sessionLocation = SavedMapLocation(
             name: "Session location",
@@ -56,14 +54,14 @@ final class ForescoopTests: XCTestCase {
             spotID: "999999",
             placeDescription: "Chile"
         )
-        SavedMapLocationStore.save(originalLocations + [sessionLocation])
-        SelectedWindguruSpotStore.save(sessionLocation.spotID!)
+        environment.savedMapLocationStore.save(environment.savedMapLocationStore.load() + [sessionLocation])
+        environment.selectedSpotStore.save(sessionLocation.spotID!)
 
-        let viewModel = ForecastDashboardViewModel(forecastService: ForecastWindguruMockup(), analytics: NoOpAnalyticsLogger())
+        let viewModel = ForecastDashboardViewModel(forecastService: ForecastWindguruMockup(), environment: environment)
         viewModel.clearPersistedSessionData()
 
         XCTAssertEqual(viewModel.savedMapLocations.map(\.spotID), [SavedMapLocationStore.primarySpotID])
-        XCTAssertEqual(SavedMapLocationStore.load().map(\.spotID), [SavedMapLocationStore.primarySpotID])
-        XCTAssertEqual(SelectedWindguruSpotStore.load(), SavedMapLocationStore.primarySpotID)
+        XCTAssertEqual(environment.savedMapLocationStore.load().map(\.spotID), [SavedMapLocationStore.primarySpotID])
+        XCTAssertEqual(environment.selectedSpotStore.load(), SavedMapLocationStore.primarySpotID)
     }
 }

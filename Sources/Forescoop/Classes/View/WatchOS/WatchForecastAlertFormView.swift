@@ -15,6 +15,7 @@ struct WatchForecastAlertFormView: View {
     let existingAlert: ForecastAlert?
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.appEnvironment) private var environment
     @State private var draft: ForecastAlert
     @State private var isPresentingSpotPicker = false
     @State private var availableModels = [(identifier: String, name: String)]()
@@ -88,7 +89,7 @@ struct WatchForecastAlertFormView: View {
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        ForecastAlertStore.save(draft)
+                        environment.forecastAlertStore.save(draft)
                         dismiss()
                     }
                     .disabled(draft.spotID.isEmpty)
@@ -96,7 +97,7 @@ struct WatchForecastAlertFormView: View {
             }
             .sheet(isPresented: $isPresentingSpotPicker) {
                 WatchLocationPicker(
-                    locations: WatchLocationStore.load(),
+                    locations: environment.watchLocationStore.load(),
                     selectedSpotID: draft.spotID,
                     forecastService: forecastService,
                     select: { location in
@@ -104,10 +105,10 @@ struct WatchForecastAlertFormView: View {
                         isPresentingSpotPicker = false
                     },
                     add: { location in
-                        var locations = WatchLocationStore.load()
+                        var locations = environment.watchLocationStore.load()
                         if !locations.contains(where: { $0.spotID == location.spotID }) {
                             locations.append(location)
-                            WatchLocationStore.save(locations)
+                            environment.watchLocationStore.save(locations)
                         }
                         selectSpot(location)
                         isPresentingSpotPicker = false

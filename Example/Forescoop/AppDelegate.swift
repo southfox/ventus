@@ -14,12 +14,12 @@ import SwiftUI
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
-    private let analytics = VentusFirebase()
+    private let environment = AppEnvironment()
     private var window: NSWindow?
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        analytics.configure()
-        let window = NSWindow(contentViewController: NSHostingController(rootView: ForecastDashboardView(analytics: analytics)))
+        environment.analytics.configure()
+        let window = NSWindow(contentViewController: NSHostingController(rootView: ForecastDashboardView(environment: environment)))
         window.title = "Ventus"
         window.setContentSize(NSSize(width: 1_180, height: 820))
         window.minSize = NSSize(width: 900, height: 650)
@@ -47,7 +47,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc private func addVentusWidget(_ sender: Any?) {
-        analytics.log(.widgetAddRequested)
+        environment.analytics.log(.widgetAddRequested)
         let didOpenGallery = NSApp.sendAction(
             Selector(("showWidgetGallery:")),
             to: nil,
@@ -76,13 +76,13 @@ import SwiftUI
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    let analytics = VentusFirebase()
+    let environment = AppEnvironment()
 
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
-        analytics.configure()
+        environment.analytics.configure()
         ForecastAlertBackgroundRefresh.register()
         ForecastAlertBackgroundRefresh.schedule()
         return true
@@ -135,9 +135,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     ) {
         guard let windowScene = scene as? UIWindowScene else { return }
 
-        let analytics = (UIApplication.shared.delegate as? AppDelegate)?.analytics ?? VentusFirebase()
+        let environment = (UIApplication.shared.delegate as? AppDelegate)?.environment ?? AppEnvironment()
         let window = UIWindow(windowScene: windowScene)
-        window.rootViewController = UIHostingController(rootView: ForecastDashboardView(analytics: analytics))
+        window.rootViewController = UIHostingController(rootView: ForecastDashboardView(environment: environment))
         window.makeKeyAndVisible()
         self.window = window
     }

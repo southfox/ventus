@@ -233,19 +233,25 @@ struct VentusThemeModifier: ViewModifier {
 
 /// Theme storage shared by every Forescoop target installed on this device.
 /// The App Group is intentionally also used by the widget extensions.
-public enum VentusThemeStore {
+public protocol VentusThemeStoring: Sendable {
+    func load() -> VentusTheme
+    func save(_ theme: VentusTheme)
+}
+
+public final class VentusThemeStore: VentusThemeStoring, @unchecked Sendable {
     private static let key = "ventusTheme"
-    private static let appGroupIdentifier = "group.org.forescoop.shared"
-    private static func defaults() -> UserDefaults {
-        UserDefaults(suiteName: appGroupIdentifier) ?? .standard
+    private let defaults: UserDefaults
+
+    public init(defaults: UserDefaults) {
+        self.defaults = defaults
     }
 
-    public static func load() -> VentusTheme {
-        defaults().string(forKey: key).flatMap(VentusTheme.init(rawValue:)) ?? .system
+    public func load() -> VentusTheme {
+        defaults.string(forKey: Self.key).flatMap(VentusTheme.init(rawValue:)) ?? .system
     }
 
-    public static func save(_ theme: VentusTheme) {
-        defaults().set(theme.rawValue, forKey: key)
+    public func save(_ theme: VentusTheme) {
+        defaults.set(theme.rawValue, forKey: Self.key)
 #if canImport(WidgetKit)
         WidgetCenter.shared.reloadAllTimelines()
 #endif

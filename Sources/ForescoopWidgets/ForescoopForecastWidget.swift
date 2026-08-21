@@ -5,12 +5,13 @@ import WidgetKit
 
 public struct ForescoopForecastWidget: Widget {
     public let kind = "org.forescoop.forecast"
+    private let environment = AppEnvironment()
 
     public init() {}
 
     public var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: ForecastWidgetProvider()) { entry in
-            ForecastWidgetView(entry: entry)
+            ForecastWidgetView(entry: entry, theme: environment.ventusThemeStore.load())
         }
         .configurationDisplayName("Forecast")
         .description("Current weather at your selected forecast location.")
@@ -43,7 +44,7 @@ public struct ForescoopForecastWidget: Widget {
 
 #if DEBUG
 #Preview("Widget configuration") {
-    ForecastWidgetView(entry: .placeholder)
+    ForecastWidgetView(entry: .placeholder, theme: .system)
         .frame(width: 320, height: 150)
         .padding()
         .background(.blue.gradient)

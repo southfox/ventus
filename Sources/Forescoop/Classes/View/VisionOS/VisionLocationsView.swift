@@ -8,9 +8,13 @@ import MapKit
 import SwiftUI
 
 public struct VisionLocationsView: View {
-    @State private var locations = SavedMapLocationStore.load()
+    private let environment: AppEnvironment
+    @State private var locations: [SavedMapLocation]
 
-    public init() {}
+    public init(environment: AppEnvironment) {
+        self.environment = environment
+        _locations = State(initialValue: environment.savedMapLocationStore.load())
+    }
 
     public var body: some View {
         NavigationStack {
@@ -35,7 +39,7 @@ public struct VisionLocationsView: View {
             .navigationTitle("Locations")
             .toolbar {
                 Button("Refresh", systemImage: "arrow.clockwise") {
-                    locations = SavedMapLocationStore.load()
+                    locations = environment.savedMapLocationStore.load()
                 }
             }
         }
@@ -43,6 +47,6 @@ public struct VisionLocationsView: View {
 }
 
 #Preview(windowStyle: .automatic) {
-    VisionLocationsView()
+    VisionLocationsView(environment: .preview)
 }
 #endif

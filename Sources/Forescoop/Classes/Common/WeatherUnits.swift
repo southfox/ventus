@@ -207,8 +207,12 @@ public enum DeviceForecastPreferences {
     }
 }
 
-public enum VentusForecastUnitStore {
-    private static let appGroupIdentifier = "group.org.forescoop.shared"
+public protocol VentusForecastUnitStoring: Sendable {
+    func load(fallback: ForecastUnitPreferences) -> ForecastUnitPreferences
+    func save(_ preferences: ForecastUnitPreferences)
+}
+
+public final class VentusForecastUnitStore: VentusForecastUnitStoring, @unchecked Sendable {
     private static let temperatureKey = "forecastUnit.temperature"
     private static let windSpeedKey = "forecastUnit.windSpeed"
     private static let waveHeightKey = "forecastUnit.waveHeight"
@@ -216,30 +220,30 @@ public enum VentusForecastUnitStore {
     private static let precipitationKey = "forecastUnit.precipitation"
     private static let freezingLevelKey = "forecastUnit.freezingLevel"
 
-    private static func defaults() -> UserDefaults {
-        UserDefaults(suiteName: appGroupIdentifier) ?? .standard
+    private let defaults: UserDefaults
+
+    public init(defaults: UserDefaults) {
+        self.defaults = defaults
     }
 
-    public static func load(fallback: ForecastUnitPreferences = DeviceForecastPreferenceProvider().forecastUnitPreferences) -> ForecastUnitPreferences {
-        let defaults = defaults()
-        return ForecastUnitPreferences(
-            temperatureUnit: defaults.string(forKey: temperatureKey).flatMap(TemperatureUnit.init(rawValue:)) ?? fallback.temperatureUnit,
-            windSpeedUnit: defaults.string(forKey: windSpeedKey).flatMap(WindSpeedUnit.init(rawValue:)) ?? fallback.windSpeedUnit,
-            waveHeightUnit: defaults.string(forKey: waveHeightKey).flatMap(WaveHeightUnit.init(rawValue:)) ?? fallback.waveHeightUnit,
-            pressureUnit: defaults.string(forKey: pressureKey).flatMap(PressureUnit.init(rawValue:)) ?? fallback.pressureUnit,
-            precipitationUnit: defaults.string(forKey: precipitationKey).flatMap(PrecipitationUnit.init(rawValue:)) ?? fallback.precipitationUnit,
-            freezingLevelUnit: defaults.string(forKey: freezingLevelKey).flatMap(FreezingLevelUnit.init(rawValue:)) ?? fallback.freezingLevelUnit
+    public func load(fallback: ForecastUnitPreferences = DeviceForecastPreferenceProvider().forecastUnitPreferences) -> ForecastUnitPreferences {
+        ForecastUnitPreferences(
+            temperatureUnit: defaults.string(forKey: Self.temperatureKey).flatMap(TemperatureUnit.init(rawValue:)) ?? fallback.temperatureUnit,
+            windSpeedUnit: defaults.string(forKey: Self.windSpeedKey).flatMap(WindSpeedUnit.init(rawValue:)) ?? fallback.windSpeedUnit,
+            waveHeightUnit: defaults.string(forKey: Self.waveHeightKey).flatMap(WaveHeightUnit.init(rawValue:)) ?? fallback.waveHeightUnit,
+            pressureUnit: defaults.string(forKey: Self.pressureKey).flatMap(PressureUnit.init(rawValue:)) ?? fallback.pressureUnit,
+            precipitationUnit: defaults.string(forKey: Self.precipitationKey).flatMap(PrecipitationUnit.init(rawValue:)) ?? fallback.precipitationUnit,
+            freezingLevelUnit: defaults.string(forKey: Self.freezingLevelKey).flatMap(FreezingLevelUnit.init(rawValue:)) ?? fallback.freezingLevelUnit
         )
     }
 
-    public static func save(_ preferences: ForecastUnitPreferences) {
-        let defaults = defaults()
-        defaults.set(preferences.temperatureUnit.rawValue, forKey: temperatureKey)
-        defaults.set(preferences.windSpeedUnit.rawValue, forKey: windSpeedKey)
-        defaults.set(preferences.waveHeightUnit.rawValue, forKey: waveHeightKey)
-        defaults.set(preferences.pressureUnit.rawValue, forKey: pressureKey)
-        defaults.set(preferences.precipitationUnit.rawValue, forKey: precipitationKey)
-        defaults.set(preferences.freezingLevelUnit.rawValue, forKey: freezingLevelKey)
+    public func save(_ preferences: ForecastUnitPreferences) {
+        defaults.set(preferences.temperatureUnit.rawValue, forKey: Self.temperatureKey)
+        defaults.set(preferences.windSpeedUnit.rawValue, forKey: Self.windSpeedKey)
+        defaults.set(preferences.waveHeightUnit.rawValue, forKey: Self.waveHeightKey)
+        defaults.set(preferences.pressureUnit.rawValue, forKey: Self.pressureKey)
+        defaults.set(preferences.precipitationUnit.rawValue, forKey: Self.precipitationKey)
+        defaults.set(preferences.freezingLevelUnit.rawValue, forKey: Self.freezingLevelKey)
 #if canImport(WidgetKit)
         WidgetCenter.shared.reloadAllTimelines()
 #endif

@@ -976,7 +976,7 @@ private struct WindguruForecastGridPreview: View {
         let models = mockup.dashboardPreviewForecasts
         self.models = models
         forecast = models.first
-        let viewModel = ForecastDashboardViewModel(forecastService: mockup, analytics: NoOpAnalyticsLogger())
+        let viewModel = ForecastDashboardViewModel(forecastService: mockup, environment: .preview)
         if let forecast = models.first {
             viewModel.usePreviewForecast(forecast, spotID: forecast.identifier ?? "64141", modelForecasts: models)
         }

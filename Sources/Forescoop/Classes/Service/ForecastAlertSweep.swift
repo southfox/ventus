@@ -6,14 +6,16 @@
 import Foundation
 
 public enum ForecastAlertSweep {
+    @MainActor
     public static func run() async {
-        guard ForecastSevereWeatherNotificationsStore.load() else { return }
-        let alerts = ForecastAlertStore.load().filter { $0.isActive && $0.pushNotificationEnabled }
+        let environment = AppEnvironment()
+        guard environment.forecastSevereWeatherNotificationsStore.load() else { return }
+        let alerts = environment.forecastAlertStore.load().filter { $0.isActive && $0.pushNotificationEnabled }
         guard !alerts.isEmpty else { return }
 
-        let username = WindguruCredentialStore.activeUsername()
-        let isProUser = WindguruCredentialStore.activeProUser()
-        let password = username.flatMap(WindguruCredentialStore.password(for:))
+        let username = environment.windguruCredentialStore.activeUsername()
+        let isProUser = environment.windguruCredentialStore.activeProUser()
+        let password = username.flatMap(environment.windguruCredentialStore.password(for:))
         let service = ForecastWindguruService()
 
         let alertsBySpot = Dictionary(grouping: alerts, by: \.spotID)
@@ -29,7 +31,7 @@ public enum ForecastAlertSweep {
                     username: username,
                     password: password
                 ) else { continue }
-                ForecastSevereWeatherNotifier.evaluateCustomAlerts(forecast)
+                environment.severeWeatherNotifier.evaluateCustomAlerts(forecast)
             }
         }
     }

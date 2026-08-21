@@ -8,8 +8,6 @@
 
 import SwiftUI
 
-/// Overrides the app's display language independently of the device's
-/// system language. "System" follows whatever language the device is set to..
 public enum AppLanguage: String, CaseIterable, Identifiable, Sendable {
     case system
     case english
@@ -45,7 +43,6 @@ public enum AppLanguage: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
-/// Applies the selected language override to the scene; Text and String(localized:locale:) resolve using the environment locale when all languages are in Bundle.main (no bundle swap needed).
 public extension View {
     @ViewBuilder
     func appLanguage(_ language: AppLanguage) -> some View {
@@ -57,41 +54,40 @@ public extension View {
     }
 }
 
-/// Per-app language preference.
-public enum AppLanguageStore {
+public protocol AppLanguageStoring: Sendable {
+    func load() -> AppLanguage
+    func save(_ language: AppLanguage)
+}
+
+public final class AppLanguageStore: AppLanguageStoring, @unchecked Sendable {
     private static let key = "appLanguage"
+    private let defaults: UserDefaults
 
-    public static func load() -> AppLanguage {
-        UserDefaults.standard.string(forKey: key).flatMap(AppLanguage.init(rawValue:)) ?? .system
+    public init(defaults: UserDefaults) {
+        self.defaults = defaults
     }
 
-    public static func save(_ language: AppLanguage) {
-        UserDefaults.standard.set(language.rawValue, forKey: key)
+    public func load() -> AppLanguage {
+        defaults.string(forKey: Self.key).flatMap(AppLanguage.init(rawValue:)) ?? .system
     }
 
-    /// For code outside the SwiftUI view hierarchy (model types, widget
-    /// timeline providers) that can't read `@Environment(\.locale)`.
+    public func save(_ language: AppLanguage) {
+        defaults.set(language.rawValue, forKey: Self.key)
+    }
+
     public static var currentLocale: Locale {
-        load().locale ?? .current
+        let language = UserDefaults.standard.string(forKey: key).flatMap(AppLanguage.init(rawValue:)) ?? .system
+        return language.locale ?? .current
     }
 }
 
 public extension Bundle {
-    /// The Forescoop package's own resource bundle, which carries every
-    /// language's compiled `Localizable.xcstrings` regardless of the app
-    /// target: several targets (including the `iOSnowatch` App Store
-    /// target, both widget extensions, and `Forescoop_Tests`) don't embed
-    /// `Localizable.xcstrings` into their own `Bundle.main` — only this
-    /// package's `Bundle.module` reliably has every `.lproj` table on every
-    /// target.
     static var forescoop: Bundle { .module }
 
-    /// Looks up a key directly in the specified locale’s Localizable.strings (bypassing Bundle.localizedString and avoiding lproj bundle pitfalls) so translations respect the chosen app language rather than the device language.
     func localizedString(_ key: String, locale: Locale, formatArguments: [CVarArg] = []) -> String {
         guard let languageCode = locale.language.languageCode?.identifier else {
             return formatArguments.isEmpty ? key : String(format: key, arguments: formatArguments)
         }
-        // Try the region-specific lproj (like "pt-BR.lproj") first, and fall back to the base language table (like "pt.lproj") if the regional one isn’t available.
         let regionQualified = locale.language.region.map { "\(languageCode)-\($0.identifier)" }
         for candidate in [regionQualified, languageCode].compactMap({ $0 }) {
             guard let lprojPath = path(forResource: candidate, ofType: "lproj"),
@@ -105,27 +101,18 @@ public extension Bundle {
 }
 
 public extension String {
-    /// Localizes `self` using the app's current language override
-    /// (`AppLanguageStore.currentLocale`), independent of the device's
-    /// system language.
     var localized: String {
         Bundle.forescoop.localizedString(self, locale: AppLanguageStore.currentLocale)
     }
 
-    /// Localizes `self` using an explicit locale, e.g. one read from
-    /// `@Environment(\.locale)` at the call site.
     func localized(locale: Locale) -> String {
         Bundle.forescoop.localizedString(self, locale: locale)
     }
 
-    /// Localizes `self` as a format string, substituting `formatArguments`,
-    /// using the app's current language override.
     func localized(formatArguments: [CVarArg]) -> String {
         Bundle.forescoop.localizedString(self, locale: AppLanguageStore.currentLocale, formatArguments: formatArguments)
     }
 
-    /// Localizes `self` as a format string, substituting `formatArguments`,
-    /// using an explicit locale.
     func localized(locale: Locale, formatArguments: [CVarArg]) -> String {
         Bundle.forescoop.localizedString(self, locale: locale, formatArguments: formatArguments)
     }

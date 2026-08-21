@@ -27,7 +27,7 @@ public final class ForecastDashboardViewModel: ObservableObject {
     @Published var modelNamesByID = [String: String]()
     @Published var displayedModelForecasts = [SpotForecast]()
     @Published var severeWeatherAlert: ForecastSevereWeatherAlert?
-    @Published var savedMapLocations = SavedMapLocationStore.load()
+    @Published var savedMapLocations: [SavedMapLocation]
     @Published var temperatureUnit: TemperatureUnit {
         didSet {
             persistWidgetUnits()
@@ -66,6 +66,11 @@ public final class ForecastDashboardViewModel: ObservableObject {
     }
 
     private let analytics: AnalyticsLogging
+    private let savedMapLocationStore: SavedMapLocationStoring
+    private let ventusForecastUnitStore: VentusForecastUnitStoring
+    private let sharedForecastSnapshotStore: SharedForecastSnapshotStoring
+    private let gridHourStepStore: GridHourStepStoring
+    private let severeWeatherNotifier: ForecastSevereWeatherNotifier
     private let profileLoader: @MainActor (String, String) async throws -> User?
     private let preferencesProvider: any ForecastPreferencesProviding
     private let forecastLoader: @MainActor (String, String?) async throws -> SpotForecast?
@@ -82,11 +87,17 @@ public final class ForecastDashboardViewModel: ObservableObject {
     public init(
         forecastService: ForecastWindguruProtocol = ForecastWindguruService(),
         preferencesProvider: any ForecastPreferencesProviding = DeviceForecastPreferenceProvider(),
-        analytics: AnalyticsLogging
+        environment: AppEnvironment
     ) {
-        self.analytics = analytics
+        self.analytics = environment.analytics
+        self.savedMapLocationStore = environment.savedMapLocationStore
+        self.ventusForecastUnitStore = environment.ventusForecastUnitStore
+        self.sharedForecastSnapshotStore = environment.sharedForecastSnapshotStore
+        self.gridHourStepStore = environment.gridHourStepStore
+        self.severeWeatherNotifier = environment.severeWeatherNotifier
         self.preferencesProvider = preferencesProvider
-        let unitPreferences = VentusForecastUnitStore.load(fallback: preferencesProvider.forecastUnitPreferences)
+        savedMapLocations = environment.savedMapLocationStore.load()
+        let unitPreferences = environment.ventusForecastUnitStore.load(fallback: preferencesProvider.forecastUnitPreferences)
         temperatureUnit = unitPreferences.temperatureUnit
         windSpeedUnit = unitPreferences.windSpeedUnit
         waveHeightUnit = unitPreferences.waveHeightUnit
@@ -162,7 +173,7 @@ public final class ForecastDashboardViewModel: ObservableObject {
     }
 
     public func applyPersistedUnitPreferences() {
-        let preferences = VentusForecastUnitStore.load(fallback: preferencesProvider.forecastUnitPreferences)
+        let preferences = ventusForecastUnitStore.load(fallback: preferencesProvider.forecastUnitPreferences)
         temperatureUnit = preferences.temperatureUnit
         windSpeedUnit = preferences.windSpeedUnit
         waveHeightUnit = preferences.waveHeightUnit
@@ -172,7 +183,7 @@ public final class ForecastDashboardViewModel: ObservableObject {
     }
 
     private func persistWidgetUnits() {
-        VentusForecastUnitStore.save(
+        ventusForecastUnitStore.save(
             ForecastUnitPreferences(
                 temperatureUnit: temperatureUnit,
                 windSpeedUnit: windSpeedUnit,
@@ -195,7 +206,7 @@ public final class ForecastDashboardViewModel: ObservableObject {
             precipitationUnit: precipitationUnit,
             freezingLevelUnit: freezingLevelUnit
         )
-        SharedForecastSnapshotStore.save(.make(from: forecast, units: preferences))
+        sharedForecastSnapshotStore.save(.make(from: forecast, units: preferences, gridHourStepStore: gridHourStepStore))
     }
 
     public func clearUserProfile() {
@@ -219,7 +230,7 @@ public final class ForecastDashboardViewModel: ObservableObject {
     }
 
     func clearPersistedSessionData() {
-        savedMapLocations = SavedMapLocationStore.clearSessionData()
+        savedMapLocations = savedMapLocationStore.clearSessionData()
     }
 
     func usePreviewForecast(_ forecast: SpotForecast, spotID: String, modelForecasts: [SpotForecast] = []) {
@@ -355,8 +366,8 @@ public final class ForecastDashboardViewModel: ObservableObject {
                 selectedModelIDs = currentSpotModelIDs
             }
             selectedHour = closestHour(to: Date(), in: forecast)
-            severeWeatherAlert = ForecastSevereWeatherNotifier.evaluate(forecast)
-            ForecastSevereWeatherNotifier.evaluateCustomAlerts(forecast)
+            severeWeatherAlert = severeWeatherNotifier.evaluate(forecast)
+            severeWeatherNotifier.evaluateCustomAlerts(forecast)
             persistWidgetSnapshot()
             analytics.log(.forecastLoadSucceeded(spotID: spotID, modelCount: displayedModelForecasts.count))
             return true
@@ -417,9 +428,9 @@ public final class ForecastDashboardViewModel: ObservableObject {
             selectedModelIDs = coordinateForecasts.compactMap(\.model)
             usableModelIDs = selectedModelIDs
             selectedHour = forecast.flatMap { closestHour(to: Date(), in: $0) }
-            severeWeatherAlert = forecast.flatMap(ForecastSevereWeatherNotifier.evaluate)
+            severeWeatherAlert = forecast.flatMap(severeWeatherNotifier.evaluate)
             if let forecast {
-                ForecastSevereWeatherNotifier.evaluateCustomAlerts(forecast)
+                severeWeatherNotifier.evaluateCustomAlerts(forecast)
             }
             persistWidgetSnapshot()
             analytics.log(.coordinateLocationSelected)

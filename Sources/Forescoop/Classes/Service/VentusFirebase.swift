@@ -19,15 +19,18 @@ import FirebaseCrashlytics
 
 public final class VentusFirebase: AnalyticsLogging {
     private static let deviceIdentifierKey = "ventusFirebaseDeviceIdentifier"
+    private let preferenceStore: VentusPreferenceStoring
 
-    public init() {}
+    init(preferenceStore: VentusPreferenceStoring) {
+        self.preferenceStore = preferenceStore
+    }
 
     private var deviceIdentifier: String {
-        if let existing = VentusPreferenceStore.value(forKey: Self.deviceIdentifierKey) {
+        if let existing = preferenceStore.value(forKey: Self.deviceIdentifierKey) {
             return existing
         }
         let generated = UUID().uuidString
-        VentusPreferenceStore.save(generated, forKey: Self.deviceIdentifierKey)
+        preferenceStore.save(generated, forKey: Self.deviceIdentifierKey)
         return generated
     }
 

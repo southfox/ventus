@@ -10,6 +10,7 @@ public struct ForecastHourSelector: View {
     public let forecast: SpotForecast
     @Binding public var selectedHour: String?
     @Environment(\.locale) private var locale
+    @Environment(\.appEnvironment) private var environment
 
     public init(
         forecast: SpotForecast,
@@ -20,7 +21,7 @@ public struct ForecastHourSelector: View {
     }
 
     private var hours: [String] {
-        forecast.steppedForecastHours(anchorHour: currentHour, step: GridHourStepStore.load(), includingPast: false)
+        forecast.steppedForecastHours(anchorHour: currentHour, step: environment.gridHourStepStore.load(), includingPast: false)
     }
 
     private var currentHour: String? {

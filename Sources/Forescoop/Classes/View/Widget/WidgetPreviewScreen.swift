@@ -17,8 +17,10 @@ struct WidgetPreviewScreen: View {
     var onSelectLocation: () -> Void = {}
     var onShowMap: () -> Void = {}
 
+    @Environment(\.appEnvironment) private var environment
+
     private var entry: ForecastWidgetEntry {
-        ForecastWidgetEntryBuilder.entry(from: forecast, coordinateLocationName: coordinateLocationName, useDetailedInsight: true)
+        ForecastWidgetEntryBuilder.entry(from: forecast, coordinateLocationName: coordinateLocationName, useDetailedInsight: true, environment: environment)
     }
 
     var body: some View {

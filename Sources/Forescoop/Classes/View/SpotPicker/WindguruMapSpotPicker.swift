@@ -15,9 +15,12 @@ struct WindguruMapSpotPicker: View {
     let initialCoordinate: CLLocationCoordinate2D?
     let onCoordinateSelected: (CLLocationCoordinate2D) -> Void
 
+    @Environment(\.appEnvironment) private var environment
+
     var body: some View {
         MapLocationPicker(
             initialCoordinate: initialCoordinate,
+            environment: environment,
             onSelection: onCoordinateSelected
         )
     }

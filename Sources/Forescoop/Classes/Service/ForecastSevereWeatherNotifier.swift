@@ -11,15 +11,23 @@ import UserNotifications
 #endif
 
 @MainActor
-enum ForecastSevereWeatherNotifier {
+final class ForecastSevereWeatherNotifier {
 #if canImport(UserNotifications) && !os(tvOS)
     private nonisolated static let deliveredAlertsKey = "forecastSevereWeatherNotifier.deliveredAlerts"
 #endif
 
-    static func evaluate(_ spotForecast: SpotForecast) -> ForecastSevereWeatherAlert? {
-        guard ForecastSevereWeatherNotificationsStore.load(),
+    private let notificationsStore: ForecastSevereWeatherNotificationsStoring
+    private let alertStore: ForecastAlertStoring
+
+    nonisolated init(notificationsStore: ForecastSevereWeatherNotificationsStoring, alertStore: ForecastAlertStoring) {
+        self.notificationsStore = notificationsStore
+        self.alertStore = alertStore
+    }
+
+    func evaluate(_ spotForecast: SpotForecast) -> ForecastSevereWeatherAlert? {
+        guard notificationsStore.load(),
               let forecast = spotForecast.forecast,
-              let hour = closestHour(in: spotForecast),
+              let hour = Self.closestHour(in: spotForecast),
               let temperature = forecast.temperatureReal(hh: hour) ?? forecast.temperature(hh: hour) else {
             return nil
         }
@@ -56,7 +64,7 @@ enum ForecastSevereWeatherNotifier {
         guard let alert else { return nil }
 #if canImport(UserNotifications) && !os(tvOS)
         let locationIdentifier = spotForecast.identifier ?? location
-        scheduleNotification(
+        Self.scheduleNotification(
             identifier: "forecast-severe-weather.\(locationIdentifier).\(alert.kind).\(alert.hour)",
             categoryIdentifier: "forecast-severe-weather",
             title: alert.title,
@@ -66,16 +74,16 @@ enum ForecastSevereWeatherNotifier {
         return alert
     }
 
-    nonisolated static func evaluateCustomAlerts(_ spotForecast: SpotForecast) {
+    nonisolated func evaluateCustomAlerts(_ spotForecast: SpotForecast) {
 #if canImport(UserNotifications) && !os(tvOS)
-        guard ForecastSevereWeatherNotificationsStore.load(), let spotID = spotForecast.identifier else { return }
-        let alerts = ForecastAlertStore.load().filter { $0.isActive && $0.pushNotificationEnabled && $0.spotID == spotID }
+        guard notificationsStore.load(), let spotID = spotForecast.identifier else { return }
+        let alerts = alertStore.load().filter { $0.isActive && $0.pushNotificationEnabled && $0.spotID == spotID }
         guard !alerts.isEmpty else { return }
 
         let location = spotForecast.locationDisplayName()
         for alert in alerts {
             guard let match = ForecastAlertEvaluator.matchingHour(for: alert, in: spotForecast) else { continue }
-            scheduleNotification(
+            Self.scheduleNotification(
                 identifier: "forecast-custom-alert.\(alert.id).\(match.hour)",
                 categoryIdentifier: "forecast-custom-alert",
                 title: alert.name.isEmpty ? "Forecast alert near \(location)" : alert.name,
@@ -119,14 +127,25 @@ struct ForecastSevereWeatherAlert: Equatable {
     let hour: String
 }
 
-public enum ForecastSevereWeatherNotificationsStore {
+public protocol ForecastSevereWeatherNotificationsStoring: Sendable {
+    func load() -> Bool
+    func save(_ isEnabled: Bool)
+}
+
+public final class ForecastSevereWeatherNotificationsStore: ForecastSevereWeatherNotificationsStoring {
     private static let key = "forecastSevereWeatherNotificationsEnabled"
 
-    public static func load() -> Bool {
-        VentusPreferenceStore.value(forKey: key).map { $0 == "true" } ?? true
+    private let preferenceStore: VentusPreferenceStoring
+
+    init(preferenceStore: VentusPreferenceStoring) {
+        self.preferenceStore = preferenceStore
     }
 
-    public static func save(_ isEnabled: Bool) {
-        VentusPreferenceStore.save(isEnabled ? "true" : "false", forKey: key)
+    public func load() -> Bool {
+        preferenceStore.value(forKey: Self.key).map { $0 == "true" } ?? true
+    }
+
+    public func save(_ isEnabled: Bool) {
+        preferenceStore.save(isEnabled ? "true" : "false", forKey: Self.key)
     }
 }
