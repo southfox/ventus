@@ -10,11 +10,6 @@ import Foundation
 import SwiftData
 import SwiftUI
 
-/// The app's single composition root. Every process that hosts Forescoop UI
-/// or logic (the main app, each widget extension, the Watch app) creates
-/// exactly one real `AppEnvironment()` and hands it down explicitly —
-/// through View constructors and `@Environment(\.appEnvironment)` — instead
-/// of any store reaching for a static default or `.shared` singleton.
 public final class AppEnvironment: Sendable {
     public let analytics: AnalyticsLogging
     public let savedMapLocationStore: SavedMapLocationStoring
@@ -36,9 +31,6 @@ public final class AppEnvironment: Sendable {
     let forecastWorkspaceSplitStore: ForecastWorkspaceSplitStoring
     let severeWeatherNotifier: ForecastSevereWeatherNotifier
 
-    /// The real, disk/Keychain/Firebase-backed environment. Call this once
-    /// per process, at the composition root, and thread the result down —
-    /// never construct a second one.
     public init() {
         let persistence = VentusPersistenceController()
         let preferenceStore = VentusPreferenceStore(container: persistence.mapLocationsContainer)
