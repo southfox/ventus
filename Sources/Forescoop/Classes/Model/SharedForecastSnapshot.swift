@@ -127,7 +127,7 @@ public struct SharedForecastSnapshot: Codable, Sendable {
 }
 
 public extension SharedForecastSnapshot {
-    static func make(from forecast: SpotForecast, units: ForecastUnitPreferences, gridHourStepStore: GridHourStepStoring) -> SharedForecastSnapshot {
+    static func make(from forecast: SpotForecast, units: ForecastUnitPreferences, gridHourStepStore: GridHourStepStoring, coordinateLocationName: String? = nil) -> SharedForecastSnapshot {
         let hour = forecast.currentForecastHour
         let temperature = forecast.forecast?.temperature(hh: hour) ?? forecast.forecast?.temperatureReal(hh: hour) ?? 0
         let rawTemperature = forecast.forecast?.temperature(hh: hour)
@@ -146,7 +146,7 @@ public extension SharedForecastSnapshot {
 
         return SharedForecastSnapshot(
             date: .now,
-            locationName: forecast.locationDisplayName(),
+            locationName: forecast.locationDisplayName(coordinateLocationName: coordinateLocationName),
             temperature: "\(Temperature(celsius: temperature).value(in: units.temperatureUnit).forecastFormatted(precision: 0))\(units.temperatureUnit.label)",
             temperatureCelsius: temperature,
             rawTemperature: rawTemperature.map { "\(Temperature(celsius: $0).value(in: units.temperatureUnit).forecastFormatted(precision: 0))\(units.temperatureUnit.label)" } ?? "—",

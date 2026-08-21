@@ -206,7 +206,7 @@ public final class ForecastDashboardViewModel: ObservableObject {
             precipitationUnit: precipitationUnit,
             freezingLevelUnit: freezingLevelUnit
         )
-        sharedForecastSnapshotStore.save(.make(from: forecast, units: preferences, gridHourStepStore: gridHourStepStore))
+        sharedForecastSnapshotStore.save(.make(from: forecast, units: preferences, gridHourStepStore: gridHourStepStore, coordinateLocationName: coordinateLocationName))
     }
 
     public func clearUserProfile() {

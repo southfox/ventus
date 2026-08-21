@@ -387,7 +387,8 @@ public struct WindguruSpotPicker: View {
             if purpose == .chooseLocation, isProUser,
                !username.isEmpty,
                account.password != nil {
-                onCoordinateSelected(location.coordinate, nil)
+                let placeName = try? await placeDescription(for: location)
+                onCoordinateSelected(location.coordinate, placeName)
                 return
             }
             guard let searchTerm = try await searchTerm(for: location) else {
@@ -472,7 +473,9 @@ public struct WindguruSpotPicker: View {
         if purpose == .chooseLocation, isProUser,
            !username.isEmpty,
            account.password != nil {
-            onCoordinateSelected(coordinate, nil)
+            let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+            let placeName = try? await placeDescription(for: location)
+            onCoordinateSelected(coordinate, placeName)
             return
         }
         isLoading = true
