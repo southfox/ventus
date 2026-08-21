@@ -198,7 +198,7 @@ public struct ForecastWidgetView: View {
             Divider()
             hourlyForecast(limit: 6)
             Divider()
-            dailyForecast(limit: 6)
+            dailyForecast(limit: 5)
         }
     }
 
@@ -266,26 +266,20 @@ public struct ForecastWidgetView: View {
                 hourlyForecast(limit: 10)
             }
 
-//            if isInAppPreview {
-                Divider()
-//            }
+            Divider()
             Label("10-Day Forecast".localized, systemImage: "calendar")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(theme.accentColor(for: colorScheme))
             dailyForecast(limit: 10)
 
-//            if isInAppPreview {
-                Divider()
-//            }
+            Divider()
             Label("Conditions", systemImage: "list.bullet.rectangle")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(theme.accentColor(for: colorScheme))
 
             expandedConditions(compact: true)
 
-//            if isInAppPreview {
-                Divider()
-//            }
+            Divider()
             insightCard
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -461,14 +455,15 @@ public struct ForecastWidgetView: View {
     }
 
     private func hourlyForecast(limit: Int) -> some View {
-        HStack(alignment: .top, spacing: isInAppPreview ? 25 : 1) {
+        HStack(alignment: .top, spacing: isInAppPreview ? 25 : 5) {
             ForEach(Array(entry.hourly.prefix(limit))) { hour in
                 VStack(spacing: 5) {
                     Text(hour.label)
                         .font(.caption2.weight(.medium))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
-                        .minimumScaleFactor(0.7)
+                    // TODO: check if this is was the issue in widget for ipad?
+//                        .minimumScaleFactor(0.7)
                         .frame(height: 14)
                     Image(systemName: hour.symbolName)
                         .font(.title3)
