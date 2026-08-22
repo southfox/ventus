@@ -223,17 +223,12 @@ public struct ForecastWidgetView: View {
             HStack(alignment: .top, spacing: 24) {
                 VStack(alignment: .leading, spacing: 16) {
                     weatherHeader
-//                    if isInAppPreview {
                         Divider()
-//                    }
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        hourlyForecast(limit: 10)
-                    }
+                    hourlyForecast(limit: 10)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
                 VStack(alignment: .leading, spacing: 12) {
-
                     Label("10-Day Forecast".localized, systemImage: "calendar")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(theme.accentColor(for: colorScheme))
@@ -241,18 +236,14 @@ public struct ForecastWidgetView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
-//            if isInAppPreview {
-                Divider()
-//            }
+            Divider()
 
             Label("Conditions", systemImage: "list.bullet.rectangle")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(theme.accentColor(for: colorScheme))
 
             expandedConditions(compact: false)
-//            if isInAppPreview {
-                Divider()
-//            }
+            Divider()
             insightCard
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -262,8 +253,12 @@ public struct ForecastWidgetView: View {
         VStack(alignment: .leading, spacing: 16) {
             weatherHeader
             Divider()
-            ScrollView(.horizontal, showsIndicators: false) {
+            if isInAppPreview {
                 hourlyForecast(limit: 10)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    hourlyForecast(limit: 10)
+                }
             }
 
             Divider()
@@ -462,8 +457,7 @@ public struct ForecastWidgetView: View {
                         .font(.caption2.weight(.medium))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
-                    // TODO: check if this is was the issue in widget for ipad?
-//                        .minimumScaleFactor(0.7)
+                        .minimumScaleFactor(0.7)
                         .frame(height: 14)
                     Image(systemName: hour.symbolName)
                         .font(.title3)
