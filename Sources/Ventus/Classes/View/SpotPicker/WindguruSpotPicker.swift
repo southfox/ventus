@@ -75,10 +75,12 @@ public struct WindguruSpotPicker: View {
         NavigationStack {
             List {
                 Section {
-                    Button("Use Current Location", systemImage: "location.fill") {
-                        Task { await searchCurrentLocation() }
+                    if isProUser {
+                        Button("Use Current Location", systemImage: "location.fill") {
+                            Task { await searchCurrentLocation() }
+                        }
+                        .disabled(isLoading)
                     }
-                    .disabled(isLoading)
 #if !os(tvOS)
                     if isProUser {
                     Button("Pick on Map", systemImage: "map") {
@@ -89,7 +91,7 @@ public struct WindguruSpotPicker: View {
                 } footer: {
                     Text(isProUser
                         ? "Pick any coordinate worldwide for a Windguru PRO forecast."
-                        : "Use your current location or enter a Windguru spot ID.")
+                        : "Enter a Windguru spot ID, or sign in with Windguru PRO to use your current location.")
                 }
 
                 if purpose == .chooseLocation {
@@ -118,6 +120,7 @@ public struct WindguruSpotPicker: View {
                         ForEach(spots.indices, id: \.self) { index in
                             let spot = spots[index]
                             Button {
+                                clearCurrentLocationMode()
                                 Task { await selectSpot(spot) }
                             } label: {
                                 VStack(alignment: .leading) {
@@ -235,8 +238,7 @@ public struct WindguruSpotPicker: View {
     private func favoriteSpotRow(_ spot: SpotOwner) -> some View {
         HStack(spacing: 12) {
             Button {
-                // Favorites are a temporary lookup: do not add them to map
-                // locations or replace the user's stored spot/model selection.
+                clearCurrentLocationMode()
                 onFavoriteSelected(spot)
             } label: {
                 Label {
@@ -384,10 +386,11 @@ public struct WindguruSpotPicker: View {
 
         do {
             let location = try await CurrentLocationProvider().location()
-            if purpose == .chooseLocation, isProUser,
+            if purpose == .chooseLocation,
                !username.isEmpty,
                account.password != nil {
                 let placeName = try? await placeDescription(for: location)
+                environment.selectedSpotStore.saveUsesCurrentLocation(true)
                 onCoordinateSelected(location.coordinate, placeName)
                 return
             }
@@ -397,6 +400,9 @@ public struct WindguruSpotPicker: View {
             query = searchTerm
             spots = try await viewModel.searchSpots(searchTerm)?.allSpots ?? []
             guard let closestSpot = spots.first else { throw DeviceLocationError.noWindguruSpot }
+            if purpose == .chooseLocation {
+                environment.selectedSpotStore.saveUsesCurrentLocation(true)
+            }
             await selectSpot(closestSpot)
         } catch {
             errorMessage = error.localizedDescription
@@ -449,6 +455,7 @@ public struct WindguruSpotPicker: View {
                 ]) else { throw DeviceLocationError.noWindguruSpot }
                 await addFavorite(spot)
             } else {
+                clearCurrentLocationMode()
                 onSpotIDSelected(spotID)
             }
         } catch {
@@ -458,6 +465,7 @@ public struct WindguruSpotPicker: View {
 
     @MainActor
     private func selectSavedLocation(_ location: SavedMapLocation) {
+        clearCurrentLocationMode()
         if let spotID = location.spotID, spotID != "0" {
             onSpotIDSelected(spotID)
         } else {
@@ -475,6 +483,7 @@ public struct WindguruSpotPicker: View {
            account.password != nil {
             let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
             let placeName = try? await placeDescription(for: location)
+            clearCurrentLocationMode()
             onCoordinateSelected(coordinate, placeName)
             return
         }
@@ -487,6 +496,7 @@ public struct WindguruSpotPicker: View {
             guard let spot = try await spotForMapCoordinate(coordinate, placeName: term) else {
                 throw DeviceLocationError.noWindguruSpot
             }
+            clearCurrentLocationMode()
             await selectSpot(spot)
         } catch {
             errorMessage = error.localizedDescription
@@ -524,8 +534,7 @@ public struct WindguruSpotPicker: View {
         )
         appendSavedLocation(savedLocation)
 
-        // A picked place should behave exactly like a searched place: keep it
-        // in Map Locations and immediately make it the dashboard location.
+        clearCurrentLocationMode()
         if let spotID, spotID != "0" {
             onSpotIDSelected(spotID)
         } else {
@@ -536,6 +545,12 @@ public struct WindguruSpotPicker: View {
                     : savedLocation.name
             )
         }
+    }
+
+    @MainActor
+    private func clearCurrentLocationMode() {
+        guard purpose == .chooseLocation else { return }
+        environment.selectedSpotStore.saveUsesCurrentLocation(false)
     }
 
     @MainActor
@@ -633,10 +648,6 @@ public struct WindguruSpotPicker: View {
         _ coordinate: CLLocationCoordinate2D,
         placeName: String
     ) async throws -> SpotOwner? {
-        // A named place is the most useful Windguru lookup (for example,
-        // "South Brisbane"). Only use coordinates when that lookup has no
-        // results, since the API can return unrelated results for a lat/lon
-        // text query.
         let placeMatches = (try? await viewModel.searchSpots(placeName))?.allSpots ?? []
         let matches: [SpotOwner]
         if placeMatches.isEmpty {
@@ -669,28 +680,36 @@ public struct WindguruSpotPicker: View {
     }
 
     private func searchTerm(for location: CLLocation) async throws -> String? {
-        guard let request = MKReverseGeocodingRequest(location: location),
-              let mapItem = try await request.mapItems.first else {
-            return nil
-        }
-        return mapItem.address?.shortAddress
-            ?? mapItem.addressRepresentations?.cityName
-            ?? mapItem.address?.fullAddress
+        try await resolvePlaceSearchTerm(for: location)
     }
 
     private func placeDescription(for location: CLLocation) async throws -> String? {
-        guard let request = MKReverseGeocodingRequest(location: location),
-              let mapItem = try await request.mapItems.first else {
-            return nil
-        }
-        return mapItem.address?.fullAddress
-            ?? mapItem.address?.shortAddress
-            ?? mapItem.addressRepresentations?.cityName
+        try await resolvePlaceDescription(for: location)
     }
 }
 
+func resolvePlaceSearchTerm(for location: CLLocation) async throws -> String? {
+    guard let request = MKReverseGeocodingRequest(location: location),
+          let mapItem = try await request.mapItems.first else {
+        return nil
+    }
+    return mapItem.address?.shortAddress
+        ?? mapItem.addressRepresentations?.cityName
+        ?? mapItem.address?.fullAddress
+}
+
+func resolvePlaceDescription(for location: CLLocation) async throws -> String? {
+    guard let request = MKReverseGeocodingRequest(location: location),
+          let mapItem = try await request.mapItems.first else {
+        return nil
+    }
+    return mapItem.address?.fullAddress
+        ?? mapItem.address?.shortAddress
+        ?? mapItem.addressRepresentations?.cityName
+}
+
 @MainActor
-private final class CurrentLocationProvider: NSObject, @preconcurrency CLLocationManagerDelegate {
+final class CurrentLocationProvider: NSObject, @preconcurrency CLLocationManagerDelegate {
     private let manager = CLLocationManager()
     private var continuation: CheckedContinuation<CLLocation, Error>?
 
@@ -739,7 +758,7 @@ private final class CurrentLocationProvider: NSObject, @preconcurrency CLLocatio
     }
 }
 
-private enum DeviceLocationError: LocalizedError {
+enum DeviceLocationError: LocalizedError {
     case permissionDenied
     case noPlacemark
     case noWindguruSpot

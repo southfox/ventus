@@ -786,10 +786,24 @@ public struct ForecastDashboardView: View {
 
     @MainActor
     private func loadPreferredForecast() async {
+        if environment.selectedSpotStore.usesCurrentLocation {
+            guard isProUser else {
+                environment.selectedSpotStore.saveUsesCurrentLocation(false)
+                await loadDefaultForecast()
+                return
+            }
+            await loadCurrentLocationForecast()
+            return
+        }
         guard !environment.selectedSpotStore.hasSavedSelection else {
             await loadForecast(spotId: selectedSpotID, modelIDs: [])
             return
         }
+        await loadDefaultForecast()
+    }
+
+    @MainActor
+    private func loadDefaultForecast() async {
         let preferredSpotID: String
         if !account.username.isEmpty,
            let password = account.password,
@@ -799,6 +813,21 @@ public struct ForecastDashboardView: View {
             preferredSpotID = "64141"
         }
         await loadForecast(spotId: preferredSpotID, modelIDs: [])
+    }
+
+    @MainActor
+    private func loadCurrentLocationForecast() async {
+        do {
+            let location = try await CurrentLocationProvider().location()
+            guard !account.username.isEmpty, account.password != nil else {
+                await loadDefaultForecast()
+                return
+            }
+            let placeName = try? await resolvePlaceDescription(for: location)
+            await loadForecast(coordinate: location.coordinate, locationName: placeName)
+        } catch {
+            await loadDefaultForecast()
+        }
     }
 
     @MainActor
