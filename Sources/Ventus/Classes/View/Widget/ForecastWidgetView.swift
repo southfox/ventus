@@ -298,8 +298,17 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
     @ViewBuilder private var windGustsMetric: some View {
         HStack(alignment: .center, spacing: 6) {
             windGustsLine("Wind", symbol: "wind", value: String(entry.wind.split(separator: " ").first!))
+            windDirectionIndicator
             windGustsLine("Gusts", symbol: "wind.circle", value: entry.gust)
         }
+    }
+
+    private var windDirectionIndicator: some View {
+        Image(systemName: "location.north.fill")
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+            .rotationEffect(.degrees(entry.windDirectionDegrees))
+            .accessibilityLabel("Wind direction \(entry.windDirection)")
     }
 
     private func windGustsLine(_ title: LocalizedStringKey, symbol: String, value: String) -> some View {

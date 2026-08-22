@@ -25,20 +25,23 @@ public struct ForecastWidgetProvider: TimelineProvider, Sendable {
     public func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<ForecastWidgetEntry>) -> Void) {
         Task {
             let entry = await currentEntry()
-            let nextHourDate = Self.nextHourBoundary(after: .now)
-            completion(Timeline(entries: [entry], policy: .after(nextHourDate)))
+            let nextReloadDate = Self.nextHalfHourBoundary(after: .now)
+            completion(Timeline(entries: [entry], policy: .after(nextReloadDate)))
         }
     }
 
-    private static func nextHourBoundary(after date: Date) -> Date {
+    private static func nextHalfHourBoundary(after date: Date) -> Date {
         let calendar = Calendar.current
-        let startOfHour = calendar.date(bySetting: .minute, value: 0, of: date)
+        let halfHour = calendar.date(bySetting: .minute, value: 30, of: date)
             .flatMap { calendar.date(bySetting: .second, value: 0, of: $0) }
             ?? date
-        return calendar.date(byAdding: .hour, value: 1, to: startOfHour) ?? date.addingTimeInterval(3_600)
+        if halfHour > date {
+            return halfHour
+        }
+        return calendar.date(byAdding: .hour, value: 1, to: halfHour) ?? date.addingTimeInterval(3_600)
     }
 
-    private static let snapshotFreshnessWindow: TimeInterval = 3 * 3_600
+    private static let snapshotFreshnessWindow: TimeInterval = 50 * 60
 
     private func currentEntry() async -> ForecastWidgetEntry {
         if let snapshot = environment.sharedForecastSnapshotStore.load(),
