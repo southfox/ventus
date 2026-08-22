@@ -120,6 +120,95 @@ public enum ForecastWidgetEntryBuilder {
         )
     }
 
+    public static func detailedHourlyForecast(for forecast: SpotForecast, environment: AppEnvironment) -> [ForecastOverviewHour] {
+        let units = environment.ventusForecastUnitStore.load(fallback: DeviceForecastPreferenceProvider().forecastUnitPreferences)
+        let currentHour = forecast.currentForecastHour
+        let currentOffset = Int(currentHour ?? "") ?? 0
+        let hours = forecast.steppedForecastHours(anchorHour: currentHour, step: environment.gridHourStepStore.load())
+            .compactMap { hour -> (hour: String, offset: Int)? in Int(hour).map { (hour, $0) } }
+            .filter { $0.offset >= currentOffset }
+            .sorted { $0.offset < $1.offset }
+            .map(\.hour)
+        let dates = hours.map { forecast.forecastDate(hour: $0) ?? .now }
+        let calendar = Calendar.current
+
+        // The next sunrise/sunset that hasn't happened yet — today's if
+        // it's still ahead, otherwise a later day's — never one already past.
+        let now = Date()
+        let sunrise = nextFutureDaylightDate(after: now) { forecast.sunriseDate(on: $0) }
+        let sunset = nextFutureDaylightDate(after: now) { forecast.sunsetDate(on: $0) }
+        let sunriseIndex = nearestIndex(to: sunrise, in: dates)
+        let sunsetIndex = nearestIndex(to: sunset, in: dates)
+
+        return hours.indices.map { index in
+            let hour = hours[index]
+            let date = dates[index]
+            let weather = forecast.forecast
+            let temperature = weather?.temperature(hh: hour) ?? weather?.temperatureReal(hh: hour) ?? 0
+            let realTemperature = weather?.temperatureReal(hh: hour) ?? temperature
+            let wind = weather?.windSpeed(hh: hour) ?? 0
+            let gust = weather?.windGustsKnots(hh: hour) ?? 0
+            let windChill = weather?.windChill(hh: hour)
+            let freezingLevel = weather?.freezingLevelHeightInMeters(hh: hour) ?? 0
+            let precipitation = weather?.precipitation1(hh: hour) ?? weather?.precipitation(hh: hour) ?? 0
+            let isSnow = precipitation > 0 && realTemperature <= 0
+
+            var daylightTime: String?
+            var daylightSymbolName: String?
+            if index == sunriseIndex, let sunrise {
+                daylightTime = sunrise.formatted(.dateTime.hour(.defaultDigits(amPM: .abbreviated)).minute())
+                daylightSymbolName = "sunrise.fill"
+            } else if index == sunsetIndex, let sunset {
+                daylightTime = sunset.formatted(.dateTime.hour(.defaultDigits(amPM: .abbreviated)).minute())
+                daylightSymbolName = "sunset.fill"
+            }
+
+            return ForecastOverviewHour(
+                dayLabel: calendar.isDateInToday(date) ? "" : date.formatted(.dateTime.weekday(.abbreviated).day()),
+                timeLabel: hour == currentHour ? "now".localized : hourLabel(for: date),
+                symbolName: forecast.weatherSymbolName(hour: hour),
+                temperature: temperatureText(temperature, unit: units.temperatureUnit),
+                wind: windText(wind, unit: units.windSpeedUnit),
+                gust: windText(gust, unit: units.windSpeedUnit),
+                windDirectionDegrees: weather?.windDirection(hh: hour) ?? 0,
+                windChill: windChill.map { temperatureText($0, unit: units.temperatureUnit) },
+                freezingLevel: freezingLevelText(freezingLevel, unit: units.freezingLevelUnit),
+                rain: (precipitation > 0 && !isSnow) ? precipitationText(precipitation, unit: units.precipitationUnit) : nil,
+                snow: (precipitation > 0 && isSnow) ? precipitationText(precipitation, unit: units.precipitationUnit) : nil,
+                daylightTime: daylightTime,
+                daylightSymbolName: daylightSymbolName
+            )
+        }
+    }
+
+    /// "13h" — the Overview hourly strip's own time format: always a plain
+    /// 24-hour number, never AM/PM. (Only used here; the real widget's
+    /// simple hourly cells keep their existing AM/PM format.)
+    private static func hourLabel(for date: Date) -> String {
+        "\(Calendar.current.component(.hour, from: date))h"
+    }
+
+    private static func nearestIndex(to target: Date?, in dates: [Date]) -> Int? {
+        guard let target else { return nil }
+        return dates.indices.min { abs(dates[$0].timeIntervalSince(target)) < abs(dates[$1].timeIntervalSince(target)) }
+    }
+
+    /// The next occurrence of a once-per-day event (sunrise or sunset)
+    /// that is still ahead of `now` — checking today first, then scanning
+    /// forward a few days if today's has already passed.
+    private static func nextFutureDaylightDate(after now: Date, on dateForDay: (Date) -> Date?) -> Date? {
+        var day = now
+        let calendar = Calendar.current
+        for _ in 0..<8 {
+            if let candidate = dateForDay(day), candidate >= now {
+                return candidate
+            }
+            guard let nextDay = calendar.date(byAdding: .day, value: 1, to: day) else { break }
+            day = nextDay
+        }
+        return nil
+    }
+
     private static func hourlyForecast(for forecast: SpotForecast, currentHour: String?, unit: TemperatureUnit, limit: Int = 10, environment: AppEnvironment) -> [ForecastWidgetHour] {
         let currentOffset = Int(currentHour ?? "") ?? 0
         let items = forecast.steppedForecastHours(anchorHour: currentHour, step: environment.gridHourStepStore.load())
@@ -231,6 +320,11 @@ public enum ForecastWidgetEntryBuilder {
     private static func waveHeightText(_ meters: Double, unit: WaveHeightUnit) -> String {
         let value = WaveHeight(meters: meters).value(in: unit)
         return "\(value.formatted(.number.precision(.fractionLength(1)))) \(unit.label)"
+    }
+
+    private static func freezingLevelText(_ meters: Double, unit: FreezingLevelUnit) -> String {
+        let value = FreezingLevel(meters: meters).value(in: unit)
+        return "\(value.formatted(.number.precision(.fractionLength(0)))) \(unit.label)"
     }
 }
 #endif

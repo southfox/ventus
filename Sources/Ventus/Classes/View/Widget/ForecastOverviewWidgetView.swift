@@ -13,6 +13,7 @@ import WidgetKit
 struct ForecastOverviewWidgetView: View, ForecastConditionsCard {
     let entry: ForecastWidgetEntry
     let theme: VentusTheme
+    var detailedHours: [ForecastOverviewHour] = []
     var onSelectLocation: () -> Void = {}
     var onShowMap: () -> Void = {}
 
@@ -164,11 +165,77 @@ struct ForecastOverviewWidgetView: View, ForecastConditionsCard {
         }
     }
 
-    private var hourlyForecast: some View {
-        HStack(alignment: .top, spacing: 25) {
-            ForEach(entry.hourly) { hour in
-                hourlyForecastHour(hour)
+    @ViewBuilder private var hourlyForecast: some View {
+        if detailedHours.isEmpty {
+            HStack(alignment: .top, spacing: 25) {
+                ForEach(entry.hourly) { hour in
+                    hourlyForecastHour(hour)
+                }
             }
+        } else {
+            HStack(alignment: .top, spacing: 18) {
+                ForEach(detailedHours) { hour in
+                    detailedHourColumn(hour)
+                }
+            }
+        }
+    }
+
+    private func detailedHourColumn(_ hour: ForecastOverviewHour) -> some View {
+        VStack(spacing: 4) {
+            if !hour.dayLabel.isEmpty {
+                Text(hour.dayLabel)
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+            Text(hour.timeLabel)
+                .font(.caption.bold())
+                .lineLimit(1)
+            if let daylightTime = hour.daylightTime, let daylightSymbolName = hour.daylightSymbolName {
+                HStack(spacing: 4) {
+                    Image(systemName: daylightSymbolName)
+                        .foregroundStyle(.orange)
+                    Text(daylightTime)
+                }
+                .font(.caption2)
+            }
+            Image(systemName: hour.symbolName)
+                .font(.title3)
+                .widgetAccentable()
+                .padding(.vertical, 2)
+            Text(hour.temperature)
+                .font(.subheadline.weight(.semibold))
+
+            VStack(alignment: .leading, spacing: 3) {
+                detailedHourRow("wind", hour.wind)
+                detailedHourRow("wind.circle", hour.gust)
+                detailedHourRow("arrow.down", "\(Int(hour.windDirectionDegrees.rounded()))°")
+                if let windChill = hour.windChill {
+                    detailedHourRow("thermometer.snowflake", windChill)
+                }
+                detailedHourRow("snowflake", hour.freezingLevel)
+                if let rain = hour.rain {
+                    detailedHourRow("drop.fill", rain)
+                }
+                if let snow = hour.snow {
+                    detailedHourRow("cloud.snow.fill", snow)
+                }
+            }
+        }
+        .frame(width: 108, alignment: .top)
+    }
+
+    private func detailedHourRow(_ symbol: String, _ value: String) -> some View {
+        HStack(spacing: 4) {
+            Image(systemName: symbol)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .frame(width: 12, alignment: .center)
+            Text(value)
+                .font(.caption2)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
     }
 }

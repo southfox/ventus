@@ -29,11 +29,16 @@ struct WidgetPreviewScreen: View {
         )
     }
 
+    private var detailedHours: [ForecastOverviewHour] {
+        ForecastWidgetEntryBuilder.detailedHourlyForecast(for: forecast, environment: environment)
+    }
+
     var body: some View {
         ScrollView {
             ForecastOverviewWidgetView(
                 entry: entry,
                 theme: theme,
+                detailedHours: detailedHours,
                 onSelectLocation: onSelectLocation,
                 onShowMap: onShowMap
             )
