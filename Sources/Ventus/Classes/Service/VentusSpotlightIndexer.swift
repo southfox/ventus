@@ -1,7 +1,7 @@
 #if canImport(CoreSpotlight) && !os(tvOS) && !os(watchOS)
 import CoreSpotlight
 
-public enum ForescoopSpotlightIndexer {
+public enum VentusSpotlightIndexer {
     private static let domain = "org.forescoop.forecast"
 
     public static func index(forecast: SpotForecast, savedLocations: [SavedMapLocation]) {
@@ -50,7 +50,7 @@ public enum ForescoopSpotlightIndexer {
     }
 }
 #else
-public enum ForescoopSpotlightIndexer {
+public enum VentusSpotlightIndexer {
     public static func index(forecast: SpotForecast, savedLocations: [SavedMapLocation]) {}
 }
 #endif

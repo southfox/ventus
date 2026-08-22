@@ -3593,30 +3593,30 @@
         }
       }
     },
-    "Forescoop Mix (%lld models)" : {
+    "Ventus Mix (%lld models)" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Forescoop Mix (%lld Modelle)"
+            "value" : "Ventus Mix (%lld Modelle)"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Forescoop Mix (%lld modelos)"
+            "value" : "Ventus Mix (%lld modelos)"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Forescoop Mix (%lld modèles)"
+            "value" : "Ventus Mix (%lld modèles)"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Forescoop Mix (%lld modelos)"
+            "value" : "Ventus Mix (%lld modelos)"
           }
         }
       }
@@ -8704,30 +8704,30 @@
         }
       }
     },
-    "Tap the Forescoop Mix model summary below the grid to expand the checkbox list. Keep at least one model selected, then use the mix and comparison tools to judge agreement." : {
+    "Tap the Ventus Mix model summary below the grid to expand the checkbox list. Keep at least one model selected, then use the mix and comparison tools to judge agreement." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tippe auf die Forescoop-Mix-Modellübersicht unterhalb des Rasters, um die Checkbox-Liste zu erweitern. Behalte mindestens ein ausgewähltes Modell bei und nutze dann die Mix- und Vergleichswerkzeuge, um die Übereinstimmung zu beurteilen."
+            "value" : "Tippe auf die Ventus-Mix-Modellübersicht unterhalb des Rasters, um die Checkbox-Liste zu erweitern. Behalte mindestens ein ausgewähltes Modell bei und nutze dann die Mix- und Vergleichswerkzeuge, um die Übereinstimmung zu beurteilen."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Toca el resumen del modelo Forescoop Mix debajo de la cuadrícula para expandir la lista de casillas. Mantén al menos un modelo seleccionado y luego usa las herramientas de mezcla y comparación para evaluar la coincidencia."
+            "value" : "Toca el resumen del modelo Ventus Mix debajo de la cuadrícula para expandir la lista de casillas. Mantén al menos un modelo seleccionado y luego usa las herramientas de mezcla y comparación para evaluar la coincidencia."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Touchez le résumé du modèle Forescoop Mix sous la grille pour développer la liste à cocher. Gardez au moins un modèle sélectionné, puis utilisez les outils de mélange et de comparaison pour évaluer la cohérence."
+            "value" : "Touchez le résumé du modèle Ventus Mix sous la grille pour développer la liste à cocher. Gardez au moins un modèle sélectionné, puis utilisez les outils de mélange et de comparaison pour évaluer la cohérence."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Toque no resumo do modelo Forescoop Mix abaixo da grade para expandir a lista de caixas de seleção. Mantenha pelo menos um modelo selecionado e, em seguida, use as ferramentas de mix e comparação para avaliar a concordância."
+            "value" : "Toque no resumo do modelo Ventus Mix abaixo da grade para expandir a lista de caixas de seleção. Mantenha pelo menos um modelo selecionado e, em seguida, use as ferramentas de mix e comparação para avaliar a concordância."
           }
         }
       }
@@ -9712,30 +9712,30 @@
         }
       }
     },
-    "Ventus combines selected models into a Forescoop Mix. Expand the model summary in the grid to change the selected sources." : {
+    "Ventus combines selected models into a Ventus Mix. Expand the model summary in the grid to change the selected sources." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ventus kombiniert ausgewählte Modelle zu einem Forescoop Mix. Erweitere die Modellübersicht im Raster, um die ausgewählten Quellen zu ändern."
+            "value" : "Ventus kombiniert ausgewählte Modelle zu einem Ventus Mix. Erweitere die Modellübersicht im Raster, um die ausgewählten Quellen zu ändern."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ventus combina los modelos seleccionados en un Forescoop Mix. Expande el resumen del modelo en la cuadrícula para cambiar las fuentes seleccionadas."
+            "value" : "Ventus combina los modelos seleccionados en un Ventus Mix. Expande el resumen del modelo en la cuadrícula para cambiar las fuentes seleccionadas."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ventus combine les modèles sélectionnés en un Forescoop Mix. Développez le résumé du modèle dans la grille pour modifier les sources sélectionnées."
+            "value" : "Ventus combine les modèles sélectionnés en un Ventus Mix. Développez le résumé du modèle dans la grille pour modifier les sources sélectionnées."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O Ventus combina os modelos selecionados em um Forescoop Mix. Expanda o resumo do modelo na grade para alterar as fontes selecionadas."
+            "value" : "O Ventus combina os modelos selecionados em um Ventus Mix. Expanda o resumo do modelo na grade para alterar as fontes selecionadas."
           }
         }
       }
@@ -10384,30 +10384,30 @@
         }
       }
     },
-    "When multiple sources are selected, Ventus presents a Forescoop Mix: one continuous forecast assembled from the selected model data available for each hour." : {
+    "When multiple sources are selected, Ventus presents a Ventus Mix: one continuous forecast assembled from the selected model data available for each hour." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wenn mehrere Quellen ausgewählt sind, zeigt Ventus einen Forescoop Mix: eine durchgehende Vorhersage, die aus den Daten der ausgewählten Modelle für jede Stunde zusammengestellt wird."
+            "value" : "Wenn mehrere Quellen ausgewählt sind, zeigt Ventus einen Ventus Mix: eine durchgehende Vorhersage, die aus den Daten der ausgewählten Modelle für jede Stunde zusammengestellt wird."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cuando se seleccionan varias fuentes, Ventus presenta un Forescoop Mix: un pronóstico continuo compuesto por los datos de los modelos seleccionados disponibles para cada hora."
+            "value" : "Cuando se seleccionan varias fuentes, Ventus presenta un Ventus Mix: un pronóstico continuo compuesto por los datos de los modelos seleccionados disponibles para cada hora."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lorsque plusieurs sources sont sélectionnées, Ventus présente un Forescoop Mix : une prévision continue composée des données des modèles sélectionnés disponibles pour chaque heure."
+            "value" : "Lorsque plusieurs sources sont sélectionnées, Ventus présente un Ventus Mix : une prévision continue composée des données des modèles sélectionnés disponibles pour chaque heure."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Quando várias fontes são selecionadas, o Ventus apresenta um Forescoop Mix: uma previsão contínua montada a partir dos dados dos modelos selecionados disponíveis para cada hora."
+            "value" : "Quando várias fontes são selecionadas, o Ventus apresenta um Ventus Mix: uma previsão contínua montada a partir dos dados dos modelos selecionados disponíveis para cada hora."
           }
         }
       }

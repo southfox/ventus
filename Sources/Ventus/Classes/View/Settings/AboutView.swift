@@ -1,6 +1,6 @@
 //
 //  AboutView.swift
-//  Forescoop package
+//  Ventus package
 //
 //  Created by Javier Fuchs on 07/31/26.
 //  Copyright © 2026 Mobile Patagonia. All rights reserved.
@@ -38,7 +38,7 @@ public struct AboutView: View {
                 Link(destination: URL(string: "mailto:javier.fuchs@gmail.com")!) {
                     Label("javier.fuchs@gmail.com", systemImage: "envelope")
                 }
-                Link(destination: URL(string: "https://github.com/patagonia2019/forescoop")!) {
+                Link(destination: URL(string: "https://github.com/southfox/ventus")!) {
                     Label("Ventus on GitHub", systemImage: "chevron.left.forwardslash.chevron.right")
                 }
             }

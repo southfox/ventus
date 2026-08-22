@@ -1,6 +1,6 @@
 //
 //  ForecastGridModelSelector.swift
-//  Forescoop package
+//  Ventus package
 //
 //  Created by Javier Fuchs on 08/01/26.
 //  Copyright © 2026 Mobile Patagonia. All rights reserved.
@@ -62,7 +62,7 @@ struct ForecastGridModelSelector: View {
 #if DEBUG
 #Preview("Forecast grid model selector") {
     ForecastGridModelSelector(
-        modelSummaryTitle: "Forescoop Mix (2 models)",
+        modelSummaryTitle: "Ventus Mix (2 models)",
         modelIDs: ["3", "4", "28"],
         selectedModelIDs: ["3", "28"],
         modelNamesByID: [

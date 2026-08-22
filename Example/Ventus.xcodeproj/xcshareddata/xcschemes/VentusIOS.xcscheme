@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "B0010000000000000000000F"
-               BuildableName = "VentusVisionOS.app"
-               BlueprintName = "VentusVisionOS"
-               ReferencedContainer = "container:Forescoop.xcodeproj">
+               BlueprintIdentifier = "A0010000000000000000000F"
+               BuildableName = "VentusIOS.app"
+               BlueprintName = "VentusIOS"
+               ReferencedContainer = "container:Ventus.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -43,10 +43,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "B0010000000000000000000F"
-            BuildableName = "VentusVisionOS.app"
-            BlueprintName = "VentusVisionOS"
-            ReferencedContainer = "container:Forescoop.xcodeproj">
+            BlueprintIdentifier = "A0010000000000000000000F"
+            BuildableName = "VentusIOS.app"
+            BlueprintName = "VentusIOS"
+            ReferencedContainer = "container:Ventus.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -60,10 +60,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "B0010000000000000000000F"
-            BuildableName = "VentusVisionOS.app"
-            BlueprintName = "VentusVisionOS"
-            ReferencedContainer = "container:Forescoop.xcodeproj">
+            BlueprintIdentifier = "A0010000000000000000000F"
+            BuildableName = "VentusIOS.app"
+            BlueprintName = "VentusIOS"
+            ReferencedContainer = "container:Ventus.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

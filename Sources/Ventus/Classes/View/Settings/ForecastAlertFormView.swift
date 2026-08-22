@@ -1,6 +1,6 @@
 //
 //  ForecastAlertFormView.swift
-//  Forescoop package
+//  Ventus package
 //
 //  Add/edit screen for a ForecastAlert, mirroring Windguru's "Add alert"
 //  screen: spot, models, name, conditions, day range, weekdays, and a

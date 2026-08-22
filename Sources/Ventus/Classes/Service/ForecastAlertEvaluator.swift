@@ -1,6 +1,6 @@
 //
 //  ForecastAlertEvaluator.swift
-//  Forescoop
+//  Ventus
 //
 //  Matches a user-defined ForecastAlert against a loaded forecast.
 //

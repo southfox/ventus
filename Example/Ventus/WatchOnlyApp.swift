@@ -1,6 +1,6 @@
 //
 //  WatchOnlyApp.swift
-//  Forescoop
+//  Ventus
 //
 //  Created by Javier Fuchs on 07/23/26.
 //  Copyright © 2026 Mobile Patagonia. All rights reserved.
@@ -12,7 +12,7 @@ import WatchKit
 import Ventus
 
 @main
-struct ForescoopWatchOnlyApp: App {
+struct VentusWatchOnlyApp: App {
     @WKApplicationDelegateAdaptor(WatchExtensionDelegate.self) private var appDelegate
 
     var body: some Scene {

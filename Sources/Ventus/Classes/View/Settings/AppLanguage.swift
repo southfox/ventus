@@ -1,6 +1,6 @@
 //
 //  AppLanguage.swift
-//  Forescoop package
+//  Ventus package
 //
 //  Created by Javier Fuchs on 08/09/26.
 //  Copyright © 2026 Mobile Patagonia. All rights reserved.
@@ -82,7 +82,7 @@ public final class AppLanguageStore: AppLanguageStoring, @unchecked Sendable {
 }
 
 public extension Bundle {
-    static var forescoop: Bundle { .module }
+    static var ventus: Bundle { .module }
 
     func localizedString(_ key: String, locale: Locale, formatArguments: [CVarArg] = []) -> String {
         guard let languageCode = locale.language.languageCode?.identifier else {
@@ -102,19 +102,19 @@ public extension Bundle {
 
 public extension String {
     var localized: String {
-        Bundle.forescoop.localizedString(self, locale: AppLanguageStore.currentLocale)
+        Bundle.ventus.localizedString(self, locale: AppLanguageStore.currentLocale)
     }
 
     func localized(locale: Locale) -> String {
-        Bundle.forescoop.localizedString(self, locale: locale)
+        Bundle.ventus.localizedString(self, locale: locale)
     }
 
     func localized(formatArguments: [CVarArg]) -> String {
-        Bundle.forescoop.localizedString(self, locale: AppLanguageStore.currentLocale, formatArguments: formatArguments)
+        Bundle.ventus.localizedString(self, locale: AppLanguageStore.currentLocale, formatArguments: formatArguments)
     }
 
     func localized(locale: Locale, formatArguments: [CVarArg]) -> String {
-        Bundle.forescoop.localizedString(self, locale: locale, formatArguments: formatArguments)
+        Bundle.ventus.localizedString(self, locale: locale, formatArguments: formatArguments)
     }
 }
 

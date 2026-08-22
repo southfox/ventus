@@ -29,15 +29,15 @@
 		C0DE00000000000000000104 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000100 /* Localizable.xcstrings */; };
 		C0DE00000000000000000105 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000100 /* Localizable.xcstrings */; };
 		C0DE00000000000000000106 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000100 /* Localizable.xcstrings */; };
-		D00100000000000000000001 /* ForescoopWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00100000000000000000002 /* ForescoopWidgetBundle.swift */; };
+		D00100000000000000000001 /* VentusWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00100000000000000000002 /* VentusWidgetBundle.swift */; };
 		D00100000000000000000003 /* VentusWidgets in Frameworks */ = {isa = PBXBuildFile; productRef = D00100000000000000000004 /* VentusWidgets */; };
 		D00100000000000000000005 /* VentusWatchWidgets.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = D00100000000000000000006 /* VentusWatchWidgets.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E00100000000000000000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E00100000000000000000002 /* Assets.xcassets */; };
-		E10100000000000000000001 /* ForescoopWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00100000000000000000002 /* ForescoopWidgetBundle.swift */; };
+		E10100000000000000000001 /* VentusWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00100000000000000000002 /* VentusWidgetBundle.swift */; };
 		E10100000000000000000002 /* VentusWidgets in Frameworks */ = {isa = PBXBuildFile; productRef = E1010000000000000000000A /* VentusWidgets */; };
 		E10100000000000000000003 /* VentusIOSWidgets.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = E10100000000000000000004 /* VentusIOSWidgets.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		F00100000000000000000001 /* VisionForescoopApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00100000000000000000003 /* VisionForescoopApp.swift */; };
-		F10100000000000000000001 /* ForescoopWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00100000000000000000002 /* ForescoopWidgetBundle.swift */; };
+		F00100000000000000000001 /* VisionVentusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00100000000000000000003 /* VisionVentusApp.swift */; };
+		F10100000000000000000001 /* VentusWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00100000000000000000002 /* VentusWidgetBundle.swift */; };
 		F10100000000000000000002 /* VentusWidgets in Frameworks */ = {isa = PBXBuildFile; productRef = F1010000000000000000000A /* VentusWidgets */; };
 		F10100000000000000000003 /* VentusMacWidgets.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = F10100000000000000000004 /* VentusMacWidgets.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FB0100000000000000000002 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FB0100000000000000000001 /* GoogleService-Info.plist */; };
@@ -52,21 +52,21 @@
 			containerPortal = 607FACC81AFB9204008FA782 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = E10100000000000000000005;
-			remoteInfo = ForescoopIOSWidgets;
+			remoteInfo = VentusIOSWidgets;
 		};
 		98231BAB3025E34900D4E0F2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 607FACC81AFB9204008FA782 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = F10100000000000000000005;
-			remoteInfo = ForescoopMacWidgets;
+			remoteInfo = VentusMacWidgets;
 		};
 		98231BAC3025E34900D4E0F2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 607FACC81AFB9204008FA782 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = D0010000000000000000000D;
-			remoteInfo = ForescoopWatchWidgets;
+			remoteInfo = VentusWatchWidgets;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -112,13 +112,12 @@
 		607FACDC1AFB9204008FA782 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		607FACDF1AFB9204008FA782 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		70BAA9BC1F276B4F004CD577 /* Forescoop_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Forescoop_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		70BAA9CC1F276B6F004CD577 /* Forescoop_Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Forescoop_Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		70BAA9BC1F276B4F004CD577 /* Ventus_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ventus_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		98688A0422D5936400A09AD0 /* VentusMacOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VentusMacOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		98688A0A22D5936700A09AD0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		98688A0D22D5936700A09AD0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		98688A0F22D5936700A09AD0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		98688A1022D5936700A09AD0 /* ForescoopMacOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ForescoopMacOS.entitlements; sourceTree = "<group>"; };
+		98688A1022D5936700A09AD0 /* VentusMacOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VentusMacOS.entitlements; sourceTree = "<group>"; };
 		987A6DC522D595D200662010 /* VentusTVOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VentusTVOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		987A6DCE22D595D400662010 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		987A6DD022D595D400662010 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -126,17 +125,17 @@
 		AA0100000000000000000011 /* VentusWatchOnly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VentusWatchOnly.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0100000000000000000012 /* WatchOnlyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchOnlyApp.swift; sourceTree = "<group>"; };
 		B0010000000000000000000D /* VentusVisionOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VentusVisionOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C0DE00000000000000000100 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = Localizable.xcstrings; path = ../Sources/Forescoop/Resources/Localizable.xcstrings; sourceTree = "<group>"; };
-		D00100000000000000000002 /* ForescoopWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForescoopWidgetBundle.swift; sourceTree = "<group>"; };
+		C0DE00000000000000000100 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = Localizable.xcstrings; path = ../Sources/Ventus/Resources/Localizable.xcstrings; sourceTree = "<group>"; };
+		D00100000000000000000002 /* VentusWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VentusWidgetBundle.swift; sourceTree = "<group>"; };
 		D00100000000000000000006 /* VentusWatchWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = VentusWatchWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		D00100000000000000000007 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		D00100000000000000000008 /* ForescoopWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ForescoopWidgets.entitlements; sourceTree = "<group>"; };
-		E00100000000000000000002 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = ../ForescoopWatchOnly/Assets.xcassets; sourceTree = "<group>"; };
+		D00100000000000000000008 /* VentusWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VentusWidgets.entitlements; sourceTree = "<group>"; };
+		E00100000000000000000002 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = ../VentusWatchOnly/Assets.xcassets; sourceTree = "<group>"; };
 		E10100000000000000000004 /* VentusIOSWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = VentusIOSWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		F00100000000000000000003 /* VisionForescoopApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionForescoopApp.swift; sourceTree = "<group>"; };
+		F00100000000000000000003 /* VisionVentusApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionVentusApp.swift; sourceTree = "<group>"; };
 		F10100000000000000000004 /* VentusMacWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = VentusMacWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB0100000000000000000001 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
-		FB0200000000000000000001 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../ForescoopWatchOnly/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		FB0200000000000000000001 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../VentusWatchOnly/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		FB0300000000000000000001 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		FB0400000000000000000001 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -212,10 +211,10 @@
 		607FACC71AFB9204008FA782 = {
 			isa = PBXGroup;
 			children = (
-				607FACD21AFB9204008FA782 /* Example for Forescoop */,
+				607FACD21AFB9204008FA782 /* Example for Ventus */,
 				607FACE81AFB9204008FA782 /* Tests */,
-				98688A0522D5936400A09AD0 /* ForescoopMacOS */,
-				987A6DC622D595D200662010 /* ForescoopTVOS */,
+				98688A0522D5936400A09AD0 /* VentusMacOS */,
+				987A6DC622D595D200662010 /* VentusTVOS */,
 				607FACD11AFB9204008FA782 /* Products */,
 				C0DE00000000000000000100 /* Localizable.xcstrings */,
 			);
@@ -224,36 +223,35 @@
 		607FACD11AFB9204008FA782 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				70BAA9BC1F276B4F004CD577 /* Forescoop_Example.app */,
+				70BAA9BC1F276B4F004CD577 /* Ventus_Example.app */,
 				A0010000000000000000000D /* VentusIOS.app */,
 				B0010000000000000000000D /* VentusVisionOS.app */,
 				AA0100000000000000000011 /* VentusWatchOnly.app */,
 				D00100000000000000000006 /* VentusWatchWidgets.appex */,
 				E10100000000000000000004 /* VentusIOSWidgets.appex */,
 				F10100000000000000000004 /* VentusMacWidgets.appex */,
-				70BAA9CC1F276B6F004CD577 /* Forescoop_Tests.xctest */,
 				98688A0422D5936400A09AD0 /* VentusMacOS.app */,
 				987A6DC522D595D200662010 /* VentusTVOS.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		607FACD21AFB9204008FA782 /* Example for Forescoop */ = {
+		607FACD21AFB9204008FA782 /* Example for Ventus */ = {
 			isa = PBXGroup;
 			children = (
 				607FACD51AFB9204008FA782 /* AppDelegate.swift */,
-				F00100000000000000000003 /* VisionForescoopApp.swift */,
+				F00100000000000000000003 /* VisionVentusApp.swift */,
 				AA0100000000000000000012 /* WatchOnlyApp.swift */,
 				E00100000000000000000002 /* Assets.xcassets */,
 				FB0100000000000000000001 /* GoogleService-Info.plist */,
 				FB0200000000000000000001 /* GoogleService-Info.plist */,
-				D0010000000000000000000A /* ForescoopWidgets */,
+				D0010000000000000000000A /* VentusWidgets */,
 				607FACDC1AFB9204008FA782 /* Images.xcassets */,
 				607FACDE1AFB9204008FA782 /* LaunchScreen.xib */,
 				607FACD31AFB9204008FA782 /* Supporting Files */,
 			);
-			name = "Example for Forescoop";
-			path = Forescoop;
+			name = "Example for Ventus";
+			path = Ventus;
 			sourceTree = "<group>";
 		};
 		607FACD31AFB9204008FA782 /* Supporting Files */ = {
@@ -280,36 +278,36 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		98688A0522D5936400A09AD0 /* ForescoopMacOS */ = {
+		98688A0522D5936400A09AD0 /* VentusMacOS */ = {
 			isa = PBXGroup;
 			children = (
 				98688A0A22D5936700A09AD0 /* Assets.xcassets */,
 				98688A0C22D5936700A09AD0 /* Main.storyboard */,
 				98688A0F22D5936700A09AD0 /* Info.plist */,
-				98688A1022D5936700A09AD0 /* ForescoopMacOS.entitlements */,
+				98688A1022D5936700A09AD0 /* VentusMacOS.entitlements */,
 				FB0300000000000000000001 /* GoogleService-Info.plist */,
 			);
-			path = ForescoopMacOS;
+			path = VentusMacOS;
 			sourceTree = "<group>";
 		};
-		987A6DC622D595D200662010 /* ForescoopTVOS */ = {
+		987A6DC622D595D200662010 /* VentusTVOS */ = {
 			isa = PBXGroup;
 			children = (
 				987A6DCE22D595D400662010 /* Assets.xcassets */,
 				987A6DD022D595D400662010 /* Info.plist */,
 				FB0400000000000000000001 /* GoogleService-Info.plist */,
 			);
-			path = ForescoopTVOS;
+			path = VentusTVOS;
 			sourceTree = "<group>";
 		};
-		D0010000000000000000000A /* ForescoopWidgets */ = {
+		D0010000000000000000000A /* VentusWidgets */ = {
 			isa = PBXGroup;
 			children = (
-				D00100000000000000000002 /* ForescoopWidgetBundle.swift */,
+				D00100000000000000000002 /* VentusWidgetBundle.swift */,
 				D00100000000000000000007 /* Info.plist */,
-				D00100000000000000000008 /* ForescoopWidgets.entitlements */,
+				D00100000000000000000008 /* VentusWidgets.entitlements */,
 			);
-			path = ../ForescoopWidgets;
+			path = ../VentusWidgets;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -375,7 +373,7 @@
 			packageProductDependencies = (
 				A0010000000000000000000C /* Ventus */,
 			);
-			productName = iOSnowatch;
+			productName = VentusIOS;
 			productReference = A0010000000000000000000D /* VentusIOS.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -486,7 +484,7 @@
 			attributes = {
 				LastSwiftUpdateCheck = 1020;
 				LastUpgradeCheck = 1420;
-				ORGANIZATIONNAME = Forescoop;
+				ORGANIZATIONNAME = Ventus;
 				TargetAttributes = {
 					70BAA9A41F276B4F004CD577 = {
 						LastSwiftMigration = "";
@@ -639,7 +637,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B00100000000000000000007 /* AppDelegate.swift in Sources */,
-				F00100000000000000000001 /* VisionForescoopApp.swift in Sources */,
+				F00100000000000000000001 /* VisionVentusApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -647,7 +645,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D00100000000000000000001 /* ForescoopWidgetBundle.swift in Sources */,
+				D00100000000000000000001 /* VentusWidgetBundle.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -655,7 +653,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E10100000000000000000001 /* ForescoopWidgetBundle.swift in Sources */,
+				E10100000000000000000001 /* VentusWidgetBundle.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -663,7 +661,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F10100000000000000000001 /* ForescoopWidgetBundle.swift in Sources */,
+				F10100000000000000000001 /* VentusWidgetBundle.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -833,7 +831,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = ForescoopMacOS/ForescoopMacOS.entitlements;
+				CODE_SIGN_ENTITLEMENTS = VentusMacOS/VentusMacOS.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -843,7 +841,7 @@
 				DEVELOPMENT_TEAM = 27XTSJS68A;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
-				INFOPLIST_FILE = ForescoopMacOS/Info.plist;
+				INFOPLIST_FILE = VentusMacOS/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.weather";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -871,7 +869,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = ForescoopMacOS/ForescoopMacOS.entitlements;
+				CODE_SIGN_ENTITLEMENTS = VentusMacOS/VentusMacOS.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -879,7 +877,7 @@
 				DEVELOPMENT_TEAM = 27XTSJS68A;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
-				INFOPLIST_FILE = ForescoopMacOS/Info.plist;
+				INFOPLIST_FILE = VentusMacOS/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.weather";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -905,12 +903,12 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = ForescoopTVOS/ForescoopTVOS.entitlements;
+				CODE_SIGN_ENTITLEMENTS = VentusTVOS/VentusTVOS.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 27XTSJS68A;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
-				INFOPLIST_FILE = ForescoopTVOS/Info.plist;
+				INFOPLIST_FILE = VentusTVOS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -938,12 +936,12 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = ForescoopTVOS/ForescoopTVOS.entitlements;
+				CODE_SIGN_ENTITLEMENTS = VentusTVOS/VentusTVOS.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 27XTSJS68A;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
-				INFOPLIST_FILE = ForescoopTVOS/Info.plist;
+				INFOPLIST_FILE = VentusTVOS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -962,9 +960,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Forescoop_Example.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Ventus_Example.entitlements;
 				DEVELOPMENT_TEAM = 27XTSJS68A;
-				INFOPLIST_FILE = "Forescoop_Example-Info.plist";
+				INFOPLIST_FILE = "Ventus_Example-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -983,9 +981,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Forescoop_Example.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Ventus_Example.entitlements;
 				DEVELOPMENT_TEAM = 27XTSJS68A;
-				INFOPLIST_FILE = "Forescoop_Example-Info.plist";
+				INFOPLIST_FILE = "Ventus_Example-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1004,10 +1002,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = ForescoopWatchOnly.entitlements;
+				CODE_SIGN_ENTITLEMENTS = VentusWatchOnly.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 27XTSJS68A;
-				INFOPLIST_FILE = "ForescoopWatchOnly-Info.plist";
+				INFOPLIST_FILE = "VentusWatchOnly-Info.plist";
 				PRODUCT_BUNDLE_IDENTIFIER = org.forescoop.iOSnowatch.ForescoopWatchOnly;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -1022,11 +1020,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = ForescoopWatchOnly.entitlements;
+				CODE_SIGN_ENTITLEMENTS = VentusWatchOnly.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 27XTSJS68A;
-				INFOPLIST_FILE = "ForescoopWatchOnly-Info.plist";
+				INFOPLIST_FILE = "VentusWatchOnly-Info.plist";
 				PRODUCT_BUNDLE_IDENTIFIER = org.forescoop.iOSnowatch.ForescoopWatchOnly;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -1041,9 +1039,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = ForescoopVisionOS.entitlements;
+				CODE_SIGN_ENTITLEMENTS = VentusVisionOS.entitlements;
 				DEVELOPMENT_TEAM = 27XTSJS68A;
-				INFOPLIST_FILE = "Forescoop_Example-Info.plist";
+				INFOPLIST_FILE = "Ventus_Example-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1064,11 +1062,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = ForescoopVisionOS.entitlements;
+				CODE_SIGN_ENTITLEMENTS = VentusVisionOS.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=xros*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 27XTSJS68A;
-				INFOPLIST_FILE = "Forescoop_Example-Info.plist";
+				INFOPLIST_FILE = "Ventus_Example-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1089,10 +1087,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
-				CODE_SIGN_ENTITLEMENTS = ForescoopWidgets/ForescoopWidgets.entitlements;
+				CODE_SIGN_ENTITLEMENTS = VentusWidgets/VentusWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 27XTSJS68A;
-				INFOPLIST_FILE = ForescoopWidgets/Info.plist;
+				INFOPLIST_FILE = VentusWidgets/Info.plist;
 				PRODUCT_BUNDLE_IDENTIFIER = org.forescoop.iOSnowatch.ForescoopWatchOnly.ForescoopWidgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -1108,11 +1106,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
-				CODE_SIGN_ENTITLEMENTS = ForescoopWidgets/ForescoopWidgets.entitlements;
+				CODE_SIGN_ENTITLEMENTS = VentusWidgets/VentusWidgets.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 27XTSJS68A;
-				INFOPLIST_FILE = ForescoopWidgets/Info.plist;
+				INFOPLIST_FILE = VentusWidgets/Info.plist;
 				PRODUCT_BUNDLE_IDENTIFIER = org.forescoop.iOSnowatch.ForescoopWatchOnly.ForescoopWidgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -1128,10 +1126,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
-				CODE_SIGN_ENTITLEMENTS = ForescoopWidgets/ForescoopWidgets.entitlements;
+				CODE_SIGN_ENTITLEMENTS = VentusWidgets/VentusWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 27XTSJS68A;
-				INFOPLIST_FILE = ForescoopWidgets/Info.plist;
+				INFOPLIST_FILE = VentusWidgets/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1152,10 +1150,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
-				CODE_SIGN_ENTITLEMENTS = ForescoopWidgets/ForescoopWidgets.entitlements;
+				CODE_SIGN_ENTITLEMENTS = VentusWidgets/VentusWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 27XTSJS68A;
-				INFOPLIST_FILE = ForescoopWidgets/Info.plist;
+				INFOPLIST_FILE = VentusWidgets/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1176,10 +1174,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
-				CODE_SIGN_ENTITLEMENTS = ForescoopWidgets/ForescoopWidgets.entitlements;
+				CODE_SIGN_ENTITLEMENTS = VentusWidgets/VentusWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 27XTSJS68A;
-				INFOPLIST_FILE = ForescoopWidgets/Info.plist;
+				INFOPLIST_FILE = VentusWidgets/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../../../../Frameworks",
@@ -1198,11 +1196,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
-				CODE_SIGN_ENTITLEMENTS = ForescoopWidgets/ForescoopWidgets.entitlements;
+				CODE_SIGN_ENTITLEMENTS = VentusWidgets/VentusWidgets.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 27XTSJS68A;
-				INFOPLIST_FILE = ForescoopWidgets/Info.plist;
+				INFOPLIST_FILE = VentusWidgets/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../../../../Frameworks",

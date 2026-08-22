@@ -1,6 +1,6 @@
 //
 //  ForecastWindguruService.swift
-//  Forescoop
+//  Ventus
 //
 //  Created by Javier Fuchs on 10/7/15.
 //  Copyright © 2023 Fuchs. All rights reserved.

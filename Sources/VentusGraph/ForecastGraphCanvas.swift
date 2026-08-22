@@ -1,6 +1,6 @@
 //
 //  ForecastGraphCanvas.swift
-//  ForescoopGraph package
+//  VentusGraph package
 //
 //  Created by Javier on 08/02/26.
 //  Copyright © 2026 Mobile Patagonia. All rights reserved.

@@ -1,6 +1,6 @@
 //
 //  ForecastModelSummary.swift
-//  Forescoop package
+//  Ventus package
 //
 //  Created by Javier Fuchs on 08/02/26.
 //  Copyright © 2026 Mobile Patagonia. All rights reserved.
@@ -45,7 +45,7 @@ struct ForecastModelSummary: View {
 }
 
 #Preview("Forecast model summary") {
-    ForecastModelSummary(title: "Forescoop Mix (4 models)") {}
+    ForecastModelSummary(title: "Ventus Mix (4 models)") {}
         .padding()
 }
 #endif

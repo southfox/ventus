@@ -1,6 +1,6 @@
 //
 //  WindguruProfileView.swift
-//  Forescoop package
+//  Ventus package
 //
 
 #if !os(watchOS)
@@ -84,7 +84,7 @@ public struct WindguruProfileView: View {
 #Preview("Windguru PRO profile") {
     let user = try! User(map: [
         "id_user": 42,
-        "username": "forescoop",
+        "username": "ventus",
         "pro": 1,
         "no_ads": 1,
         "wind_units": "knots",

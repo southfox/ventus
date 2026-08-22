@@ -1,6 +1,6 @@
 //
 //  ForecastAlertMacBackgroundRefresh.swift
-//  Forescoop
+//  Ventus
 //
 
 #if os(macOS)

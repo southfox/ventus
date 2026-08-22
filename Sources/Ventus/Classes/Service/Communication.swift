@@ -1,6 +1,6 @@
 //
 //  Communication.swift
-//  Forescoop
+//  Ventus
 //
 //  Created by javierfuchs on 7/28/17.
 //

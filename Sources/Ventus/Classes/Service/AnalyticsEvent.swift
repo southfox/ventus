@@ -1,6 +1,6 @@
 //
 //  AnalyticsEvent.swift
-//  Forescoop package
+//  Ventus package
 //
 //  Created by Javier Fuchs on 08/20/26.
 //  Copyright © 2026 Mobile Patagonia. All rights reserved.

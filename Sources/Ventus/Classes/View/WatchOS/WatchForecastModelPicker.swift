@@ -1,6 +1,6 @@
 //
 //  WatchForecastModelPicker.swift
-//  Forescoop package
+//  Ventus package
 //
 
 #if os(watchOS)

@@ -1,6 +1,6 @@
 //
 //  GeoRegions.swift
-//  Forescoop
+//  Ventus
 //
 //  Created by javierfuchs on 7/14/17.
 //

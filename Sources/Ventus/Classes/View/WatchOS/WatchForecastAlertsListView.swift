@@ -1,6 +1,6 @@
 //
 //  WatchForecastAlertsListView.swift
-//  Forescoop package
+//  Ventus package
 //
 //  A compact, watch-native list of the user's ForecastAlert definitions.
 //  Alerts created here are evaluated both in-app and by

@@ -1,27 +1,27 @@
 #!/usr/bin/env swift
 //
 //  upload-testflight.swift
-//  Forescoop
+//  Ventus
 //
-//  Bumps the build number, archives the iOSnowatch app, exports an IPA,
+//  Bumps the build number, archives the VentusIOS app, exports an IPA,
 //  validates it, and uploads it to App Store Connect / TestFlight.
 //
 //  Usage:
 //    ./upload-testflight.swift
-//    ./upload-testflight.swift --ipa build/export/iOSnowatch.ipa   # skip archive/export, just validate+upload
+//    ./upload-testflight.swift --ipa build/export/VentusIOS.ipa   # skip archive/export, just validate+upload
 //
 
 import Foundation
 
 // MARK: - Configuration
 
-let projectPath = "Example/Forescoop.xcodeproj"
-let scheme = "iOSnowatch"
+let projectPath = "Example/Ventus.xcodeproj"
+let scheme = "VentusIOS"
 let teamID = "27XTSJS68A"
-let appInfoPlist = "Example/Forescoop_Example-Info.plist"
-let widgetInfoPlist = "Example/ForescoopWidgets/Info.plist"
+let appInfoPlist = "Example/Ventus_Example-Info.plist"
+let widgetInfoPlist = "Example/VentusWidgets/Info.plist"
 let buildDir = "build"
-let archivePath = "\(buildDir)/iOSnowatch.xcarchive"
+let archivePath = "\(buildDir)/VentusIOS.xcarchive"
 let exportDir = "\(buildDir)/export"
 let exportOptionsPlist = "\(buildDir)/ExportOptions.plist"
 let keychainItemName = ProcessInfo.processInfo.environment["ALTOOL_KEYCHAIN_ITEM"] ?? "Forescoop-AppStoreConnect"

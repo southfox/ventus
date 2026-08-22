@@ -1,6 +1,6 @@
 //
 //  ForecastAlert.swift
-//  Forescoop
+//  Ventus
 //
 //  User-defined conditions that trigger a push notification via
 //  ForecastSevereWeatherNotifier, independent of its built-in severe-weather

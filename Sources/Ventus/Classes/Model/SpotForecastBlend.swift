@@ -1,6 +1,6 @@
 //
 //  SpotForecastBlend.swift
-//  Forescoop
+//  Ventus
 //
 //  Created by Javier Fuchs on 07/22/26.
 //  Copyright © 2026 Mobile Patagonia. All rights reserved.
@@ -76,7 +76,7 @@ public extension SpotForecast {
             }
         }
 
-        let mixName = "Forescoop Mix (%lld models)".localized(formatArguments: [forecasts.count])
+        let mixName = "Ventus Mix (%lld models)".localized(formatArguments: [forecasts.count])
         var model: [String: Any] = blendedWeather
         model["initdate"] = base.forecast?.initdate ?? ""
         model["initstamp"] = base.forecast?.initStamp ?? 0
@@ -94,7 +94,7 @@ public extension SpotForecast {
             "sunrise": base.sunrise ?? "",
             "sunset": base.sunset ?? "",
             "models": base.models,
-            "forecast": ["forescoop-mix": model]
+            "forecast": ["ventus-mix": model]
         ]
         return try SpotForecast(map: map)
     }

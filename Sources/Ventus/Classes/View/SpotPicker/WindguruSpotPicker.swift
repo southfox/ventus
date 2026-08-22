@@ -1,9 +1,9 @@
 //
 //  WindguruSpotPicker.swift
-//  Forescoop
+//  Ventus
 //
 //  Created by Javier on 23/07/2026.
-//  Copyright © 2026 Forescoop. All rights reserved.
+//  Copyright © 2026 Ventus. All rights reserved.
 
 #if !os(watchOS)
 import CoreLocation

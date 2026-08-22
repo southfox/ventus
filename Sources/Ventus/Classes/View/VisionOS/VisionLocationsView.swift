@@ -1,6 +1,6 @@
 //
 //  VisionLocationsView.swift
-//  Forescoop
+//  Ventus
 //
 
 #if os(visionOS)

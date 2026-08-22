@@ -1,6 +1,6 @@
 //
 //  WindguruFavoritesView.swift
-//  Forescoop package
+//  Ventus package
 //
 //  Created by Javier on 07/26/26.
 //  Copyright © 2026 Mobile Patagonia. All rights reserved.

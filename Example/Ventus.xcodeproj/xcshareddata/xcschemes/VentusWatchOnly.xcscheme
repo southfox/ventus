@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1420"
+   LastUpgradeVersion = "2600"
    version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "A0010000000000000000000F"
-               BuildableName = "VentusIOS.app"
-               BlueprintName = "VentusIOS"
-               ReferencedContainer = "container:Forescoop.xcodeproj">
+               BlueprintIdentifier = "AA0100000000000000000005"
+               BuildableName = "VentusWatchOnly.app"
+               BlueprintName = "VentusWatchOnly"
+               ReferencedContainer = "container:Ventus.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -26,7 +26,7 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      shouldUseLaunchSchemeArgsEnv = "YES"
+      shouldUseLaunchSchemeArgsEnv = "NO"
       shouldAutocreateTestPlan = "YES">
    </TestAction>
    <LaunchAction
@@ -43,10 +43,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "A0010000000000000000000F"
-            BuildableName = "VentusIOS.app"
-            BlueprintName = "VentusIOS"
-            ReferencedContainer = "container:Forescoop.xcodeproj">
+            BlueprintIdentifier = "AA0100000000000000000005"
+            BuildableName = "VentusWatchOnly.app"
+            BlueprintName = "VentusWatchOnly"
+            ReferencedContainer = "container:Ventus.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -56,16 +56,6 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "A0010000000000000000000F"
-            BuildableName = "VentusIOS.app"
-            BlueprintName = "VentusIOS"
-            ReferencedContainer = "container:Forescoop.xcodeproj">
-         </BuildableReference>
-      </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

@@ -1,6 +1,6 @@
 //
 //  WGError.swift
-//  Forescoop
+//  Ventus
 //
 //  Created by javierfuchs on 7/11/17.
 //
@@ -11,7 +11,7 @@ import Foundation
  *  WGError
  *
  *  Discussion:
- *    Model object representing an error in a request in Forescoop api.
+ *    Model object representing an error in a request in Ventus api.
  *
  * {
  *   "return":"error",

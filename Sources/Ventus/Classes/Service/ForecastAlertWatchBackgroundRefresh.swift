@@ -1,6 +1,6 @@
 //
 //  ForecastAlertWatchBackgroundRefresh.swift
-//  Forescoop
+//  Ventus
 
 #if os(watchOS)
 import Foundation

@@ -1,6 +1,6 @@
 //
 //  WeatherNightSkyOverlay.swift
-//  Forescoop package
+//  Ventus package
 //
 
 import SwiftUI

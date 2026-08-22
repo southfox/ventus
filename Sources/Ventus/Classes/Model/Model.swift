@@ -1,6 +1,6 @@
 //
 //  Model.swift
-//  Forescoop
+//  Ventus
 //
 //  Created by javierfuchs on 7/13/17.
 //

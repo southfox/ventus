@@ -1,6 +1,6 @@
 //
 //  ForecastHourSelector.swift
-//  Forescoop
+//  Ventus
 //
 
 #if !os(watchOS)

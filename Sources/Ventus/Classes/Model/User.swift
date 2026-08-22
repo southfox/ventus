@@ -1,6 +1,6 @@
 //
 //  User.swift
-//  Forescoop
+//  Ventus
 //
 //  Created by javierfuchs on 7/11/17.
 //

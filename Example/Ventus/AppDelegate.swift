@@ -1,6 +1,6 @@
 //
 //  AppDelegate.swift
-//  Forescoop
+//  Ventus
 //
 //  Created by southfox on 07/06/2017.
 //  Copyright © 2023 southfox. All rights reserved.
@@ -145,7 +145,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 #elseif os(visionOS)
 
-// visionOS uses VisionForescoopApp's SwiftUI lifecycle.
+// visionOS uses VisionVentusApp's SwiftUI lifecycle.
 
 #else
 

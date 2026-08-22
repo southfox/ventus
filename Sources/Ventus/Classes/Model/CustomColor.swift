@@ -1,6 +1,6 @@
 //
 //  Color.swift
-//  Forescoop
+//  Ventus
 //
 //  Created by javierfuchs on 7/27/17.
 //

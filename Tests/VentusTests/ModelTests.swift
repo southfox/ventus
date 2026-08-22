@@ -1,6 +1,6 @@
 //
 //  ModelTests.swift
-//  ForescoopTests
+//  VentusTests
 //
 //  Created by Javier Fuchs on 07/26/26.
 //  Copyright © 2026 Mobile Patagonia. All rights reserved.
@@ -330,7 +330,7 @@ class ModelTests: XCTestCase {
         } catch {
             return XCTFail("Expected an equal-weight model blend")
         }
-        XCTAssertEqual(blendedForecast?.forecast?.modelName, "Forescoop Mix (2 models)")
+        XCTAssertEqual(blendedForecast?.forecast?.modelName, "Ventus Mix (2 models)")
         let blendHour = forecast?.availableHours.first
         XCTAssertEqual(blendedForecast?.forecast?.windSpeed(hh: blendHour), forecast?.windSpeed(hh: blendHour))
         XCTAssertEqual(blendedForecast?.forecast?.cloudCoverTotal(hh: blendHour), forecast?.cloudCoverTotal(hh: blendHour))
@@ -344,7 +344,7 @@ class ModelTests: XCTestCase {
         nonOverlappingResponse?["forecast"] = nonOverlappingModels
         let nonOverlappingForecast = try? SpotForecast(map: nonOverlappingResponse)
         let expandedBlend = try? SpotForecast.blended([spotForecast!, nonOverlappingForecast!])
-        XCTAssertEqual(expandedBlend?.forecast?.modelName, "Forescoop Mix (2 models)")
+        XCTAssertEqual(expandedBlend?.forecast?.modelName, "Ventus Mix (2 models)")
         XCTAssertEqual(expandedBlend?.forecast?.windSpeed(hh: "999"), 4.0)
 
         var firstHourlyBlock = spotForecastDict

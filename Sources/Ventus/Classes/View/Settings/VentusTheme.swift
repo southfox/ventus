@@ -1,6 +1,6 @@
 //
 //  VentusTheme.swift
-//  Forescoop package
+//  Ventus package
 //
 //  Created by Javier Fuchs on 08/02/26.
 //  Copyright © 2026 Mobile Patagonia. All rights reserved.
@@ -231,7 +231,7 @@ struct VentusThemeModifier: ViewModifier {
     }
 }
 
-/// Theme storage shared by every Forescoop target installed on this device.
+/// Theme storage shared by every Ventus target installed on this device.
 /// The App Group is intentionally also used by the widget extensions.
 public protocol VentusThemeStoring: Sendable {
     func load() -> VentusTheme

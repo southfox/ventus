@@ -1,6 +1,6 @@
 //
 //  VentusHelpView.swift
-//  Forescoop package
+//  Ventus package
 //
 //  Created by Javier Fuchs on 08/02/26.
 //  Copyright © 2026 Mobile Patagonia. All rights reserved.
@@ -74,9 +74,9 @@ public struct VentusHelpView: View {
                 HelpSection {
                     VStack(alignment: .leading, spacing: 12) {
                         HelpFeature(symbol: "cpu", title: "Models depend on the location".localized, detail: "Each spot exposes the forecast models that cover it. The available selection can change when you choose another location or sign in to a different account tier.".localized)
-                        HelpFeature(symbol: "circle.hexagongrid", title: "Forescoop Mix", detail: "When multiple sources are selected, Ventus presents a Forescoop Mix: one continuous forecast assembled from the selected model data available for each hour.".localized)
+                        HelpFeature(symbol: "circle.hexagongrid", title: "Ventus Mix", detail: "When multiple sources are selected, Ventus presents a Ventus Mix: one continuous forecast assembled from the selected model data available for each hour.".localized)
                         HelpFeature(symbol: "arrow.left.and.right", title: "Compare before relying on a forecast".localized, detail: "In Forecast Grid, use Compare models to reveal source values row by row, or Compare all to expand every forecast field at once.".localized)
-                        HelpFeature(symbol: "checklist", title: "Choose the sources".localized, detail: "Tap the Forescoop Mix model summary below the grid to expand the checkbox list. Keep at least one model selected, then use the mix and comparison tools to judge agreement.".localized)
+                        HelpFeature(symbol: "checklist", title: "Choose the sources".localized, detail: "Tap the Ventus Mix model summary below the grid to expand the checkbox list. Keep at least one model selected, then use the mix and comparison tools to judge agreement.".localized)
                     }
                     .padding(.vertical, 4)
                 } label: {
@@ -88,7 +88,7 @@ public struct VentusHelpView: View {
                         HelpFeature(symbol: "tablecells", title: "Forecast Grid".localized, detail: "Scroll through hours, tap a column to select it, and use the comparison control to inspect individual or all model sources.".localized)
                         HelpFeature(symbol: "rectangle.split.2x1", title: "Grid and Dashboard".localized, detail: "Drag the separator to choose your preferred balance. The selected hour, units, location, and models stay synchronized.".localized)
                         HelpFeature(symbol: "square.grid.2x2", title: "Overview".localized, detail: "Shows the same large layout as the Home Screen widget, with a written analysis of current conditions and the days ahead — flagging strong wind and chill, refreeze or ice risk, extended rain or snow, temperature extremes, and swell when relevant.".localized)
-                        HelpFeature(symbol: "cpu", title: "Forecast models".localized, detail: "Ventus combines selected models into a Forescoop Mix. Expand the model summary in the grid to change the selected sources.".localized)
+                        HelpFeature(symbol: "cpu", title: "Forecast models".localized, detail: "Ventus combines selected models into a Ventus Mix. Expand the model summary in the grid to change the selected sources.".localized)
                         HelpFeature(symbol: "map", title: "Maps and saved locations".localized, detail: "View forecast locations on the map, keep places locally, and use Windguru favorites when signed in.".localized)
                         HelpFeature(symbol: "circle.righthalf.filled", title: "Appearance and theme".localized, detail: "Choose System, Light, or Dark in Settings, plus a color theme that changes the palette and font design independently of light or dark mode.".localized)
                     }

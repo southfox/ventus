@@ -1,6 +1,6 @@
 //
 //  ForecastAlertSweep.swift
-//  Forescoop
+//  Ventus
 //
 
 import Foundation

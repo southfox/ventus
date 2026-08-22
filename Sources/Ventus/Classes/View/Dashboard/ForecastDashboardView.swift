@@ -1,6 +1,6 @@
 //
 //  ForecastDashboardView.swift
-//  Forescoop package
+//  Ventus package
 //
 //  Created by Javier Fuchs on 07/22/26.
 //  Copyright © 2026 Mobile Patagonia. All rights reserved.
@@ -823,7 +823,7 @@ public struct ForecastDashboardView: View {
             }
         }
         if didLoad, let forecast {
-            ForescoopSpotlightIndexer.index(forecast: forecast, savedLocations: savedMapLocations)
+            VentusSpotlightIndexer.index(forecast: forecast, savedLocations: savedMapLocations)
         }
     }
 
@@ -840,7 +840,7 @@ public struct ForecastDashboardView: View {
             account: account
         )
         if let forecast {
-            ForescoopSpotlightIndexer.index(forecast: forecast, savedLocations: savedMapLocations)
+            VentusSpotlightIndexer.index(forecast: forecast, savedLocations: savedMapLocations)
         }
     }
 

@@ -1,6 +1,6 @@
 //
 //  WatchForecastAlertFormView.swift
-//  Forescoop package
+//  Ventus package
 //
 //  Add/edit screen for a single ForecastAlert, sized for the watch. Unlike
 //  the iOS form, this keeps exactly one condition (no add/remove rows) to

@@ -1,6 +1,6 @@
 //
 //  WatchAboutView.swift
-//  Forescoop package
+//  Ventus package
 //
 
 #if os(watchOS)
@@ -23,7 +23,7 @@ struct WatchAboutView: View {
                 .frame(maxWidth: .infinity)
 
                 LabeledContent("Version", value: versionDescription)
-                Link(destination: URL(string: "https://github.com/patagonia2019/forescoop")!) {
+                Link(destination: URL(string: "https://github.com/southfox/ventus")!) {
                     Label("Ventus on GitHub", systemImage: "chevron.left.forwardslash.chevron.right")
                 }
             }

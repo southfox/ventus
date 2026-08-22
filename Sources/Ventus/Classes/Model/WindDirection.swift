@@ -1,6 +1,6 @@
 //
 //  WindDirection.swift
-//  Forescoop
+//  Ventus
 //
 //  Created by fox on 06/06/2023.
 //

@@ -1,5 +1,5 @@
 @startuml
-title Ventus / Forescoop architecture
+title Ventus architecture
 
 skinparam backgroundColor #FFFFFF
 skinparam shadowing false
@@ -17,12 +17,12 @@ skinparam database {
 }
 
 package "Apple platform applications" #F5F8FB {
-  [App targets\niOS / iPadOS: iOSnowatch\nmacOS: ForescoopMacOS\ntvOS: ForescoopTVOS\nvisionOS: ForescoopVisionOS\nwatchOS: ForescoopWatchOnly] as apps
-  [watchOS Widget Extension\nForescoopWatchWidgets] as watchWidget
+  [App targets\niOS / iPadOS: VentusIOS\nmacOS: VentusMacOS\ntvOS: VentusTVOS\nvisionOS: VentusVisionOS\nwatchOS: VentusWatchOnly] as apps
+  [watchOS Widget Extension\nVentusWatchWidgets] as watchWidget
 }
 
 package "Swift packages" #E9F4EC {
-  package "Forescoop" #F8FCF8 {
+  package "Ventus" #F8FCF8 {
     package "Views" #F8FCF8 {
       [Dashboard and workspace\nForecastDashboardView\naccount and location menus] as dashboard
       [Forecast views\noverview, details, hour selector,\nmodel comparison and intelligence] as forecastViews
@@ -45,17 +45,17 @@ package "Swift packages" #E9F4EC {
       interface "ForecastWindguruProtocol" as forecastProtocol
       [ForecastWindguruService\nURLSession REST client] as service
       [ForecastWindguruMockup\nfixture-backed previews and tests] as mock
-      [ForescoopSpotlightIndexer\ncurrent forecast and locations] as spotlight
+      [VentusSpotlightIndexer\ncurrent forecast and locations] as spotlight
       [Forecast intelligence\nFoundation Models with\ndeterministic fallback] as intelligence
     }
   }
 
-  package "ForescoopGraph" #F8FCF8 {
+  package "VentusGraph" #F8FCF8 {
     [ForecastGraphView adapter] as graphAdapter
     [Canvas graph\ndata, smooth paths, legend\nand model comparison] as graph
   }
 
-  package "ForescoopWidgets" #F8FCF8 {
+  package "VentusWidgets" #F8FCF8 {
     [Widget timeline provider\nand forecast entry] as widgetProvider
     [Adaptive widget view\nstandard and accessory families] as widgetView
   }

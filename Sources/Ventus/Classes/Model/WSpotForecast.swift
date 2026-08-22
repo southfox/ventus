@@ -1,6 +1,6 @@
 //
 //  WSpotForecast.swift
-//  Forescoop
+//  Ventus
 //
 //  Created by javierfuchs on 7/17/17.
 //

@@ -1,6 +1,6 @@
 //
 //  ForecastSevereWeatherNotifier.swift
-//  Forescoop
+//  Ventus
 //
 //  Local notifications for exceptional conditions in the selected forecast.
 //

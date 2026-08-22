@@ -1,6 +1,6 @@
 //
 //  WeatherBackgroundStyleStore.swift
-//  ForescoopPackage
+//  VentusPackage
 //
 //  Created by Javier on 19/08/2026.
 //

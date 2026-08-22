@@ -1,6 +1,6 @@
 //
-//  VisionForescoopApp.swift
-//  Forescoop
+//  VisionVentusApp.swift
+//  Ventus
 //
 //  Created by Javier Fuchs on 07/23/26.
 //  Copyright © 2026 Mobile Patagonia. All rights reserved.
@@ -11,7 +11,7 @@ import SwiftUI
 import Ventus
 
 @main
-struct VisionForescoopApp: App {
+struct VisionVentusApp: App {
     @Environment(\.scenePhase) private var scenePhase
     private let environment = AppEnvironment()
 

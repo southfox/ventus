@@ -1,6 +1,6 @@
 //
 //  ForecastAlertsListView.swift
-//  Forescoop package
+//  Ventus package
 //
 //  Lists the user's custom ForecastAlert definitions, mirroring Windguru's
 //  "Forecast alerts" screen but push-notification only.

@@ -3,12 +3,12 @@
 //  JFWindguru_Tests
 //
 //  Created by fox on 29/05/2023.
-//  Copyright © 2023 Forescoop. All rights reserved.
+//  Copyright © 2023 Ventus. All rights reserved.
 //
 
 import XCTest
 import Ventus
-@testable import Forescoop_Example
+@testable import Ventus_Example
 
 final class AlertViewModelTests: XCTestCase {
     
