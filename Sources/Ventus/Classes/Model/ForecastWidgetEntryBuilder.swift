@@ -132,8 +132,6 @@ public enum ForecastWidgetEntryBuilder {
         let dates = hours.map { forecast.forecastDate(hour: $0) ?? .now }
         let calendar = Calendar.current
 
-        // The next sunrise/sunset that hasn't happened yet — today's if
-        // it's still ahead, otherwise a later day's — never one already past.
         let now = Date()
         let sunrise = nextFutureDaylightDate(after: now) { forecast.sunriseDate(on: $0) }
         let sunset = nextFutureDaylightDate(after: now) { forecast.sunsetDate(on: $0) }
@@ -145,13 +143,12 @@ public enum ForecastWidgetEntryBuilder {
             let date = dates[index]
             let weather = forecast.forecast
             let temperature = weather?.temperature(hh: hour) ?? weather?.temperatureReal(hh: hour) ?? 0
-            let realTemperature = weather?.temperatureReal(hh: hour) ?? temperature
             let wind = weather?.windSpeed(hh: hour) ?? 0
             let gust = weather?.windGustsKnots(hh: hour) ?? 0
             let windChill = weather?.windChill(hh: hour)
             let freezingLevel = weather?.freezingLevelHeightInMeters(hh: hour) ?? 0
             let precipitation = weather?.precipitation1(hh: hour) ?? weather?.precipitation(hh: hour) ?? 0
-            let isSnow = precipitation > 0 && realTemperature <= 0
+            let phase = forecast.precipitationPhase(hh: hour)
 
             var daylightTime: String?
             var daylightSymbolName: String?
@@ -173,17 +170,15 @@ public enum ForecastWidgetEntryBuilder {
                 windDirectionDegrees: weather?.windDirection(hh: hour) ?? 0,
                 windChill: windChill.map { temperatureText($0, unit: units.temperatureUnit) },
                 freezingLevel: freezingLevelText(freezingLevel, unit: units.freezingLevelUnit),
-                rain: (precipitation > 0 && !isSnow) ? precipitationText(precipitation, unit: units.precipitationUnit) : nil,
-                snow: (precipitation > 0 && isSnow) ? precipitationText(precipitation, unit: units.precipitationUnit) : nil,
+                rain: (precipitation > 0 && phase == .rain) ? precipitationText(precipitation, unit: units.precipitationUnit) : nil,
+                sleet: (precipitation > 0 && phase == .sleet) ? precipitationText(precipitation, unit: units.precipitationUnit) : nil,
+                snow: (precipitation > 0 && phase == .snow) ? precipitationText(precipitation, unit: units.precipitationUnit) : nil,
                 daylightTime: daylightTime,
                 daylightSymbolName: daylightSymbolName
             )
         }
     }
 
-    /// "13h" — the Overview hourly strip's own time format: always a plain
-    /// 24-hour number, never AM/PM. (Only used here; the real widget's
-    /// simple hourly cells keep their existing AM/PM format.)
     private static func hourLabel(for date: Date) -> String {
         "\(Calendar.current.component(.hour, from: date))h"
     }
@@ -193,9 +188,6 @@ public enum ForecastWidgetEntryBuilder {
         return dates.indices.min { abs(dates[$0].timeIntervalSince(target)) < abs(dates[$1].timeIntervalSince(target)) }
     }
 
-    /// The next occurrence of a once-per-day event (sunrise or sunset)
-    /// that is still ahead of `now` — checking today first, then scanning
-    /// forward a few days if today's has already passed.
     private static func nextFutureDaylightDate(after now: Date, on dateForDay: (Date) -> Date?) -> Date? {
         var day = now
         let calendar = Calendar.current

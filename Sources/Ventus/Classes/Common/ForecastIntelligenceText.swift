@@ -319,8 +319,7 @@ struct ForecastIntelligenceSnapshot: Hashable, Sendable {
             guard amount > 0 else { continue }
             total += amount
             if onsetHour == nil { onsetHour = item.hour }
-            let celsius = source.temperatureReal(hh: item.hour) ?? source.temperature(hh: item.hour) ?? 0
-            if celsius <= 0 { isSnow = true }
+            if forecast.precipitationPhase(hh: item.hour) != .rain { isSnow = true }
         }
         guard total > 0 else { return nil }
         let amountText = precipitation(total, unit: unit, locale: locale)
@@ -391,7 +390,7 @@ struct ForecastIntelligenceSnapshot: Hashable, Sendable {
             for item in dayHours {
                 let amount = source.precipitation1(hh: item.hour) ?? source.precipitation(hh: item.hour) ?? 0
                 precipitationTotal += amount
-                if amount > 0, let celsius = source.temperatureReal(hh: item.hour) ?? source.temperature(hh: item.hour), celsius <= 0 {
+                if amount > 0, forecast.precipitationPhase(hh: item.hour) != .rain {
                     isSnowDay = true
                 }
                 let windKnots = source.windSpeed(hh: item.hour) ?? 0

@@ -36,7 +36,7 @@ final class ForecastSevereWeatherNotifier {
         let location = spotForecast.locationDisplayName()
         let alert: ForecastSevereWeatherAlert?
 
-        if temperature <= 0, precipitation >= 8 {
+        if spotForecast.precipitationPhase(hh: hour) == .snow, precipitation >= 8 {
             alert = ForecastSevereWeatherAlert(
                 kind: "heavy-snow",
                 title: "Heavy snow near \(location)",

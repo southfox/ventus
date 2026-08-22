@@ -20,6 +20,7 @@ public struct ForecastOverviewHour: Identifiable, Sendable {
     public let windChill: String?
     public let freezingLevel: String
     public let rain: String?
+    public let sleet: String?
     public let snow: String?
     public let daylightTime: String?
     public let daylightSymbolName: String?
@@ -35,6 +36,7 @@ public struct ForecastOverviewHour: Identifiable, Sendable {
         windChill: String? = nil,
         freezingLevel: String,
         rain: String? = nil,
+        sleet: String? = nil,
         snow: String? = nil,
         daylightTime: String? = nil,
         daylightSymbolName: String? = nil
@@ -49,6 +51,7 @@ public struct ForecastOverviewHour: Identifiable, Sendable {
         self.windChill = windChill
         self.freezingLevel = freezingLevel
         self.rain = rain
+        self.sleet = sleet
         self.snow = snow
         self.daylightTime = daylightTime
         self.daylightSymbolName = daylightSymbolName

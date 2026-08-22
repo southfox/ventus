@@ -127,15 +127,15 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
 #if !os(watchOS)
             ForecastLocationHeader(locationName: entry.locationName)
                 .lineLimit(1)
-                .minimumScaleFactor(0.6)
+                .minimumScaleFactor(0.5)
 #else
             Text(entry.locationName)
                 .font(.headline)
                 .lineLimit(1)
-                .minimumScaleFactor(0.6)
+                .minimumScaleFactor(0.5)
 #endif
 
-            HStack(spacing: 8) {
+            HStack(spacing: 6) {
                 Image(systemName: entry.symbolName)
                     .font(.default)
                     .widgetAccentable()
@@ -143,9 +143,9 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
                     .font(.system(.title3, design: .rounded).weight(.light))
                     .minimumScaleFactor(0.5)
             }
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 6) {
                 windGustsMetric
-                HStack(alignment: .bottom, spacing: 8) {
+                HStack(alignment: .bottom, spacing: 6) {
                     widgetMetric(entry.rain, symbol: "drop.fill")
                     widgetMetric(entry.cloudCover, symbol: "cloud.fill")
                 }
@@ -321,7 +321,7 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
             Text(value)
                 .font(.subheadline.weight(.semibold))
                 .lineLimit(1)
-                .minimumScaleFactor(0.7)
+                .minimumScaleFactor(displayedFamily == .systemSmall ? 0.6 : 0.7)
         }
     }
 
@@ -337,7 +337,7 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
         Label(value, systemImage: symbol)
             .font(.caption.weight(.medium))
             .lineLimit(1)
-            .minimumScaleFactor(0.75)
+            .minimumScaleFactor(0.5)
     }
 }
 

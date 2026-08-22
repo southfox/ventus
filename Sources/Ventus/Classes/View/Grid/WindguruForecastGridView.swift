@@ -853,12 +853,12 @@ public struct WindguruForecastGridView: View {
         let millimeters = accumulatedPrecipitation ?? sourceWeather?.precipitation1(hh: resolvedHour)
         guard let millimeters else { return .empty }
         let converted = Precipitation(millimeters: millimeters).value(in: viewModel.precipitationUnit)
-        let temperature = sourceWeather?.temperatureReal(hh: resolvedHour) ?? sourceWeather?.temperature(hh: resolvedHour)
+        let phase = (source ?? forecast).precipitationPhase(hh: resolvedHour)
         return GridCell(
             value: converted,
             text: number(converted),
             colorValue: millimeters,
-            isSnow: millimeters > 0 && (temperature ?? .infinity) <= 0,
+            isSnow: millimeters > 0 && phase != .rain,
             usesAccumulatedPrecipitation: accumulatedPrecipitation != nil
         )
     }

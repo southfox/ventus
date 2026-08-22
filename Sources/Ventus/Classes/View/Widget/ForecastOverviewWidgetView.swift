@@ -218,6 +218,9 @@ struct ForecastOverviewWidgetView: View, ForecastConditionsCard {
                 if let rain = hour.rain {
                     detailedHourRow("drop.fill", rain)
                 }
+                if let sleet = hour.sleet {
+                    detailedHourRow("cloud.sleet.fill", sleet)
+                }
                 if let snow = hour.snow {
                     detailedHourRow("cloud.snow.fill", snow)
                 }

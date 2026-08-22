@@ -240,9 +240,11 @@ public struct ForecastWeatherDetails: View {
 
     @ViewBuilder private var precipitationIndicator: some View {
         let dropCount = precipitationValue > 0 ? min(max(Int(ceil(precipitationValue / 2)), 1), 4) : 0
-        let temperature = weather?.temperature(hh: hour) ?? weather?.temperatureReal(hh: hour)
-        if precipitationValue > 0, let temperature, temperature <= 0 {
+        let phase = forecast.precipitationPhase(hh: hour)
+        if precipitationValue > 0, phase == .snow {
             Image(systemName: "snowflake").foregroundStyle(.cyan).accessibilityLabel("Snow")
+        } else if precipitationValue > 0, phase == .sleet {
+            Image(systemName: "cloud.sleet.fill").foregroundStyle(.cyan).accessibilityLabel("Sleet")
         } else if dropCount > 0 {
             HStack(spacing: 2) {
                 ForEach(0..<dropCount, id: \.self) { _ in Image(systemName: "drop.fill") }
