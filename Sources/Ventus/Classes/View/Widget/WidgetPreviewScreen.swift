@@ -31,10 +31,9 @@ struct WidgetPreviewScreen: View {
 
     var body: some View {
         ScrollView {
-            ForecastWidgetView(
+            ForecastOverviewWidgetView(
                 entry: entry,
                 theme: theme,
-                previewFamily: .systemExtraLarge,
                 onSelectLocation: onSelectLocation,
                 onShowMap: onShowMap
             )

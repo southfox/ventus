@@ -153,6 +153,7 @@ public extension SpotForecast {
         guard items.count > 1 else { return items }
         var result = [Item]()
         result.reserveCapacity(items.count + 2)
+        var insertedSymbols = Set<String>()
         for index in items.indices {
             let item = items[index]
             result.append(item)
@@ -161,7 +162,8 @@ public extension SpotForecast {
             let start = date(item)
             let end = date(next)
             guard start < end else { continue }
-            for event in daylightEvents(from: start, until: end) {
+            for event in daylightEvents(from: start, until: end) where !insertedSymbols.contains(event.symbolName) {
+                insertedSymbols.insert(event.symbolName)
                 result.append(make(item, next, event.date, event.symbolName))
             }
         }
