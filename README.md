@@ -1,6 +1,6 @@
 # Ventus
 
-Ventus is a SwiftUI weather-forecast app powered by Windguru. Its shared `Ventus` Swift package provides the forecast client, typed domain models, unit conversions, persistence helpers, and reusable views used by the Apple-platform example targets.
+Ventus is a SwiftUI weather-forecast app powered by Windguru. Its shared `Ventus` Swift package provides the forecast client, typed domain models, unit conversions, persistence helpers, and reusable views used by the Apple-platform app targets.
 
 ![Ventus architecture](docs/architecture.png)
 
@@ -28,7 +28,7 @@ The package requires Swift tools 6.2 and Apple platform version 26.0 or later.
 | watchOS | Compact forecast and persistent local spot selector |
 | tvOS | Native SwiftUI forecast experience |
 
-`VentusIOS` is an iOS-only sample target. `VentusWatchOnly` is a separate watchOS app whose companion is `VentusIOS`.
+`VentusIOS` is an iOS-only app target. `VentusWatchOnly` is a separate watchOS app whose companion is `VentusIOS`.
 
 ## Add the framework
 
@@ -46,9 +46,9 @@ import Ventus
 
 The package container is named `VentusPackage`; its public library product and module are both named `Ventus`.
 
-## Run the examples
+## Run the app
 
-Open [Example/Ventus.xcodeproj](Example/Ventus.xcodeproj) in Xcode. It resolves the local Swift package directly and contains shared schemes for iOS, macOS, tvOS, visionOS, and watchOS.
+Open [App/Ventus.xcodeproj](App/Ventus.xcodeproj) in Xcode. It resolves the local Swift package directly and contains shared schemes for iOS, macOS, tvOS, visionOS, and watchOS.
 
 To exercise the framework and its bundled fixtures from the command line:
 
@@ -68,7 +68,7 @@ For offline previews and tests, inject `ForecastWindguruMockup`; it reads JSON f
 
 ## Architecture
 
-The example apps depend on `ForecastWindguruProtocol`, rather than on the network implementation directly. `ForecastWindguruService` uses `URLSession` to map public and PRO Windguru responses into the shared forecast domain. `ForecastWindguruMockup` implements the same protocol with bundled fixtures.
+The app targets depend on `ForecastWindguruProtocol`, rather than on the network implementation directly. `ForecastWindguruService` uses `URLSession` to map public and PRO Windguru responses into the shared forecast domain. `ForecastWindguruMockup` implements the same protocol with bundled fixtures.
 
 The [PlantUML source](docs/architecture.puml) is the canonical diagram. Regenerate `docs/architecture.png` with PlantUML after changing it:
 
@@ -81,8 +81,8 @@ plantuml -tpng docs/architecture.puml
 The former standalone migration log is maintained here.
 
 - The internal library was migrated to the root Swift package, with resources processed by Swift Package Manager and loaded through `Bundle.module`. Legacy dependency-manager configuration, generated workspace metadata, framework references, and build phases were removed.
-- Every package and example target has a 26.0 deployment target. The Xcode project links the local `Ventus` product directly for iOS, watchOS, macOS, tvOS, and visionOS.
-- UIKit view controllers and the main storyboard were removed in favor of SwiftUI app lifecycles across the example targets.
+- Every package and app target has a 26.0 deployment target. The Xcode project links the local `Ventus` product directly for iOS, watchOS, macOS, tvOS, and visionOS.
+- UIKit view controllers and the main storyboard were removed in favor of SwiftUI app lifecycles across the app targets.
 - The SwiftUI `ForecastDashboardView` provides the adaptive dashboard, while `WindguruForecastGridView` provides the dense horizontal forecast grid. Both share the animated weather background and selected-hour state.
 - Forecast display is based on the current local day, so an hour key of `27` means tomorrow at 03:00. The detail view includes wind speed, gusts, direction, cloud cover, humidity, precipitation, freezing level, waves, and pressure, with selectable units.
 - The available models are discovered for the active spot or coordinate. Multiple selected models form the local `Ventus Mix`; Windguru's metadata-only `WG` mix is not used.

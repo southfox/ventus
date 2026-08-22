@@ -8,7 +8,7 @@
 
 import XCTest
 import Ventus
-@testable import Ventus_Example
+@testable import Ventus_App
 
 final class AlertViewModelTests: XCTestCase {
     

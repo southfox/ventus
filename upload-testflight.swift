@@ -15,11 +15,11 @@ import Foundation
 
 // MARK: - Configuration
 
-let projectPath = "Example/Ventus.xcodeproj"
+let projectPath = "App/Ventus.xcodeproj"
 let scheme = "VentusIOS"
 let teamID = "27XTSJS68A"
-let appInfoPlist = "Example/Ventus_Example-Info.plist"
-let widgetInfoPlist = "Example/VentusWidgets/Info.plist"
+let appInfoPlist = "App/Ventus_App-Info.plist"
+let widgetInfoPlist = "App/VentusWidgets/Info.plist"
 let buildDir = "build"
 let archivePath = "\(buildDir)/VentusIOS.xcarchive"
 let exportDir = "\(buildDir)/export"
