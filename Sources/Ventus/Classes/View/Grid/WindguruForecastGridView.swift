@@ -1024,7 +1024,7 @@ private struct WindguruForecastGridPreview: View {
         forecast = models.first
         let viewModel = ForecastDashboardViewModel(forecastService: mockup, environment: .preview)
         if let forecast = models.first {
-            viewModel.usePreviewForecast(forecast, spotID: forecast.identifier ?? "64141", modelForecasts: models)
+            viewModel.usePreviewForecast(forecast, spotID: forecast.identifier ?? SavedMapLocationStore.primarySpotID, modelForecasts: models)
         }
         _viewModel = StateObject(wrappedValue: viewModel)
     }

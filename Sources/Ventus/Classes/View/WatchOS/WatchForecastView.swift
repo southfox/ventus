@@ -13,7 +13,7 @@ public struct WatchForecastView: View {
     nonisolated(unsafe) private let forecastService: ForecastWindguruProtocol
     private let environment: AppEnvironment
     @Environment(\.scenePhase) private var scenePhase
-    @AppStorage("watchSelectedWindguruSpotID") private var selectedSpotID = "64141"
+    @AppStorage("watchSelectedWindguruSpotID") private var selectedSpotID = SavedMapLocationStore.primarySpotID
     @AppStorage("watchTemperatureUnit") private var temperatureUnitRaw = DeviceForecastPreferences.temperatureUnit.rawValue
     @AppStorage("watchWindSpeedUnit") private var windSpeedUnitRaw = DeviceForecastPreferences.windSpeedUnit.rawValue
     @AppStorage("watchWaveHeightUnit") private var waveHeightUnitRaw = DeviceForecastPreferences.waveHeightUnit.rawValue

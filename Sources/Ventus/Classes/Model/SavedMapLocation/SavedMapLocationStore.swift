@@ -28,6 +28,7 @@ public final class SavedMapLocationStore: SavedMapLocationStoring {
         spotID: primarySpotID,
         placeDescription: "Argentina"
     )
+    public static let primaryLocationDisplayName = "\(primaryLocation.name) #\(primarySpotID)"
 
     private let container: ModelContainer
     private let selectedSpotStore: SelectedWindguruSpotStoring

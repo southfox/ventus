@@ -105,7 +105,7 @@ public class ForecastWindguruMockup: ForecastWindguruProtocol {
         ]
 
         return [
-            "id_spot": "64141",
+            "id_spot": SavedMapLocationStore.primarySpotID,
             "spotname": "Bariloche",
             "country": "Argentina",
             "id_country": 32,

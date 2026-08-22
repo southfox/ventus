@@ -22,7 +22,7 @@ protocol WatchLocationStoring: Sendable {
 
 final class WatchLocationStore: WatchLocationStoring, @unchecked Sendable {
     private static let key = "watchSavedWindguruLocations"
-    private static let defaultLocations = [WatchLocation(spotID: "64141", name: "Bariloche")]
+    private static let defaultLocations = [WatchLocation(spotID: SavedMapLocationStore.primarySpotID, name: "Bariloche")]
 
     private let defaults: UserDefaults
 

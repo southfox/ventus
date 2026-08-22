@@ -49,12 +49,12 @@ struct ForecastLocationHeader: View {
 
 #if DEBUG
 #Preview("Forecast location header") {
-    ForecastLocationHeader(locationName: "Bariloche #64141")
+    ForecastLocationHeader(locationName: SavedMapLocationStore.primaryLocationDisplayName)
     .padding()
 }
 #Preview("Forecast location header (w/Selection)") {
     ForecastLocationHeader(
-        locationName: "Bariloche #64141",
+        locationName: SavedMapLocationStore.primaryLocationDisplayName,
         onSelectLocation: {},
         onShowMap: {}
     )

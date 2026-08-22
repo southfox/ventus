@@ -219,9 +219,9 @@ public struct ForecastWidgetView: View {
     }
 
     private var extraLargeColumnContent: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(alignment: .top, spacing: 24) {
-                VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .top, spacing: 22) {
+                VStack(alignment: .leading, spacing: 14) {
                     weatherHeader
                         Divider()
                     if isInAppPreview {
@@ -234,7 +234,7 @@ public struct ForecastWidgetView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 10) {
                     Label("10-Day Forecast".localized, systemImage: "calendar")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(theme.accentColor(for: colorScheme))
@@ -244,11 +244,13 @@ public struct ForecastWidgetView: View {
             }
             Divider()
 
-            Label("Conditions", systemImage: "list.bullet.rectangle")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(theme.accentColor(for: colorScheme))
+            VStack(alignment: .leading, spacing: 2) {
+                Label("Conditions", systemImage: "list.bullet.rectangle")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(theme.accentColor(for: colorScheme))
 
-            expandedConditions(compact: false)
+                expandedConditions(compact: false)
+            }
             Divider()
             insightCard
         }
@@ -256,7 +258,7 @@ public struct ForecastWidgetView: View {
     }
 
     private var extraLargeStackedContent: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 4) {
             weatherHeader
             Divider()
             if isInAppPreview {
@@ -274,11 +276,13 @@ public struct ForecastWidgetView: View {
             dailyForecast(limit: 10)
 
             Divider()
-            Label("Conditions", systemImage: "list.bullet.rectangle")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(theme.accentColor(for: colorScheme))
+            VStack(alignment: .leading, spacing: 2) {
+                Label("Conditions", systemImage: "list.bullet.rectangle")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(theme.accentColor(for: colorScheme))
 
-            expandedConditions(compact: true)
+                expandedConditions(compact: true)
+            }
 
             Divider()
             insightCard
@@ -305,13 +309,13 @@ public struct ForecastWidgetView: View {
                 Text(entry.insight)
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(2)
             }
 #else
             Text(entry.insight)
                 .font(.caption)
                 .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+                .lineLimit(2)
 #endif
         }
     }
@@ -417,15 +421,11 @@ public struct ForecastWidgetView: View {
 
 #if !os(watchOS)
                     if isInAppPreview {
-                    // if displayedFamily == .systemLarge || displayedFamily == .systemExtraLarge {
                         RealTemperatureLabel(entry.realTemperature, celsius: entry.realTemperatureCelsius)
                             .font(.system(.title, design: .rounded).weight(.light))
                             .minimumScaleFactor(0.5)
-                    } else if displayedFamily == .systemExtraLarge {
-                        ThermalLabel(entry.low, celsius: entry.lowCelsius)
-                        ThermalLabel(entry.high, celsius: entry.highCelsius)
                     }
-                    if !isInAppPreview && displayedFamily != .systemSmall {
+                    if !isInAppPreview && (displayedFamily == .systemMedium || displayedFamily == .systemLarge) {
                         Spacer()
                         windGustsMetric
                             .layoutPriority(1)

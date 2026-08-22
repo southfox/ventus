@@ -2805,6 +2805,9 @@
         }
       }
     },
+    "Enter a Windguru spot ID, or sign in with Windguru PRO to use your current location." : {
+
+    },
     "Every %lld hours" : {
       "localizations" : {
         "de" : {
@@ -9518,6 +9521,7 @@
       }
     },
     "Use your current location or enter a Windguru spot ID." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {

@@ -205,6 +205,8 @@ public struct WindguruSpotPicker: View {
             Section("Map locations") {
                 ForEach(locations) { location in
                     savedLocationRow(location)
+                        .deleteDisabled(location.isPrimaryLocation)
+                        .moveDisabled(location.isPrimaryLocation)
                 }
                 .onDelete(perform: delete)
                 .onMove(perform: move)
@@ -285,12 +287,14 @@ public struct WindguruSpotPicker: View {
 
 #if !os(macOS)
             if editMode.isEditing {
-                Button("Rename \(location.name)", systemImage: "pencil") {
-                    beginRenaming(location)
+                if !location.isPrimaryLocation {
+                    Button("Rename \(location.name)", systemImage: "pencil") {
+                        beginRenaming(location)
+                    }
+                    .labelStyle(.iconOnly)
+                    .buttonStyle(.borderless)
+                    .accessibilityHint("Changes this saved location's name")
                 }
-                .labelStyle(.iconOnly)
-                .buttonStyle(.borderless)
-                .accessibilityHint("Changes this saved location's name")
 
                 if location.spotID != nil, !location.isPrimaryLocation {
                     Button("Move \(location.name) to Favorites", systemImage: "star") {
@@ -305,7 +309,9 @@ public struct WindguruSpotPicker: View {
 #endif
         }
         .contextMenu {
-            Button("Rename", systemImage: "pencil") { beginRenaming(location) }
+            if !location.isPrimaryLocation {
+                Button("Rename", systemImage: "pencil") { beginRenaming(location) }
+            }
             if location.spotID != nil, !location.isPrimaryLocation {
                 Button("Move to Favorites", systemImage: "star") {
                     Task { await moveToFavorites(location) }

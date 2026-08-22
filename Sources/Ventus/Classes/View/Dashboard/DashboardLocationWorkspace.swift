@@ -83,7 +83,7 @@ struct DashboardLocationWorkspace: View {
             SavedMapLocation(
                 name: "Bariloche",
                 coordinate: CLLocationCoordinate2D(latitude: -41.1281, longitude: -71.3480),
-                spotID: "64141",
+                spotID: SavedMapLocationStore.primarySpotID,
                 placeDescription: "Argentina"
             )
         ],

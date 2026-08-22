@@ -47,7 +47,7 @@ struct LocationMapButton: View {
 
 #if DEBUG
 #Preview("Location map button") {
-    LocationMapButton(locationName: "Bariloche #64141", action: {})
+    LocationMapButton(locationName: SavedMapLocationStore.primaryLocationDisplayName, action: {})
         .padding()
 }
 #endif

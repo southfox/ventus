@@ -77,7 +77,7 @@ public struct ForecastModelPicker: View {
 #Preview("Forecast model picker") {
     ForecastModelPicker(
         forecastService: ForecastWindguruMockup(),
-        spotID: "64141",
+        spotID: SavedMapLocationStore.primarySpotID,
         selectedModelIDs: [],
         usableModelIDs: [],
         isProUser: true,

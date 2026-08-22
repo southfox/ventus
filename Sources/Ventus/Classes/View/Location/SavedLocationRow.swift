@@ -64,7 +64,7 @@ struct SavedLocationRow: View {
             location: SavedMapLocation(
                 name: "Bariloche",
                 coordinate: .init(latitude: -41.1281, longitude: -71.3480),
-                spotID: "64141",
+                spotID: SavedMapLocationStore.primarySpotID,
                 placeDescription: "Argentina"
             ),
             onSelect: {}

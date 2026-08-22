@@ -165,7 +165,7 @@ public struct ForecastDashboardView: View {
     private func logout() {
         analytics.log(.logoutTapped)
         account.signOut()
-        selectedSpotID = "64141"
+        selectedSpotID = SavedMapLocationStore.primarySpotID
         viewModel.resetSessionForecastState()
         viewModel.clearPersistedSessionData()
         favoriteMapLocations = []
@@ -810,7 +810,7 @@ public struct ForecastDashboardView: View {
            let favoriteSpotID = try? await favoriteSpotsLoader(account.username, password)?.allSpots.first?.identifier {
             preferredSpotID = favoriteSpotID
         } else {
-            preferredSpotID = "64141"
+            preferredSpotID = SavedMapLocationStore.primarySpotID
         }
         await loadForecast(spotId: preferredSpotID, modelIDs: [])
     }
