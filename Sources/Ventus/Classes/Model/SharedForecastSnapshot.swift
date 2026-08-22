@@ -59,6 +59,7 @@ public struct SharedForecastSnapshot: Codable, Sendable {
     public let cloudCover: String
     public let pressure: String
     public let wave: String?
+    public let windChill: String?
     public let symbolName: String
     public let condition: String
     public let high: String
@@ -87,6 +88,7 @@ public struct SharedForecastSnapshot: Codable, Sendable {
         cloudCover: String,
         pressure: String,
         wave: String? = nil,
+        windChill: String? = nil,
         symbolName: String,
         condition: String,
         high: String,
@@ -114,6 +116,7 @@ public struct SharedForecastSnapshot: Codable, Sendable {
         self.cloudCover = cloudCover
         self.pressure = pressure
         self.wave = wave
+        self.windChill = windChill
         self.symbolName = symbolName
         self.condition = condition
         self.high = high
@@ -139,6 +142,7 @@ public extension SharedForecastSnapshot {
         let cloudCover = forecast.forecast?.cloudCoverTotal(hh: hour) ?? 0
         let pressure = forecast.forecast?.seaLevelPressure(hh: hour) ?? 0
         let wave = forecast.forecast?.waveHeight(hh: hour)
+        let windChill = forecast.forecast?.windChill(hh: hour)
         let hourly = hourlyForecast(for: forecast, currentHour: hour, unit: units.temperatureUnit, gridHourStepStore: gridHourStepStore)
         let daily = dailyForecast(for: forecast, unit: units.temperatureUnit)
         let today = daily.first
@@ -162,6 +166,7 @@ public extension SharedForecastSnapshot {
             cloudCover: "\(cloudCover)%",
             pressure: pressureText(pressure, unit: units.pressureUnit),
             wave: wave.map { waveHeightText($0, unit: units.waveHeightUnit) },
+            windChill: windChill.map { temperatureText($0, unit: units.temperatureUnit) },
             symbolName: forecast.weatherSymbolName(hour: hour),
             condition: conditionText(for: forecast, hour: hour),
             high: today?.high ?? temperatureText(temperature, unit: units.temperatureUnit),

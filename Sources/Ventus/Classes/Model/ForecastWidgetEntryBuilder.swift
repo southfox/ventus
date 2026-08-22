@@ -14,6 +14,7 @@ public enum ForecastWidgetEntryBuilder {
         from forecast: SpotForecast,
         coordinateLocationName: String?,
         useDetailedInsight: Bool = false,
+        hourlyLimit: Int = 10,
         environment: AppEnvironment
     ) -> ForecastWidgetEntry {
         let hour = forecast.currentForecastHour
@@ -28,7 +29,8 @@ public enum ForecastWidgetEntryBuilder {
         let cloudCover = forecast.forecast?.cloudCoverTotal(hh: hour) ?? 0
         let pressure = forecast.forecast?.seaLevelPressure(hh: hour) ?? 0
         let wave = forecast.forecast?.waveHeight(hh: hour)
-        let hourly = hourlyForecast(for: forecast, currentHour: hour, unit: units.temperatureUnit, environment: environment)
+        let windChill = forecast.forecast?.windChill(hh: hour)
+        let hourly = hourlyForecast(for: forecast, currentHour: hour, unit: units.temperatureUnit, limit: hourlyLimit, environment: environment)
         let daily = dailyForecast(for: forecast, unit: units.temperatureUnit)
         let today = daily.first
         let dailyRange = forecast.dailyTemperatureRange(hour: hour)
@@ -51,6 +53,7 @@ public enum ForecastWidgetEntryBuilder {
             cloudCover: "\(cloudCover)%",
             pressure: pressureText(pressure, unit: units.pressureUnit),
             wave: wave.map { waveHeightText($0, unit: units.waveHeightUnit) },
+            windChill: windChill.map { temperatureText($0, unit: units.temperatureUnit) },
             symbolName: forecast.weatherSymbolName(hour: hour),
             condition: conditionText(for: forecast, hour: hour),
             high: today?.high ?? temperatureText(temperature, unit: units.temperatureUnit),
@@ -101,6 +104,7 @@ public enum ForecastWidgetEntryBuilder {
             cloudCover: snapshot.cloudCover,
             pressure: snapshot.pressure,
             wave: snapshot.wave,
+            windChill: snapshot.windChill,
             symbolName: snapshot.symbolName,
             condition: snapshot.condition,
             high: snapshot.high,
@@ -116,13 +120,13 @@ public enum ForecastWidgetEntryBuilder {
         )
     }
 
-    private static func hourlyForecast(for forecast: SpotForecast, currentHour: String?, unit: TemperatureUnit, environment: AppEnvironment) -> [ForecastWidgetHour] {
+    private static func hourlyForecast(for forecast: SpotForecast, currentHour: String?, unit: TemperatureUnit, limit: Int = 10, environment: AppEnvironment) -> [ForecastWidgetHour] {
         let currentOffset = Int(currentHour ?? "") ?? 0
         let items = forecast.steppedForecastHours(anchorHour: currentHour, step: environment.gridHourStepStore.load())
             .compactMap { hour -> (hour: String, offset: Int)? in Int(hour).map { (hour, $0) } }
             .filter { $0.offset >= currentOffset }
             .sorted { $0.offset < $1.offset }
-            .prefix(10)
+            .prefix(limit)
             .map { item -> (date: Date, celsius: Double, hour: ForecastWidgetHour) in
                 let date = forecast.forecastDate(hour: item.hour) ?? .now
                 let label = item.hour == currentHour ? "now".localized : date.formatted(.dateTime.hour(.defaultDigits(amPM: .abbreviated)))

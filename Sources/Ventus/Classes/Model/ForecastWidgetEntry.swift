@@ -28,6 +28,7 @@ public struct ForecastWidgetEntry: TimelineEntry, Sendable {
     public let cloudCover: String
     public let pressure: String
     public let wave: String?
+    public let windChill: String?
 
     public init(
         date: Date,
@@ -47,6 +48,7 @@ public struct ForecastWidgetEntry: TimelineEntry, Sendable {
         cloudCover: String,
         pressure: String,
         wave: String? = nil,
+        windChill: String? = nil,
         symbolName: String,
         condition: String,
         high: String,
@@ -75,6 +77,7 @@ public struct ForecastWidgetEntry: TimelineEntry, Sendable {
         self.cloudCover = cloudCover
         self.pressure = pressure
         self.wave = wave
+        self.windChill = windChill
         self.symbolName = symbolName
         self.condition = condition
         self.high = high

@@ -20,7 +20,13 @@ struct WidgetPreviewScreen: View {
     @Environment(\.appEnvironment) private var environment
 
     private var entry: ForecastWidgetEntry {
-        ForecastWidgetEntryBuilder.entry(from: forecast, coordinateLocationName: coordinateLocationName, useDetailedInsight: true, environment: environment)
+        ForecastWidgetEntryBuilder.entry(
+            from: forecast,
+            coordinateLocationName: coordinateLocationName,
+            useDetailedInsight: true,
+            hourlyLimit: forecast.availableForecastHours.count,
+            environment: environment
+        )
     }
 
     var body: some View {

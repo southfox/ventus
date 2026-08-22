@@ -59,7 +59,7 @@ public struct ForecastWidgetView: View {
         .tint(theme.accentColor(for: colorScheme))
         .modifier(ForecastWidgetFontDesign(design: theme.fontDesign))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(entry.errorMessage ?? "\(entry.locationName). Temperature \(entry.temperature). Wind \(entry.wind), gusts \(entry.gust), from \(entry.windDirection). Rain \(entry.rain). Humidity \(entry.humidity). Cloud cover \(entry.cloudCover). Pressure \(entry.pressure).\(entry.wave.map { " Wave \($0)." } ?? "")")
+        .accessibilityLabel(entry.errorMessage ?? "\(entry.locationName). Temperature \(entry.temperature). Wind \(entry.wind), gusts \(entry.gust), from \(entry.windDirection). Rain \(entry.rain). Humidity \(entry.humidity). Cloud cover \(entry.cloudCover). Pressure \(entry.pressure).\(entry.windChill.map { " Wind chill \($0)." } ?? "")\(entry.wave.map { " Wave \($0)." } ?? "")")
         .accessibilityHint("Open Ventus for the full forecast.")
         .accessibilityIdentifier("forecast.widget")
     }
@@ -224,7 +224,13 @@ public struct ForecastWidgetView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     weatherHeader
                         Divider()
-                    hourlyForecast(limit: 10)
+                    if isInAppPreview {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            hourlyForecast(limit: entry.hourly.count)
+                        }
+                    } else {
+                        hourlyForecast(limit: 10)
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -254,11 +260,11 @@ public struct ForecastWidgetView: View {
             weatherHeader
             Divider()
             if isInAppPreview {
-                hourlyForecast(limit: 10)
-            } else {
                 ScrollView(.horizontal, showsIndicators: false) {
-                    hourlyForecast(limit: 10)
+                    hourlyForecast(limit: entry.hourly.count)
                 }
+            } else {
+                hourlyForecast(limit: 10)
             }
 
             Divider()
@@ -311,20 +317,36 @@ public struct ForecastWidgetView: View {
     }
 
     private func expandedConditions(compact: Bool) -> some View {
-        LazyVGrid(
-            columns: Array(repeating: GridItem(.flexible(), alignment: .trailing), count: compact ? 2 : 4),
-            alignment: .leading,
-            spacing: isInAppPreview ? 12 : 4
-        ) {
-            expandedMetric("Wind", value: entry.wind, symbol: "wind")
-            expandedMetric("Gusts", value: entry.gust, symbol: "wind.circle")
-            expandedDirectionMetric("Direction", degrees: entry.windDirectionDegrees)
-            expandedMetric("Rain", value: entry.rain, symbol: "drop.fill")
-            expandedMetric("Humidity", value: entry.humidity, symbol: "humidity")
-            expandedMetric("Clouds", value: entry.cloudCover, symbol: "cloud.fill")
-            expandedMetric("Pressure", value: entry.pressure, symbol: "gauge.medium")
+        let metricColumns = compact ? 2 : 4
+        let valueSpacing: CGFloat = isInAppPreview ? 12 : 4
+        let columns = (0..<metricColumns).flatMap { _ in
+            [
+                GridItem(.flexible(), spacing: 3, alignment: .trailing),
+                GridItem(.flexible(), spacing: valueSpacing, alignment: .leading)
+            ]
+        }
+        return LazyVGrid(columns: columns, alignment: .leading, spacing: isInAppPreview ? 12 : 4) {
+            expandedMetricLabel("Wind", symbol: "wind")
+            expandedMetricValue(entry.wind)
+            expandedMetricLabel("Gusts", symbol: "wind.circle")
+            expandedMetricValue(entry.gust)
+            expandedDirectionLabel("Direction", degrees: entry.windDirectionDegrees)
+            expandedDirectionValue(degrees: entry.windDirectionDegrees)
+            expandedMetricLabel("Rain", symbol: "drop.fill")
+            expandedMetricValue(entry.rain)
+            expandedMetricLabel("Humidity", symbol: "humidity")
+            expandedMetricValue(entry.humidity)
+            expandedMetricLabel("Clouds", symbol: "cloud.fill")
+            expandedMetricValue(entry.cloudCover)
+            expandedMetricLabel("Pressure", symbol: "gauge.medium")
+            expandedMetricValue(entry.pressure)
+            if let windChill = entry.windChill {
+                expandedMetricLabel("Wind Chill", symbol: "thermometer.snowflake")
+                expandedMetricValue(windChill)
+            }
             if let wave = entry.wave {
-                expandedMetric("Wave", value: wave, symbol: "water.waves")
+                expandedMetricLabel("Wave", symbol: "water.waves")
+                expandedMetricValue(wave)
             }
         }
     }
@@ -334,41 +356,41 @@ public struct ForecastWidgetView: View {
             .frame(width: 14, alignment: .center)
     }
 
-    private func expandedMetric(_ title: LocalizedStringKey, value: String, symbol: String) -> some View {
-        HStack(alignment: .bottom, spacing: 3) {
-            Label {
-                Text(title) + Text(": ")
-            } icon: {
-                expandedMetricIcon(symbol)
-            }
-            .font(.caption2)
-            .foregroundStyle(.secondary)
-            .lineLimit(1)
-            Text(value)
-                .font(.subheadline.weight(.semibold))
-                .lineLimit(1)
-                .minimumScaleFactor(0.75)
+    private func expandedMetricLabel(_ title: LocalizedStringKey, symbol: String) -> some View {
+        Label {
+            Text(title) + Text(":")
+        } icon: {
+            expandedMetricIcon(symbol)
         }
-        .frame(maxWidth: .infinity, alignment: .trailing)
+        .font(.caption2)
+        .foregroundStyle(.secondary)
+        .lineLimit(1)
     }
 
-    private func expandedDirectionMetric(_ title: LocalizedStringKey, degrees: Double) -> some View {
-        HStack(alignment: .top, spacing: 4) {
-            Label {
-                Text(title)
-            } icon: {
-                expandedMetricIcon("arrow.down")
-                    .rotationEffect(.degrees(degrees))
-            }
-            .font(.caption2)
-            .foregroundStyle(.secondary)
+    private func expandedMetricValue(_ value: String) -> some View {
+        Text(value)
+            .font(.subheadline.weight(.semibold))
             .lineLimit(1)
-            Text("\(Int(degrees.rounded()))°")
-                .font(.subheadline.weight(.semibold))
-                .lineLimit(1)
-                .minimumScaleFactor(0.75)
+            .minimumScaleFactor(0.75)
+    }
+
+    private func expandedDirectionLabel(_ title: LocalizedStringKey, degrees: Double) -> some View {
+        Label {
+            Text(title)
+        } icon: {
+            expandedMetricIcon("arrow.down")
+                .rotationEffect(.degrees(degrees))
         }
-        .frame(maxWidth: .infinity, alignment: .trailing)
+        .font(.caption2)
+        .foregroundStyle(.secondary)
+        .lineLimit(1)
+    }
+
+    private func expandedDirectionValue(degrees: Double) -> some View {
+        Text("\(Int(degrees.rounded()))°")
+            .font(.subheadline.weight(.semibold))
+            .lineLimit(1)
+            .minimumScaleFactor(0.75)
     }
 
     private var weatherHeader: some View {
