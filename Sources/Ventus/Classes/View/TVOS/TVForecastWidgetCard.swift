@@ -4,6 +4,7 @@ import SwiftUI
 struct TVForecastWidgetCard: View {
     let forecast: SpotForecast
     let hour: String?
+    var coordinateLocationName: String? = nil
 
     private var weather: Forecast? { forecast.forecast }
 
@@ -15,7 +16,7 @@ struct TVForecastWidgetCard: View {
                 .foregroundStyle(.tint)
 
             VStack(alignment: .leading, spacing: 8) {
-                Text(forecast.locationDisplayName())
+                Text(forecast.locationDisplayName(coordinateLocationName: coordinateLocationName))
                     .font(.title2.weight(.semibold))
                 HStack(spacing: 24) {
                     metric("Temperature", value: temperature, symbol: "thermometer.medium", celsius: temperatureCelsius)
@@ -29,7 +30,7 @@ struct TVForecastWidgetCard: View {
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
         .focusable()
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(forecast.locationDisplayName()). Temperature \(temperature). Wind \(wind). Rain \(rain).")
+        .accessibilityLabel("\(forecast.locationDisplayName(coordinateLocationName: coordinateLocationName)). Temperature \(temperature). Wind \(wind). Rain \(rain).")
         .accessibilityHint("Current selected forecast hour")
         .accessibilityIdentifier("tv.forecast.card")
     }

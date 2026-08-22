@@ -79,9 +79,7 @@ public class SpotForecast: SpotInfo {
 public extension SpotForecast {
 
     func locationDisplayName(coordinateLocationName: String? = nil) -> String {
-        guard isCoordinateLocation,
-              let coordinateLocationName,
-              !coordinateLocationName.isEmpty else {
+        guard let coordinateLocationName, !coordinateLocationName.isEmpty else {
             return displayName
         }
         return coordinateLocationName

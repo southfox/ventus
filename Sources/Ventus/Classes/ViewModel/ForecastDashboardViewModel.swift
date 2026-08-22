@@ -271,7 +271,7 @@ public final class ForecastDashboardViewModel: ObservableObject {
         persistSelection: Bool,
         account: WindguruAccount
     ) async -> Bool {
-        coordinateLocationName = nil
+        coordinateLocationName = savedMapLocations.first(where: { $0.spotID == spotID })?.name
         isLoading = true
         errorMessage = nil
         defer { isLoading = false }

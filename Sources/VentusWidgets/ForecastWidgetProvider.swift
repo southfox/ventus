@@ -59,6 +59,7 @@ public struct ForecastWidgetProvider: TimelineProvider, Sendable {
         let username = environment.windguruCredentialStore.activeUsername()
         let isProUser = environment.windguruCredentialStore.activeProUser()
         let password = username.flatMap(environment.windguruCredentialStore.password(for:))
+        let savedLocationName = environment.savedMapLocationStore.load().first(where: { $0.spotID == spotID })?.name
 
         return await withTimeout(seconds: 12) {
             let service = ForecastWindguruService()
@@ -69,7 +70,7 @@ public struct ForecastWidgetProvider: TimelineProvider, Sendable {
                     username: isProUser ? username : nil,
                     password: isProUser ? password : nil
                 ), !forecast.availableForecastHours.isEmpty else { return nil }
-                return self.entry(from: forecast, coordinateLocationName: nil)
+                return self.entry(from: forecast, coordinateLocationName: savedLocationName)
             } catch {
                 return nil
             }

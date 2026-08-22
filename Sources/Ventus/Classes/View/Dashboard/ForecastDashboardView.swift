@@ -494,7 +494,7 @@ public struct ForecastDashboardView: View {
                 ForecastDaylightSummary(forecast: forecast)
 
 #if os(tvOS)
-                TVForecastWidgetCard(forecast: forecast, hour: selectedHour)
+                TVForecastWidgetCard(forecast: forecast, hour: selectedHour, coordinateLocationName: coordinateLocationName)
 #endif
 
                 if usesWideLayout {
