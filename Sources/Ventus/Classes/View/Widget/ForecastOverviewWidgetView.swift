@@ -14,6 +14,7 @@ struct ForecastOverviewWidgetView: View, ForecastConditionsCard {
     let entry: ForecastWidgetEntry
     let theme: VentusTheme
     var detailedHours: [ForecastOverviewHour] = []
+    var temperatureUnit: Binding<TemperatureUnit> = .constant(.celsius)
     var onSelectLocation: () -> Void = {}
     var onShowMap: () -> Void = {}
 
@@ -151,14 +152,25 @@ struct ForecastOverviewWidgetView: View, ForecastConditionsCard {
                 )
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
-                HStack(spacing: 10) {
-                    ThermalLabel(entry.temperature, celsius: entry.temperatureCelsius)
-                        .font(.system(.title, design: .rounded).weight(.light))
-                        .minimumScaleFactor(0.5)
-                    RealTemperatureLabel(entry.realTemperature, celsius: entry.realTemperatureCelsius)
-                        .font(.system(.title, design: .rounded).weight(.light))
-                        .minimumScaleFactor(0.5)
+                ForecastUnitSelector(
+                    "Temperature unit",
+                    selection: temperatureUnit,
+                    unitTitle: \.label
+                ) {
+                    HStack(spacing: 10) {
+                        ThermalLabel(entry.temperature, celsius: entry.temperatureCelsius)
+                            .font(.system(.title, design: .rounded).weight(.light))
+                            .minimumScaleFactor(0.5)
+                        RealTemperatureLabel(entry.realTemperature, celsius: entry.realTemperatureCelsius)
+                            .font(.system(.title, design: .rounded).weight(.light))
+                            .minimumScaleFactor(0.5)
+                        Text(temperatureUnit.wrappedValue.label)
+                            .font(.system(.title, design: .rounded).weight(.light))
+                            .foregroundStyle(theme.accentColor(for: colorScheme))
+                            .minimumScaleFactor(0.5)
+                    }
                 }
+                .accessibilityLabel("Temperature")
                 .font(.caption)
                 .foregroundStyle(.secondary)
             }

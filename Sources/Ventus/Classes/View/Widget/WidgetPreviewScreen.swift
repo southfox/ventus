@@ -14,6 +14,7 @@ struct WidgetPreviewScreen: View {
     let forecast: SpotForecast
     let coordinateLocationName: String?
     let theme: VentusTheme
+    var temperatureUnit: Binding<TemperatureUnit> = .constant(.celsius)
     var onSelectLocation: () -> Void = {}
     var onShowMap: () -> Void = {}
 
@@ -39,6 +40,7 @@ struct WidgetPreviewScreen: View {
                 entry: entry,
                 theme: theme,
                 detailedHours: detailedHours,
+                temperatureUnit: temperatureUnit,
                 onSelectLocation: onSelectLocation,
                 onShowMap: onShowMap
             )

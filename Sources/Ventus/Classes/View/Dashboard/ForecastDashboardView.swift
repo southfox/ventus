@@ -470,6 +470,7 @@ public struct ForecastDashboardView: View {
             forecast: forecast,
             coordinateLocationName: coordinateLocationName,
             theme: theme,
+            temperatureUnit: $viewModel.temperatureUnit,
             onSelectLocation: { activeSheet = .spotPicker },
             onShowMap: { activeSheet = .forecastMap }
         )
