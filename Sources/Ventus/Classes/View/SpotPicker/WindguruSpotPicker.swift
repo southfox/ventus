@@ -73,6 +73,9 @@ public struct WindguruSpotPicker: View {
 
     public var body: some View {
         NavigationStack {
+#if os(tvOS)
+            tvPickerBody
+#else
             List {
                 Section {
                     if isProUser {
@@ -138,6 +141,8 @@ public struct WindguruSpotPicker: View {
 #if !os(macOS)
             .environment(\.editMode, $editMode)
 #endif
+#endif
+ #if !os(tvOS)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
@@ -152,6 +157,7 @@ public struct WindguruSpotPicker: View {
                 }
 #endif
             }
+#endif
         }
         .task {
             await loadFavorites()
@@ -197,6 +203,134 @@ public struct WindguruSpotPicker: View {
         }
         .trackScreenView("Spot Picker")
     }
+
+#if os(tvOS)
+    private var tvPickerBody: some View {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 28) {
+                HStack {
+                    Text(purpose == .addFavorite ? "Add Favorite" : "Choose location")
+                        .font(.title2.weight(.semibold))
+                    Spacer()
+                    Button(action: dismiss.callAsFunction) {
+                        Image(systemName: "xmark")
+                            .frame(width: 44, height: 44)
+                            .contentShape(Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Close")
+                }
+
+                if isProUser {
+                    Button("Use Current Location", systemImage: "location.fill") {
+                        Task { await searchCurrentLocation() }
+                    }
+                    .buttonStyle(.plain)
+                    .frame(height: 58)
+                    .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .disabled(isLoading)
+                } else {
+                    Text("Enter a Windguru spot ID, or sign in with Windguru PRO to use your current location.")
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                }
+
+                if purpose == .chooseLocation {
+                    let locations = isProUser ? savedLocations : savedLocations.filter { $0.spotID != nil }
+                    if !locations.isEmpty {
+                        tvSectionTitle("Map locations")
+                        LazyVStack(spacing: 10) {
+                            ForEach(locations) { location in
+                                tvSavedLocationRow(location)
+                            }
+                        }
+                    }
+                }
+
+                tvSectionTitle("Search Windguru spots")
+                HStack(spacing: 14) {
+                    TextField("City or spot", text: $viewModel.query)
+                        .textInputAutocapitalization(.words)
+                        .onSubmit { Task { await submitSearch() } }
+                        .padding(.horizontal, 18)
+                        .frame(height: 58)
+                        .background(.quaternary, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    Button {
+                        Task { await submitSearch() }
+                    } label: {
+                        Image(systemName: "magnifyingglass")
+                            .frame(width: 58, height: 58)
+                            .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isLoading)
+                    .accessibilityLabel("Search")
+                }
+
+                if isLoading {
+                    ProgressView("Searching spots…")
+                } else if let errorMessage {
+                    ContentUnavailableView("Location unavailable", systemImage: "location.slash", description: Text(errorMessage))
+                } else if !spots.isEmpty {
+                    tvSectionTitle("Windguru spots")
+                    LazyVStack(spacing: 10) {
+                        ForEach(spots.indices, id: \.self) { index in
+                            let spot = spots[index]
+                            Button {
+                                clearCurrentLocationMode()
+                                Task { await selectSpot(spot) }
+                            } label: {
+                                tvSpotRow(name: spot.displayName, subtitle: spot.countryName ?? "", symbol: "mappin.and.ellipse")
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal, 72)
+            .padding(.vertical, 38)
+            .frame(maxWidth: 1_000, alignment: .leading)
+        }
+        .toolbar(.hidden, for: .navigationBar)
+    }
+
+    private func tvSectionTitle(_ title: LocalizedStringKey) -> some View {
+        Text(title)
+            .font(.title3.weight(.semibold))
+            .foregroundStyle(.secondary)
+    }
+
+    private func tvSavedLocationRow(_ location: SavedMapLocation) -> some View {
+        Button {
+            selectSavedLocation(location)
+        } label: {
+            tvSpotRow(name: location.displayName, subtitle: location.placeDescription ?? "", symbol: "mappin.and.ellipse")
+        }
+        .buttonStyle(.plain)
+        .disabled(isLoading || favoriteIDsBeingAdded.contains(location.spotID ?? ""))
+    }
+
+    private func tvSpotRow(name: String, subtitle: String, symbol: String) -> some View {
+        HStack(spacing: 16) {
+            Image(systemName: symbol)
+                .font(.title3)
+                .frame(width: 30)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(name).font(.title3)
+                if !subtitle.isEmpty {
+                    Text(subtitle).font(.body).foregroundStyle(.secondary)
+                }
+            }
+            Spacer(minLength: 0)
+            Image(systemName: "chevron.right")
+                .font(.caption.weight(.bold))
+                .foregroundStyle(.tertiary)
+        }
+        .padding(.horizontal, 20)
+        .frame(height: 76)
+        .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+#endif
 
     @ViewBuilder
     private var mapLocationsSection: some View {
