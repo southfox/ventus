@@ -215,10 +215,11 @@ public struct ForecastDashboardView: View {
             action()
         } label: {
             Label(title, systemImage: symbol)
+                .padding(.horizontal, 18)
                 .frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .padding(.horizontal, 18)
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 

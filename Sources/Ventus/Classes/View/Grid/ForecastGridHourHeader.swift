@@ -21,10 +21,28 @@ struct ForecastGridHourHeader: View {
     let daylightOverlay: (String) -> Color
     let selectedHour: String?
     let onSelectHour: (String) -> Void
+#if os(tvOS)
+    @FocusState private var focusedHour: String?
+#endif
 
     var body: some View {
         LazyHStack(spacing: columnSpacing) {
             ForEach(hours, id: \.self) { hour in
+#if os(tvOS)
+                ForecastGridHourCell(
+                    hour: hour,
+                    columnWidth: columnWidth,
+                    height: height,
+                    day: day,
+                    time: time,
+                    weatherSymbols: weatherSymbols,
+                    daylightSymbol: daylightSymbol,
+                    daylightOverlay: daylightOverlay,
+                    isSelected: selectedHour == hour,
+                    onSelect: onSelectHour,
+                    focusedHour: $focusedHour
+                )
+#else
                 ForecastGridHourCell(
                     hour: hour,
                     columnWidth: columnWidth,
@@ -37,8 +55,15 @@ struct ForecastGridHourHeader: View {
                     isSelected: selectedHour == hour,
                     onSelect: onSelectHour
                 )
+#endif
             }
         }
+#if os(tvOS)
+        .onChange(of: focusedHour) { _, hour in
+            guard let hour else { return }
+            onSelectHour(hour)
+        }
+#endif
     }
 }
 
@@ -55,14 +80,23 @@ struct ForecastGridHourCell: View {
     let daylightOverlay: (String) -> Color
     let isSelected: Bool
     let onSelect: (String) -> Void
+#if os(tvOS)
+    let focusedHour: FocusState<String?>.Binding
+#endif
 
     var body: some View {
         Button {
             onSelect(hour)
         } label: {
             VStack(spacing: 2) {
-                Text(day(hour)).font(.caption2)
-                Text(time(hour)).font(.caption.bold())
+                Text(day(hour))
+                    .font(dayFont)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                Text(time(hour))
+                    .font(timeFont)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
                 HStack(spacing: 2) {
                     if let daylightSymbol = daylightSymbol(hour) {
                         Image(systemName: daylightSymbol)
@@ -102,6 +136,10 @@ struct ForecastGridHourCell: View {
             }
         }
         .buttonStyle(.plain)
+        .contentShape(Rectangle())
+#if os(tvOS)
+        .focused(focusedHour, equals: hour)
+#endif
         .foregroundStyle(accentColor)
         .accessibilityLabel("\(day(hour)), \(time(hour))\(daylightSymbol(hour).map { ", \($0 == "sunrise.fill" ? "sunrise" : "sunset")" } ?? ""), \(weatherSymbols(hour).count) weather symbol\(weatherSymbols(hour).count == 1 ? "" : "s")")
         .accessibilityHint(isSelected ? "Selected forecast hour" : "Select forecast hour")
@@ -109,6 +147,22 @@ struct ForecastGridHourCell: View {
     }
 
     private var accentColor: Color { theme.accentColor(for: colorScheme) }
+
+    private var dayFont: Font {
+#if os(tvOS)
+        .caption2
+#else
+        .caption2
+#endif
+    }
+
+    private var timeFont: Font {
+#if os(tvOS)
+        .caption.bold()
+#else
+        .caption.bold()
+#endif
+    }
 
     private func hasPrecipitation(_ hour: String) -> Bool {
         weatherSymbols(hour).contains { $0.contains("snow") || $0.contains("rain") || $0.contains("drizzle") }

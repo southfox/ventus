@@ -37,6 +37,10 @@ struct ForecastUnitSelector<Unit, Label: View>: View where Unit: CaseIterable & 
                 label()
             }
             .buttonStyle(.plain)
+#if os(tvOS)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+#endif
         } else {
 #if os(watchOS) || os(tvOS)
             Button {
@@ -50,6 +54,10 @@ struct ForecastUnitSelector<Unit, Label: View>: View where Unit: CaseIterable & 
                 label()
             }
             .buttonStyle(.plain)
+#if os(tvOS)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+#endif
 #else
             Menu {
                 Picker(title, selection: $selection) {

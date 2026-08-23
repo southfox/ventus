@@ -28,7 +28,7 @@ struct TVForecastWidgetCard: View {
         }
         .padding(28)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-        .focusable()
+        .focusable(false)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(forecast.locationDisplayName(coordinateLocationName: coordinateLocationName)). Temperature \(temperature). Wind \(wind). Rain \(rain).")
         .accessibilityHint("Current selected forecast hour")

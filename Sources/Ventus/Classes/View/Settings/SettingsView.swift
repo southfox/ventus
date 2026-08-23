@@ -69,6 +69,8 @@ public struct SettingsView: View {
             Group {
 #if os(macOS)
                 macColumnsBody
+#elseif os(tvOS)
+                tvSettingsBody
 #else
                 Form {
                     layoutSection
@@ -189,6 +191,186 @@ public struct SettingsView: View {
 #endif
 
     // MARK: - Shared section content
+
+#if os(tvOS)
+    /// tvOS does not present inline `Picker`s compactly: their focus treatment
+    /// becomes a full-width, glassy band. Keep the settings overview as a
+    /// concise list and push each set of choices onto its own focused screen.
+    private var tvSettingsBody: some View {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 30) {
+                tvSettingsSection("Layout".localized) {
+                    NavigationLink {
+                        tvChoiceList(
+                            title: "Forecast view".localized,
+                            selection: $forecastViewMode,
+                            options: ForecastViewMode.availableCases,
+                            label: { $0.title.localized },
+                            symbol: { $0.systemImage }
+                        )
+                    } label: {
+                        tvSettingsRow(
+                            title: "Forecast view".localized,
+                            value: forecastViewMode.title.localized,
+                            symbol: forecastViewMode.systemImage
+                        )
+                    }
+                }
+
+                tvSettingsSection("Forecast hours".localized) {
+                    NavigationLink {
+                        tvHourStepPicker
+                    } label: {
+                        tvSettingsRow(
+                            title: "Forecast hour step".localized,
+                            value: gridHourStep == 1 ? "Hourly".localized : "Every %lld hours".localized(formatArguments: [gridHourStep]),
+                            symbol: "clock"
+                        )
+                    }
+                }
+
+                tvSettingsSection("Appearance".localized) {
+                    NavigationLink {
+                        tvChoiceList(title: "Weather background".localized, selection: $weatherBackgroundStyle, options: WeatherBackgroundStyle.allCases, label: { $0.title.localized }, symbol: { $0.systemImage })
+                    } label: {
+                        tvSettingsRow(title: "Weather background".localized, value: weatherBackgroundStyle.title.localized, symbol: weatherBackgroundStyle.systemImage)
+                    }
+                    NavigationLink {
+                        tvChoiceList(title: "Display".localized, selection: $appAppearanceMode, options: AppAppearanceMode.allCases, label: { $0.title.localized }, symbol: { _ in "circle.lefthalf.filled" })
+                    } label: {
+                        tvSettingsRow(title: "Display".localized, value: appAppearanceMode.title.localized, symbol: "circle.lefthalf.filled")
+                    }
+                    NavigationLink {
+                        tvChoiceList(title: "Theme".localized, selection: $theme, options: VentusTheme.allCases, label: { $0.title.localized }, symbol: { _ in "paintpalette" })
+                    } label: {
+                        tvSettingsRow(title: "Theme".localized, value: theme.title.localized, symbol: "paintpalette")
+                    }
+                }
+
+                tvSettingsSection("Language".localized) {
+                    NavigationLink {
+                        tvChoiceList(title: "Language".localized, selection: $appLanguage, options: AppLanguage.allCases, label: { $0.title(locale: locale) }, symbol: { _ in "globe" })
+                    } label: {
+                        tvSettingsRow(title: "Language".localized, value: appLanguage.title(locale: locale), symbol: "globe")
+                    }
+                }
+
+                tvSettingsSection("Notifications".localized) {
+                    Button {
+                        notificationsEnabled.toggle()
+                    } label: {
+                        tvSettingsRow(
+                            title: "Severe weather alerts".localized,
+                            value: notificationsEnabled ? "On".localized : "Off".localized,
+                            symbol: notificationsEnabled ? "bell.badge.fill" : "bell.slash"
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, 84)
+            .padding(.vertical, 36)
+            .frame(maxWidth: 980, alignment: .leading)
+        }
+    }
+
+    private func tvSettingsSection<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(title)
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(.secondary)
+            VStack(spacing: 10) {
+                content()
+            }
+        }
+    }
+
+    private func tvSettingsRow(title: String, value: String, symbol: String) -> some View {
+        HStack(spacing: 18) {
+            Image(systemName: symbol)
+                .frame(width: 28)
+                .font(.title3)
+            Text(title)
+                .font(.title3)
+            Spacer(minLength: 20)
+            Text(value)
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+            Image(systemName: "chevron.right")
+                .font(.caption.weight(.bold))
+                .foregroundStyle(.tertiary)
+        }
+        .padding(.horizontal, 22)
+        .frame(height: 68)
+        .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+
+    private func tvChoiceList<Option: Identifiable & Hashable>(
+        title: String,
+        selection: Binding<Option>,
+        options: [Option],
+        label: @escaping (Option) -> String,
+        symbol: @escaping (Option) -> String
+    ) -> some View {
+        ScrollView {
+            LazyVStack(spacing: 12) {
+                ForEach(options) { option in
+                    Button {
+                        selection.wrappedValue = option
+                        dismiss()
+                    } label: {
+                        HStack(spacing: 18) {
+                            Image(systemName: symbol(option)).frame(width: 28)
+                            Text(label(option)).font(.title3)
+                            Spacer()
+                            if selection.wrappedValue == option {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundStyle(.tint)
+                            }
+                        }
+                        .padding(.horizontal, 22)
+                        .frame(height: 68)
+                        .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(48)
+            .frame(maxWidth: 900)
+        }
+        .navigationTitle(title)
+    }
+
+    private var tvHourStepPicker: some View {
+        ScrollView {
+            LazyVStack(spacing: 12) {
+                ForEach(Array(GridHourStepStore.range), id: \.self) { step in
+                    Button {
+                        gridHourStep = step
+                        dismiss()
+                    } label: {
+                        HStack {
+                            Text(step == 1 ? "Hourly".localized : "Every %lld hours".localized(formatArguments: [step]))
+                                .font(.title3)
+                            Spacer()
+                            if gridHourStep == step {
+                                Image(systemName: "checkmark.circle.fill").foregroundStyle(.tint)
+                            }
+                        }
+                        .padding(.horizontal, 22)
+                        .frame(height: 68)
+                        .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(48)
+            .frame(maxWidth: 900)
+        }
+        .navigationTitle("Forecast hour step".localized)
+    }
+#endif
 
     private var layoutPicker: some View {
         Picker("Forecast view".localized, selection: $forecastViewMode) {

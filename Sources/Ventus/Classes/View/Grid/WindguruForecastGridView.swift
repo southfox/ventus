@@ -54,7 +54,16 @@ public struct WindguruForecastGridView: View {
     @Environment(\.ventusTheme) private var theme
     @Environment(\.colorScheme) private var colorScheme
     @State private var horizontalGridOffset: CGFloat = 0
-    private var columnWidth: CGFloat = 56
+#if os(tvOS)
+    @FocusState private var focusedGridHour: String?
+#endif
+    private var columnWidth: CGFloat {
+#if os(tvOS)
+        112
+#else
+        56
+#endif
+    }
 
     public init(
         forecast: SpotForecast,
@@ -116,6 +125,12 @@ public struct WindguruForecastGridView: View {
             onModelComparisonChanged(false)
         }
         .onAppear { onModelComparisonChanged(isModelComparisonEnabled) }
+#if os(tvOS)
+        .onChange(of: focusedGridHour) { _, hour in
+            guard let hour else { return }
+            selectHour(hour)
+        }
+#endif
         .forecastAccessibilityContainer(
             "Forecast grid for \(forecast.locationDisplayName(coordinateLocationName: coordinateLocationName))",
             hint: "Select an hour to inspect it. The forecast columns can scroll horizontally.",
@@ -124,6 +139,16 @@ public struct WindguruForecastGridView: View {
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 if viewModel.displayedModelForecasts.count > 1 {
+#if os(tvOS)
+                    Button {
+                        advanceModelComparisonMode()
+                    } label: {
+                        Image(systemName: modelComparisonMode.symbolName)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(modelComparisonMode.title)
+                    .opacity(isModelComparisonEnabled ? 1 : 0.6)
+#else
                     Button(
                         modelComparisonMode.title,
                         systemImage: modelComparisonMode.symbolName
@@ -131,6 +156,7 @@ public struct WindguruForecastGridView: View {
                         advanceModelComparisonMode()
                     }
                     .tint(isModelComparisonEnabled ? gridAccentColor : .secondary)
+#endif
                 }
             }
         }
@@ -202,6 +228,9 @@ public struct WindguruForecastGridView: View {
                     gridRows(in: .labels)
                 }
                 .frame(width: rowLabelWidth, alignment: .leading)
+#if os(tvOS)
+                .focusSection()
+#endif
 
                 ScrollView(.horizontal) {
                     LazyVStack(alignment: .leading, spacing: 0) {
@@ -450,7 +479,7 @@ public struct WindguruForecastGridView: View {
                 }
                 .font(gridRowTitleFont)
                 .padding(.horizontal, 8)
-                .frame(width: rowLabelWidth, height: 30, alignment: displaysRowTitles ? .leading : .center)
+                .frame(width: rowLabelWidth, height: gridRowHeight, alignment: displaysRowTitles ? .leading : .center)
                 .background(gridLabelBackground)
 
                 if isExpanded {
@@ -459,7 +488,7 @@ public struct WindguruForecastGridView: View {
                             .font(.caption2)
                             .lineLimit(1)
                             .padding(.horizontal, 8)
-                            .frame(width: rowLabelWidth, height: 24, alignment: displaysRowTitles ? .leading : .center)
+                            .frame(width: rowLabelWidth, height: comparisonRowHeight, alignment: displaysRowTitles ? .leading : .center)
                             .background(gridLabelBackground)
                     }
                 }
@@ -473,7 +502,7 @@ public struct WindguruForecastGridView: View {
                             hour: hour,
                             values: { comparisonValues(source, $0) },
                             background: background,
-                            height: 24
+                            height: comparisonRowHeight
                         )
                     }
                 }
@@ -520,10 +549,14 @@ public struct WindguruForecastGridView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .buttonStyle(.plain)
+#if os(tvOS)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+#endif
                 }
                 .font(gridRowTitleFont)
                 .padding(.horizontal, 8)
-                .frame(width: rowLabelWidth, height: 90, alignment: .leading)
+                .frame(width: rowLabelWidth, height: gridRowHeight * 3, alignment: .leading)
                 .background(gridLabelBackground)
 
                 if isComparisonExpanded {
@@ -535,7 +568,7 @@ public struct WindguruForecastGridView: View {
                         }
                         .font(.caption2)
                         .padding(.horizontal, 8)
-                        .frame(width: rowLabelWidth, height: 72, alignment: .leading)
+                        .frame(width: rowLabelWidth, height: comparisonRowHeight * 3, alignment: .leading)
                         .background(gridLabelBackground)
                     }
                 }
@@ -546,7 +579,7 @@ public struct WindguruForecastGridView: View {
 
                 if isComparisonExpanded {
                     ForEach(Array(viewModel.displayedModelForecasts.enumerated()), id: \.offset) { _, source in
-                        cloudLayerValueRows(hour: hour, source: source, height: 24)
+                        cloudLayerValueRows(hour: hour, source: source, height: comparisonRowHeight)
                     }
                 }
             }
@@ -573,6 +606,21 @@ public struct WindguruForecastGridView: View {
     private func forecastColumn(for hour: String, includesHeader: Bool) -> some View {
         VStack(spacing: cellSpacing) {
             if includesHeader {
+#if os(tvOS)
+                ForecastGridHourCell(
+                    hour: hour,
+                    columnWidth: columnWidth,
+                    height: gridHeaderHeight,
+                    day: day(for:),
+                    time: time(for:),
+                    weatherSymbols: weatherSymbols(for:),
+                    daylightSymbol: daylightSymbol(for:),
+                    daylightOverlay: daylightColumnOverlay(for:),
+                    isSelected: viewModel.selectedHour == hour,
+                    onSelect: selectHour,
+                    focusedHour: $focusedGridHour
+                )
+#else
                 ForecastGridHourCell(
                     hour: hour,
                     columnWidth: columnWidth,
@@ -585,6 +633,7 @@ public struct WindguruForecastGridView: View {
                     isSelected: viewModel.selectedHour == hour,
                     onSelect: selectHour
                 )
+#endif
             }
             hourColumn(for: hour)
         }
@@ -603,6 +652,15 @@ public struct WindguruForecastGridView: View {
         height: CGFloat = 30
     ) -> some View {
         let cell = values(hour)
+#if os(tvOS)
+        return Text(cell.text)
+            .font(cell.isDirection ? .title3 : (cell.isSnow ? .body.bold() : .body))
+            .monospacedDigit()
+            .foregroundStyle(cell.isSnow ? .blue : .primary)
+            .frame(width: columnWidth, height: height == 30 ? gridRowHeight : height)
+            .background(background(cell))
+            .focusable(false)
+#else
         return Button {
             selectHour(hour)
         } label: {
@@ -614,6 +672,7 @@ public struct WindguruForecastGridView: View {
                 .background(background(cell))
         }
         .buttonStyle(.plain)
+#endif
     }
 
     @ViewBuilder
@@ -625,6 +684,8 @@ public struct WindguruForecastGridView: View {
     ) -> some View where Unit: CaseIterable & Identifiable & Hashable, Unit.AllCases: RandomAccessCollection, Unit.AllCases.Element == Unit {
         ForecastUnitSelector(title, selection: selection, unitTitle: unitLabel) {
             rowLabel(title, icon: icon, isInteractive: true)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
         }
     }
 
@@ -633,8 +694,14 @@ public struct WindguruForecastGridView: View {
             windDirectionDisplayMode = windDirectionDisplayMode.next
         } label: {
             rowLabel("Wind direction (\(windDirectionDisplayMode.indicator))", icon: "location.north.line", isInteractive: true)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+#if os(tvOS)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
+#endif
     }
 
     private func cloudCoverLabel(_ title: LocalizedStringKey, showsIcon: Bool = true) -> some View {
@@ -643,12 +710,20 @@ public struct WindguruForecastGridView: View {
         } label: {
             if showsIcon {
                 rowLabel(title, icon: "cloud.fill", isInteractive: true)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
             } else {
                 Text(title)
                     .foregroundStyle(gridAccentColor)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
             }
         }
         .buttonStyle(.plain)
+#if os(tvOS)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
+#endif
         .accessibilityLabel("Cloud cover")
         .accessibilityHint(showsCloudLayers ? "Shows total cloud cover" : "Shows high, mid, and low cloud cover")
     }
@@ -680,12 +755,42 @@ public struct WindguruForecastGridView: View {
     }
 
     private var rowLabelWidth: CGFloat {
+#if os(tvOS)
+        return displaysRowTitles ? 250 : 64
+#else
         guard displaysRowTitles else { return 44 }
         return 152
+#endif
     }
-    private var gridHeaderHeight: CGFloat { 64 }
+    private var gridHeaderHeight: CGFloat {
+#if os(tvOS)
+        112
+#else
+        64
+#endif
+    }
+    private var gridRowHeight: CGFloat {
+#if os(tvOS)
+        52
+#else
+        30
+#endif
+    }
+    private var comparisonRowHeight: CGFloat {
+#if os(tvOS)
+        42
+#else
+        24
+#endif
+    }
     private var cellSpacing: CGFloat { 1 / displayScale }
-    private var gridRowTitleFont: Font { theme == .sunset ? .caption2 : .caption }
+    private var gridRowTitleFont: Font {
+#if os(tvOS)
+        .caption2
+#else
+        theme == .sunset ? .caption2 : .caption
+#endif
+    }
     private var gridAccentColor: Color { theme.accentColor(for: colorScheme) }
     @ViewBuilder private var gridLabelBackground: some View {
         if theme.usesMaterial {

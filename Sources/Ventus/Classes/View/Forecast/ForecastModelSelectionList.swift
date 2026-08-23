@@ -51,14 +51,16 @@ struct ForecastModelSelectionList: View {
                         Text(model.name)
                         Spacer()
                     }
+#if os(tvOS)
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 12)
+                    .frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
+#endif
                     .contentShape(.rect)
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(isSelected ? theme.accentColor : Color.primary)
 #if os(tvOS)
-                .padding(.horizontal, 18)
-                .padding(.vertical, 12)
-                .frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
                 .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
 #endif
 

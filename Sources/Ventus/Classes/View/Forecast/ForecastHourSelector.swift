@@ -47,6 +47,10 @@ public struct ForecastHourSelector: View {
             } label: {
                 Label("Previous forecast hour", systemImage: "chevron.left")
                     .labelStyle(.iconOnly)
+#if os(tvOS)
+                    .frame(width: 56, height: 56)
+                    .contentShape(Rectangle())
+#endif
             }
             .buttonStyle(.plain)
             .disabled(selectedIndex == nil || selectedIndex == 0)
@@ -81,6 +85,10 @@ public struct ForecastHourSelector: View {
             } label: {
                 Label("Next forecast hour", systemImage: "chevron.right")
                     .labelStyle(.iconOnly)
+#if os(tvOS)
+                    .frame(width: 56, height: 56)
+                    .contentShape(Rectangle())
+#endif
             }
             .buttonStyle(.plain)
             .disabled(selectedIndex == nil || selectedIndex == hours.count - 1)
