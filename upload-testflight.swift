@@ -36,7 +36,7 @@ let xcodeFriendlyEnvironment: [String: String] = {
 }()
 
 func fail(_ message: String) -> Never {
-    FileHandle.standardError.write("\n❌ \(message)\n".data(using: .utf8)!)
+    FileHandle.standardError.write("\n💣 \(message)\n".data(using: .utf8)!)
     exit(1)
 }
 
@@ -109,6 +109,63 @@ func readSecret(prompt: String) -> String {
 
 let fileManager = FileManager.default
 
+func machOBinaryPaths(under root: String) -> [String] {
+    guard let enumerator = fileManager.enumerator(atPath: root) else { return [] }
+    var results: [String] = []
+    for case let relativePath as String in enumerator {
+        let fullPath = "\(root)/\(relativePath)"
+        var isDirectory: ObjCBool = false
+        guard fileManager.fileExists(atPath: fullPath, isDirectory: &isDirectory), !isDirectory.boolValue else { continue }
+        guard fileManager.isExecutableFile(atPath: fullPath) else { continue }
+        guard capture("/usr/bin/file", ["-b", fullPath]).contains("Mach-O") else { continue }
+        results.append(fullPath)
+    }
+    return results
+}
+
+func dwarfUUIDs(forMachO path: String) -> Set<String> {
+    let output = capture("/usr/bin/dwarfdump", ["--uuid", path])
+    var found = Set<String>()
+    for line in output.split(separator: "\n") {
+        guard let range = line.range(of: "UUID: ") else { continue }
+        let rest = line[range.upperBound...]
+        guard let spaceIndex = rest.firstIndex(of: " ") else { continue }
+        found.insert(String(rest[..<spaceIndex]))
+    }
+    return found
+}
+
+func checkDSYMs(archivePath: String, appPath: String) {
+    let dSYMsDir = "\(archivePath)/dSYMs"
+    var availableUUIDs = Set<String>()
+    if let dsymBundles = try? fileManager.contentsOfDirectory(atPath: dSYMsDir) {
+        for bundle in dsymBundles where bundle.hasSuffix(".dSYM") {
+            let dwarfDir = "\(dSYMsDir)/\(bundle)/Contents/Resources/DWARF"
+            guard let dwarfFiles = try? fileManager.contentsOfDirectory(atPath: dwarfDir) else { continue }
+            for dwarfFile in dwarfFiles {
+                availableUUIDs.formUnion(dwarfUUIDs(forMachO: "\(dwarfDir)/\(dwarfFile)"))
+            }
+        }
+    }
+
+    var missing: [(binary: String, uuid: String)] = []
+    for binary in machOBinaryPaths(under: appPath) {
+        let binaryName = (binary as NSString).lastPathComponent
+        for uuid in dwarfUUIDs(forMachO: binary) where !availableUUIDs.contains(uuid) {
+            missing.append((binary: binaryName, uuid: uuid))
+        }
+    }
+
+    if missing.isEmpty {
+        print("All embedded binaries have matching dSYMs.")
+        return
+    }
+    print("⚠️  Missing dSYMs for \(missing.count) binary UUID(s) — App Store Connect will report \"Upload Symbols Failed\" for these (expected for closed-source third-party frameworks that don't ship dSYMs, e.g. Firebase/Google Ads):")
+    for entry in missing.sorted(by: { $0.binary < $1.binary }) {
+        print("   - \(entry.binary): \(entry.uuid)")
+    }
+}
+
 // MARK: - Argument parsing
 
 var explicitIPAPath: String? = nil
@@ -174,13 +231,11 @@ if let apiKeyID = environment["ASC_API_KEY_ID"], let apiIssuerID = environment["
     credentials = .appleID(email: appleID, passwordArgument: passwordArgument)
 }
 
-/// -authenticationKey* flags for xcodebuild (archive/export), empty when using Apple ID auth.
 let xcodebuildAuthArgs: [String] = {
     guard case let .apiKey(keyID, issuerID, keyPath) = credentials else { return [] }
     return ["-authenticationKeyPath", keyPath, "-authenticationKeyID", keyID, "-authenticationKeyIssuerID", issuerID]
 }()
 
-/// --apiKey/--apiIssuer or -u/-p flags for altool.
 let altoolAuthArgs: [String] = {
     switch credentials {
     case let .apiKey(keyID, issuerID, _):
@@ -241,6 +296,10 @@ if let explicitIPAPath {
         print("Note: archive is currently signed with: \(authorityLine). Proceeding to export, which re-signs for distribution.")
     }
 
+    // 2b. Check dSYMs
+    step("Checking dSYMs for embedded binaries")
+    checkDSYMs(archivePath: archivePath, appPath: archivedAppPath)
+
     // 3. Export
     step("Exporting IPA")
     let exportOptions = """
@@ -299,4 +358,4 @@ let uploadStatus = run("/usr/bin/xcrun", [
 ] + altoolAuthArgs)
 guard uploadStatus == 0 else { fail("Upload failed (status \(uploadStatus))") }
 
-print("\n✅ Uploaded \(ipaPath) to App Store Connect. It will appear in TestFlight once Apple finishes processing.")
+print("\n✅ 🚀 Uploaded \(ipaPath) to App Store Connect. It will appear in TestFlight once Apple finishes processing.")
