@@ -20,11 +20,26 @@ let scheme = "VentusIOS"
 let teamID = "27XTSJS68A"
 let appInfoPlist = "App/Ventus_App-Info.plist"
 let widgetInfoPlist = "App/VentusWidgets/Info.plist"
+let watchAppInfoPlist = "App/VentusWatchOnly-Info.plist"
+let watchCompanionInfoPlist = "App/VentusWatch-Info.plist"
+let watchExtensionInfoPlist = "App/VentusWatch Extension-Info.plist"
+let macAppInfoPlist = "App/VentusMacOS/Info.plist"
+let tvAppInfoPlist = "App/VentusTVOS/Info.plist"
 let buildDir = "build"
 let archivePath = "\(buildDir)/VentusIOS.xcarchive"
 let exportDir = "\(buildDir)/export"
 let exportOptionsPlist = "\(buildDir)/ExportOptions.plist"
 let keychainItemName = ProcessInfo.processInfo.environment["ALTOOL_KEYCHAIN_ITEM"] ?? "Forescoop-AppStoreConnect"
+
+let bundleVersionPlists = [
+    appInfoPlist,
+    widgetInfoPlist,
+    watchAppInfoPlist,
+    watchCompanionInfoPlist,
+    watchExtensionInfoPlist,
+    macAppInfoPlist,
+    tvAppInfoPlist,
+]
 
 // MARK: - Helpers
 
@@ -264,7 +279,7 @@ if let explicitIPAPath {
         fail("Could not read CFBundleVersion from \(appInfoPlist) (got \"\(currentBuild)\")")
     }
     let newBuildNumber = currentBuildNumber + 1
-    for plist in [appInfoPlist, widgetInfoPlist] {
+    for plist in bundleVersionPlists {
         let status = run(plistBuddy, ["-c", "Set :CFBundleVersion \(newBuildNumber)", plist])
         guard status == 0 else { fail("Failed to update CFBundleVersion in \(plist)") }
     }
