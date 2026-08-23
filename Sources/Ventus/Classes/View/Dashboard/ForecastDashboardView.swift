@@ -55,6 +55,10 @@ public struct ForecastDashboardView: View {
     @State private var iPadMapPosition: MapCameraPosition = .automatic
     @State private var selectedMapLocationID: SavedMapLocation.ID?
     @State private var favoriteMapLocations = [SavedMapLocation]()
+#if os(tvOS)
+    @Namespace private var tvDashboardFocus
+    @State private var showsTVMenu = false
+#endif
 
     public init(
         forecastService: ForecastWindguruProtocol = ForecastWindguruService(),
@@ -110,7 +114,7 @@ public struct ForecastDashboardView: View {
     }
 
     private var usesWideLayout: Bool {
-#if os(macOS)
+#if os(macOS) || os(tvOS)
         true
 #else
         horizontalSizeClass == .regular
@@ -156,6 +160,75 @@ public struct ForecastDashboardView: View {
             onLogout: logout
         )
     }
+
+#if os(tvOS)
+    private var tvMenu: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    tvMenuButton("Forecast Dashboard", symbol: "rectangle.3.group") { setContent(.dashboard) }
+                    tvMenuButton("Forecast Grid", symbol: "tablecells") { setContent(.grid) }
+                    tvMenuButton("Grid and Dashboard", symbol: "rectangle.split.2x1") { setContent(.workspace) }
+                    tvMenuButton("Forecast Graph", symbol: "chart.xyaxis.line") { setContent(.graph) }
+                    tvMenuButton("Overview", symbol: "square.grid.2x2") { setContent(.overview) }
+
+                    Divider()
+
+                    tvMenuButton("Settings", symbol: "gearshape") { presentTVMenuSheet(.weatherBackgroundSettings) }
+                    tvMenuButton("Help", symbol: "questionmark.circle") { presentTVMenuSheet(.help) }
+                    tvMenuButton("About", symbol: "info.circle") { presentTVMenuSheet(.about) }
+
+                    Divider()
+
+                    if account.username.isEmpty {
+                        tvMenuButton("Login", symbol: "person.crop.circle") { presentTVMenuSheet(.login) }
+                    } else {
+                        tvMenuButton("Profile", symbol: "person.crop.circle") { presentTVMenuSheet(.login) }
+                        tvMenuButton("Favorites", symbol: "star") { presentTVMenuSheet(.favorites) }
+                        tvMenuButton("Logout", symbol: "rectangle.portrait.and.arrow.right", role: .destructive, action: logout)
+                    }
+                }
+                .frame(maxWidth: 700, alignment: .leading)
+                .padding(48)
+            }
+            .navigationTitle("Menu")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(action: { showsTVMenu = false }) {
+                        Image(systemName: "xmark")
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Close menu")
+                }
+            }
+        }
+    }
+
+    private func tvMenuButton(
+        _ title: String,
+        symbol: String,
+        role: ButtonRole? = nil,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(role: role) {
+            showsTVMenu = false
+            action()
+        } label: {
+            Label(title, systemImage: symbol)
+                .frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 18)
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+
+    private func presentTVMenuSheet(_ sheet: DashboardSheet) {
+        showsTVMenu = false
+        DispatchQueue.main.async {
+            activeSheet = sheet
+        }
+    }
+#endif
 
     private func setContent(_ mode: ForecastViewMode) {
         content = mode
@@ -261,6 +334,16 @@ public struct ForecastDashboardView: View {
                 ToolbarItem(placement: .navigation) {
                     accountMenu
                 }
+#elseif os(tvOS)
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        showsTVMenu = true
+                    } label: {
+                        Image(systemName: "line.3.horizontal")
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Menu")
+                }
 #else
                 ToolbarItem(placement: .topBarLeading) {
                     accountMenu
@@ -268,16 +351,33 @@ public struct ForecastDashboardView: View {
 #endif
                 ToolbarItem(placement: .primaryAction) {
                     HStack {
+#if os(tvOS)
+                        Button {
+                            Task { await loadForecast() }
+                        } label: {
+                            Image(systemName: "arrow.clockwise")
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Refresh forecast")
+#else
                         Button("Refresh", systemImage: "arrow.clockwise") {
                             Task { await loadForecast() }
                         }
+#endif
                         if (content == .dashboard || content == .graph), displayedModelForecasts.count > 1 {
+#if os(tvOS)
+                            Button {
+                                showsDashboardModelComparison.toggle()
+                            } label: {
+                                Image(systemName: "arrow.left.and.right")
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Compare models")
+                            .opacity(showsDashboardModelComparison ? 1 : 0.6)
+#else
                             Button("Compare models", systemImage: "arrow.left.and.right") {
                                 showsDashboardModelComparison.toggle()
                             }
-#if os(tvOS)
-                            .opacity(showsDashboardModelComparison ? 1 : 0.6)
-#else
                             .tint(showsDashboardModelComparison ? .accentColor : .secondary)
 #endif
                         }
@@ -292,6 +392,11 @@ public struct ForecastDashboardView: View {
             }
             .onChange(of: selectedSpotID) { _, spotID in environment.selectedSpotStore.save(spotID) }
             .onChange(of: content) { _, mode in environment.forecastViewModeStore.save(mode) }
+#if os(tvOS)
+            .sheet(isPresented: $showsTVMenu) {
+                tvMenu
+            }
+#endif
             .sheet(isPresented: sheetBinding(.spotPicker), onDismiss: {
                 refreshSavedMapLocations()
                 Task { await loadFavoriteMapLocations() }
@@ -492,11 +597,10 @@ public struct ForecastDashboardView: View {
                     forecast: forecast,
                     selectedHour: selectedHourBinding
                 )
-                ForecastDaylightSummary(forecast: forecast)
-
 #if os(tvOS)
-                TVForecastWidgetCard(forecast: forecast, hour: selectedHour, coordinateLocationName: coordinateLocationName)
+                .prefersDefaultFocus(true, in: tvDashboardFocus)
 #endif
+                ForecastDaylightSummary(forecast: forecast)
 
                 if usesWideLayout {
                     HStack(alignment: .top, spacing: 56) {
@@ -513,6 +617,7 @@ public struct ForecastDashboardView: View {
                     }
 
                     if includesLocationWorkspace {
+#if !os(tvOS)
                         DashboardLocationWorkspace(
                             savedLocations: savedMapLocations,
                             favoriteLocations: favoriteLocationsNotSaved,
@@ -523,6 +628,7 @@ public struct ForecastDashboardView: View {
                             onManageLocations: { activeSheet = .spotPicker },
                             onSelectLocation: selectMapLocation
                         )
+#endif
                     }
 
                     ForecastIntelligenceSummary(forecast: forecast, hour: selectedHour, coordinateLocationName: coordinateLocationName, temperatureUnit: viewModel.temperatureUnit, windSpeedUnit: viewModel.windSpeedUnit, precipitationUnit: viewModel.precipitationUnit, freezingLevelUnit: viewModel.freezingLevelUnit, pressureUnit: viewModel.pressureUnit, waveHeightUnit: viewModel.waveHeightUnit)
@@ -539,6 +645,9 @@ public struct ForecastDashboardView: View {
             .frame(maxWidth: forecastContentMaximumWidth)
             .padding()
         }
+#if os(tvOS)
+        .focusScope(tvDashboardFocus)
+#endif
 #if !os(tvOS)
         .simultaneousGesture(hourSwipeGesture(for: forecast))
 #endif

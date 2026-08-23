@@ -115,7 +115,7 @@ public struct ForecastWindDetails: View {
 
     private func windSpeed(_ knots: Double?) -> String {
         guard let knots, let value = Knots(knots).value(in: windSpeedUnit) else { return "—" }
-        return "\(value.forecastFormatted()) \(windSpeedUnit.label)"
+        return "\(value.forecastFormatted(precision: windSpeedUnit.displayPrecision)) \(windSpeedUnit.label)"
     }
 
     @ViewBuilder private func windDirectionView(_ direction: Double) -> some View {
