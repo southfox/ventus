@@ -8,7 +8,7 @@
 
 import Foundation
 
-public enum PrecipitationPhase: Sendable {
+public enum PrecipitationPhase: Sendable, Equatable {
     case rain
     case sleet
     case snow
