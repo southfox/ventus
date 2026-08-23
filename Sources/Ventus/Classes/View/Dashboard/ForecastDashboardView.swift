@@ -396,6 +396,7 @@ public struct ForecastDashboardView: View {
 #if os(tvOS)
             .sheet(isPresented: $showsTVMenu) {
                 tvMenu
+                    .presentationSizing(.page)
             }
 #endif
             .sheet(isPresented: sheetBinding(.spotPicker), onDismiss: {
@@ -425,6 +426,9 @@ public struct ForecastDashboardView: View {
                         Task { await loadForecast(coordinate: coordinate, locationName: locationName) }
                     }
                 )
+#if os(tvOS)
+                .presentationSizing(.page)
+#endif
 #if os(macOS)
                 .macSheetFrame(widthFraction: 0.45, minWidth: 560, heightFraction: 0.55, minHeight: 520)
 #endif
@@ -495,13 +499,16 @@ public struct ForecastDashboardView: View {
                     account: account,
                     environment: environment
                 )
+#if os(tvOS)
+                .presentationSizing(.page)
+#endif
             }
             .sheet(isPresented: sheetBinding(.help)) {
                 NavigationStack {
                     VentusHelpView()
                 }
 #if os(tvOS)
-                .presentationDetents([.large])
+                .presentationSizing(.page)
 #endif
             }
             .sheet(isPresented: sheetBinding(.about)) {

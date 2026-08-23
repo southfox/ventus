@@ -268,9 +268,9 @@ public struct SettingsView: View {
                     .buttonStyle(.plain)
                 }
             }
-            .padding(.horizontal, 84)
-            .padding(.vertical, 36)
-            .frame(maxWidth: 980, alignment: .leading)
+            .padding(.horizontal, 104)
+            .padding(.vertical, 54)
+            .frame(maxWidth: 1_360, alignment: .leading)
         }
     }
 

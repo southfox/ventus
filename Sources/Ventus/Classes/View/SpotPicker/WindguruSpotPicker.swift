@@ -141,8 +141,6 @@ public struct WindguruSpotPicker: View {
 #if !os(macOS)
             .environment(\.editMode, $editMode)
 #endif
-#endif
- #if !os(tvOS)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
