@@ -454,6 +454,8 @@ class ModelTests: XCTestCase {
         XCTAssertEqual(wind.value(in: .kilometersPerHour) ?? 0, 18.52, accuracy: 0.00001)
         XCTAssertEqual(wind.value(in: .milesPerHour) ?? 0, 11.5078, accuracy: 0.00001)
         XCTAssertEqual(wind.value(in: .beaufort), 3)
+        XCTAssertEqual(WindSpeedUnit.beaufort.displayPrecision, 0)
+        XCTAssertEqual(WindSpeedUnit.knots.displayPrecision, 1)
 
         XCTAssertEqual(Temperature(celsius: 0).value(in: .celsius), 0)
         XCTAssertEqual(Temperature(celsius: 0).value(in: .fahrenheit), 32)

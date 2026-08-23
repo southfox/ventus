@@ -43,6 +43,13 @@ public enum WindSpeedUnit: String, CaseIterable, Identifiable, Sendable {
 }
 
 public extension WindSpeedUnit {
+    /// Beaufort is a discrete scale, so it must never be presented with a
+    /// fractional component. Other speed units retain one decimal where a
+    /// detailed screen needs it.
+    var displayPrecision: Int {
+        self == .beaufort ? 0 : 1
+    }
+
     init?(windguruPreference: String?) {
         switch windguruPreference?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() {
         case "knots", "knot", "kt", "kts": self = .knots
