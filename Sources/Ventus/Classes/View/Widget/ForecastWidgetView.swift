@@ -330,8 +330,16 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
             Text(value)
                 .font(.subheadline.weight(.semibold))
                 .lineLimit(1)
-                .minimumScaleFactor(displayedFamily == .systemSmall ? 0.6 : 0.7)
+                .minimumScaleFactor(widgetValueMinimumScale)
         }
+    }
+
+    private var widgetValueMinimumScale: CGFloat {
+#if os(watchOS)
+        0.7
+#else
+        displayedFamily == .systemSmall ? 0.6 : 0.7
+#endif
     }
 
     private func hourlyForecast(limit: Int) -> some View {

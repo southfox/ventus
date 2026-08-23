@@ -25,6 +25,7 @@ public struct WatchForecastView: View {
     @State private var errorMessage: String?
     @State private var selectedHour: String?
     @State private var selectedModelID: String?
+    @State private var crownHourIndex = 0.0
     @State private var navigationPath = NavigationPath()
     @State private var theme: VentusTheme
     @State private var appLanguage: AppLanguage
@@ -60,6 +61,11 @@ public struct WatchForecastView: View {
                     )
                 case .hours:
                     WatchForecastHoursView(forecast: forecast, selectedHour: $selectedHour, temperatureUnit: temperatureUnit, windSpeedUnit: windSpeedUnit, precipitationUnit: precipitationUnit) {
+                        navigationPath = NavigationPath()
+                    }
+                case .days:
+                    WatchForecastDaysView(forecast: forecast, temperatureUnit: temperatureUnit) { hour in
+                        selectedHour = hour
                         navigationPath = NavigationPath()
                     }
                 case .settings:
@@ -111,9 +117,16 @@ public struct WatchForecastView: View {
                     .font(.headline)
                     .lineLimit(1)
 
-                NavigationLink(value: WatchDestination.hours) {
-                    Label(hourTitle(forecast, hour: hour), systemImage: "clock").font(.caption).foregroundStyle(.secondary)
+                HStack(spacing: 10) {
+                    NavigationLink(value: WatchDestination.hours) {
+                        Label(hourTitle(forecast, hour: hour), systemImage: "clock")
+                    }
+                    NavigationLink(value: WatchDestination.days) {
+                        Label("Days", systemImage: "calendar")
+                    }
                 }
+                .font(.caption)
+                .foregroundStyle(.secondary)
 
                 if let sunrise = forecast.sunrise, let sunset = forecast.sunset {
                     HStack(spacing: 14) {
@@ -133,6 +146,23 @@ public struct WatchForecastView: View {
                 .font(.title2)
                 Text(temperature(weather?.temperatureReal(hh: hour) ?? weather?.temperature(hh: hour)))
                     .font(.system(.title2, design: .rounded).weight(.semibold))
+
+                Text(conditionText(for: forecast, hour: hour))
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.secondary)
+
+                if let range = forecast.dailyTemperatureRange(hour: hour) {
+                    HStack(spacing: 12) {
+                        Label(temperature(range.low), systemImage: "thermometer.low")
+                        Label(temperature(range.high), systemImage: "thermometer.high")
+                    }
+                    .font(.caption2.monospacedDigit())
+                    .foregroundStyle(.secondary)
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("Daily low \(temperature(range.low)). High \(temperature(range.high)).")
+                }
+
+                hourlyOutlook(for: forecast, selectedHour: hour)
 
                 HStack(spacing: 12) {
                     metric("Wind", value: wind(weather?.windSpeed(hh: hour)), symbol: "wind")
@@ -163,6 +193,26 @@ public struct WatchForecastView: View {
         }
         .scrollIndicators(.hidden)
         .multilineTextAlignment(.center)
+        .digitalCrownRotation(
+            $crownHourIndex,
+            from: 0,
+            through: Double(max(forecast.availableForecastHours.count - 1, 0)),
+            by: 1,
+            sensitivity: .low,
+            isContinuous: false,
+            isHapticFeedbackEnabled: true
+        )
+        .onAppear { syncCrownHourIndex(for: forecast) }
+        .onChange(of: crownHourIndex) { _, index in
+            selectHour(at: Int(index.rounded()), in: forecast)
+        }
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 24)
+                .onEnded { value in
+                    guard abs(value.translation.width) > abs(value.translation.height) else { return }
+                    moveSelectedHour(by: value.translation.width < 0 ? 1 : -1, in: forecast)
+                }
+        )
         .forecastAccessibilityContainer(
             ForecastAccessibility.summary(for: forecast, hour: hour),
             hint: "Use the controls to change location, settings, refresh, choose an hour, or select a forecast model.",
@@ -253,9 +303,70 @@ public struct WatchForecastView: View {
         guard let hour, let date = forecast.forecastDate(hour: hour) else { return "Select hour" }
         return WatchForecastFormatting.hour(date)
     }
+
+    private func conditionText(for forecast: SpotForecast, hour: String?) -> String {
+        let symbols = forecast.weatherSymbolNames(hour: hour)
+        if symbols.contains(where: { $0.contains("snow") }) { return "Snow" }
+        if symbols.contains(where: { $0.contains("rain") || $0.contains("drizzle") }) { return "Rain" }
+        if symbols.contains(where: { $0.contains("fog") }) { return "Foggy" }
+        if symbols.contains("cloud.fill") { return "Overcast" }
+        if symbols.contains(where: { $0.hasPrefix("cloud.sun") || $0.hasPrefix("cloud.moon") }) { return "Partly cloudy" }
+        if symbols.contains("cloud") { return "Cloudy" }
+        if symbols.contains(where: { $0.hasPrefix("wind") || $0.hasPrefix("tornado") }) { return "Windy" }
+        return "Clear"
+    }
+
+    private func hourlyOutlook(for forecast: SpotForecast, selectedHour: String?) -> some View {
+        let selectedOffset = Int(selectedHour ?? "") ?? 0
+        let hours = forecast.availableForecastHours
+            .filter { (Int($0) ?? 0) >= selectedOffset }
+            .prefix(4)
+
+        return ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 12) {
+                ForEach(Array(hours), id: \.self) { hour in
+                    VStack(spacing: 3) {
+                        Text(hourTitle(forecast, hour: hour))
+                            .font(.system(size: 9, weight: .medium))
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                        Image(systemName: forecast.weatherSymbolName(hour: hour))
+                            .font(.caption)
+                        Text(temperature(forecast.forecast?.temperatureReal(hh: hour) ?? forecast.forecast?.temperature(hh: hour)))
+                            .font(.caption2.weight(.semibold))
+                    }
+                    .frame(width: 46)
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("\(hourTitle(forecast, hour: hour)). \(conditionText(for: forecast, hour: hour)). \(temperature(forecast.forecast?.temperatureReal(hh: hour) ?? forecast.forecast?.temperature(hh: hour))).")
+                }
+            }
+            .padding(.vertical, 2)
+        }
+        .frame(height: 58)
+        .accessibilityIdentifier("watch.forecast.hourlyOutlook")
+    }
+
+    private func moveSelectedHour(by offset: Int, in forecast: SpotForecast) {
+        let hours = forecast.availableForecastHours
+        guard !hours.isEmpty else { return }
+        let currentIndex = hours.firstIndex(of: selectedHour ?? forecast.currentForecastHour ?? hours[0]) ?? 0
+        let destination = min(max(currentIndex + offset, 0), hours.count - 1)
+        selectedHour = hours[destination]
+        crownHourIndex = Double(destination)
+    }
+
+    private func selectHour(at index: Int, in forecast: SpotForecast) {
+        guard forecast.availableForecastHours.indices.contains(index) else { return }
+        selectedHour = forecast.availableForecastHours[index]
+    }
+
+    private func syncCrownHourIndex(for forecast: SpotForecast) {
+        let currentHour = selectedHour ?? forecast.currentForecastHour
+        crownHourIndex = Double(forecast.availableForecastHours.firstIndex(of: currentHour ?? "") ?? 0)
+    }
 }
 
-enum WatchDestination: Hashable { case locations, hours, settings, models }
+enum WatchDestination: Hashable { case locations, hours, days, settings, models }
 
 enum WatchForecastFormatting {
     /// Uses the system's 12/24-hour preference while keeping the watch label concise.
