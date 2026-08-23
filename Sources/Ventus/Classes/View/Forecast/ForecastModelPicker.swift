@@ -34,6 +34,14 @@ public struct ForecastModelPicker: View {
         self.onModelSelected = onModelSelected
     }
 
+    private var selectionSummary: String {
+        let selectedCount = viewModel.selectedIDs.count
+        let availableCount = viewModel.models.count
+        return selectedCount == availableCount
+            ? "All selected"
+            : "\(selectedCount)/\(availableCount) selected"
+    }
+
     public var body: some View {
         NavigationStack {
             Group {
@@ -44,8 +52,35 @@ public struct ForecastModelPicker: View {
                 } else if viewModel.models.isEmpty {
                     ContentUnavailableView("No forecast models", systemImage: "cpu")
                 } else {
+#if os(tvOS)
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 28) {
+                            Text(selectionSummary)
+                                .font(.title3.weight(.semibold))
+
+                            ForecastModelSelectionList(
+                                models: viewModel.models,
+                                selectedModelIDs: viewModel.selectedIDs,
+                                onToggle: viewModel.toggle
+                            )
+
+                            HStack(spacing: 28) {
+                                Button("Cancel", action: dismiss.callAsFunction)
+                                    .buttonStyle(.plain)
+                                Spacer()
+                                Button("Apply") { onModelSelected(viewModel.selectedIDs.sorted()) }
+                                    .buttonStyle(.plain)
+                                    .disabled(viewModel.selectedIDs.isEmpty)
+                            }
+                            .font(.headline)
+                        }
+                        .frame(maxWidth: 760, alignment: .leading)
+                        .padding(.horizontal, 72)
+                        .padding(.vertical, 44)
+                    }
+#else
                     List {
-                        Section("\(viewModel.selectedIDs.count) selected of \(viewModel.models.count) available") {
+                        Section(selectionSummary) {
                             ForecastModelSelectionList(
                                 models: viewModel.models,
                                 selectedModelIDs: viewModel.selectedIDs,
@@ -53,9 +88,11 @@ public struct ForecastModelPicker: View {
                             )
                         }
                     }
+#endif
                 }
             }
             .navigationTitle("Forecast model")
+#if !os(tvOS)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Done") { dismiss() }
@@ -65,6 +102,7 @@ public struct ForecastModelPicker: View {
                         .disabled(viewModel.selectedIDs.isEmpty)
                 }
             }
+#endif
             .task {
                 await viewModel.loadModels(spotID: spotID, selectedModelIDs: selectedModelIDs, usableModelIDs: usableModelIDs, isProUser: isProUser)
             }

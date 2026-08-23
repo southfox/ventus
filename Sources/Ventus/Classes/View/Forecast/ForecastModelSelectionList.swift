@@ -39,7 +39,7 @@ struct ForecastModelSelectionList: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: rowSpacing) {
             ForEach(models) { model in
                 let isSelected = selectedModelIDs.contains(model.identifier)
                 Button {
@@ -55,12 +55,26 @@ struct ForecastModelSelectionList: View {
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(isSelected ? theme.accentColor : Color.primary)
+#if os(tvOS)
+                .padding(.horizontal, 18)
+                .padding(.vertical, 12)
+                .frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
+                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+#endif
 
                 if showsDividers, model.identifier != models.last?.identifier {
                     Divider()
                 }
             }
         }
+    }
+
+    private var rowSpacing: CGFloat {
+#if os(tvOS)
+        16
+#else
+        0
+#endif
     }
 }
 
