@@ -16,6 +16,9 @@ public struct VentusHelpView: View {
     public init() {}
 
     public var body: some View {
+#if os(tvOS)
+        tvHelpBody
+#else
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 VStack(alignment: .leading, spacing: 8) {
@@ -131,7 +134,125 @@ public struct VentusHelpView: View {
         }
 #endif
         .trackScreenView("Help")
+#endif
     }
+
+#if os(tvOS)
+    private var tvHelpBody: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 30) {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Label("Welcome to Ventus".localized, systemImage: "wind")
+                            .font(.largeTitle.bold())
+                            .foregroundStyle(.tint)
+                        Text("A practical guide to Windguru-powered forecasts across your Apple devices.".localized)
+                            .font(.title3)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Button(action: dismiss.callAsFunction) {
+                        Image(systemName: "xmark")
+                            .frame(width: 52, height: 52)
+                            .contentShape(Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Close help")
+                }
+
+                LazyVGrid(columns: [GridItem(.flexible(), spacing: 24), GridItem(.flexible(), spacing: 24)], spacing: 24) {
+                    tvHelpCard("Quick guide", detail: "Choose a location, select a forecast view, and inspect each hour.", symbol: "list.number") {
+                        tvHelpPage("Quick guide", items: [
+                            ("Choose a location", "Use the location button to search Windguru spots, choose a saved place, or use your current location.", "mappin.and.ellipse"),
+                            ("Pick the forecast view", "Switch between Dashboard, Forecast Grid, Graph, and Overview from the menu or Settings.", "rectangle.3.group"),
+                            ("Read and compare", "Select a grid hour for the dashboard, adjust units from row labels, and compare forecast models.", "arrow.left.and.right")
+                        ])
+                    }
+                    tvHelpCard("Forecast essentials", detail: "Learn the grid, dashboard, overview, models, and saved locations.", symbol: "book") {
+                        tvHelpPage("Forecast essentials", items: [
+                            ("Forecast Grid", "Browse the forecast by hour. Header controls select hours and row labels change available units.", "tablecells"),
+                            ("Overview", "Review current conditions and the days ahead in the largest forecast presentation.", "square.grid.2x2"),
+                            ("Forecast models", "Ventus Mix combines selected model sources. Compare them when conditions matter.", "cpu"),
+                            ("Maps and locations", "Keep locations locally and access Windguru favorites when signed in.", "map")
+                        ])
+                    }
+                    tvHelpCard("Understanding models", detail: "See how Ventus Mix and source comparison work for a location.", symbol: "cpu") {
+                        tvHelpPage("Understanding models", items: [
+                            ("Models depend on the location", "Each spot exposes only the forecast models that cover it.", "cpu"),
+                            ("Ventus Mix", "Ventus builds one continuous forecast from the selected sources available at each hour.", "circle.hexagongrid"),
+                            ("Compare before relying", "Use Compare models in the grid to reveal source values row by row.", "arrow.left.and.right")
+                        ])
+                    }
+                    tvHelpCard("Reading the icons", detail: "Understand real temperature, weather conditions, and wind symbols.", symbol: "eye") {
+                        tvHelpPage("Reading the icons", items: [
+                            ("Real vs. raw temperature", "Ventus prefers the altitude-corrected temperature when supplied by the forecast model.", "thermometer.variable.and.figure"),
+                            ("Thermometer color", "Temperature icons move from icy blue through warm colors as readings rise.", "thermometer.sun.fill"),
+                            ("Wind strength", "At stronger Beaufort levels, weather icons make way for dedicated wind and storm symbols.", "wind")
+                        ])
+                    }
+                }
+            }
+            .padding(.horizontal, 84)
+            .padding(.vertical, 54)
+            .frame(maxWidth: 1_500, alignment: .leading)
+        }
+        .toolbar(.hidden, for: .navigationBar)
+        .trackScreenView("Help")
+    }
+
+    private func tvHelpCard<Destination: View>(
+        _ title: String,
+        detail: String,
+        symbol: String,
+        @ViewBuilder destination: () -> Destination
+    ) -> some View {
+        NavigationLink(destination: destination) {
+            VStack(alignment: .leading, spacing: 16) {
+                Image(systemName: symbol)
+                    .font(.largeTitle)
+                    .foregroundStyle(.tint)
+                Text(title).font(.title2.weight(.semibold))
+                Text(detail)
+                    .font(.title3)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 0)
+                Label("Open", systemImage: "chevron.right")
+                    .font(.body.weight(.medium))
+            }
+            .padding(30)
+            .frame(maxWidth: .infinity, minHeight: 260, alignment: .leading)
+            .contentShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+    }
+
+    private func tvHelpPage(_ title: String, items: [(String, String, String)]) -> some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 28) {
+                Text(title).font(.largeTitle.bold())
+                ForEach(Array(items.enumerated()), id: \.offset) { _, item in
+                    HStack(alignment: .top, spacing: 22) {
+                        Image(systemName: item.2)
+                            .font(.title)
+                            .foregroundStyle(.tint)
+                            .frame(width: 42)
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(item.0).font(.title2.weight(.semibold))
+                            Text(item.1).font(.title3).foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(24)
+                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                }
+            }
+            .padding(64)
+            .frame(maxWidth: 1_250, alignment: .leading)
+        }
+        .navigationTitle(title)
+    }
+#endif
 }
 
 private struct HelpStep: View {

@@ -500,6 +500,9 @@ public struct ForecastDashboardView: View {
                 NavigationStack {
                     VentusHelpView()
                 }
+#if os(tvOS)
+                .presentationDetents([.large])
+#endif
             }
             .sheet(isPresented: sheetBinding(.about)) {
                 aboutSheet
