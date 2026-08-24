@@ -297,8 +297,9 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
 
     @ViewBuilder private var windGustsMetric: some View {
         HStack(alignment: .center, spacing: 4) {
-            windGustsLine("Wind", symbol: "wind", value: String(entry.wind.split(separator: " ").first!))
             windDirectionIndicator
+            windGustsLine(displayedFamily == .systemSmall ? "" : "Wind", symbol: "wind", value: String(entry.wind.split(separator: " ").first!))
+            Text("-")
             windGustsLine("Gusts", symbol: "wind.circle", value: entry.gust)
         }
     }
