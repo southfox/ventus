@@ -143,9 +143,9 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
                     .font(.system(.title3, design: .rounded).weight(.light))
                     .minimumScaleFactor(0.5)
             }
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 4) {
                 windGustsMetric
-                HStack(alignment: .bottom, spacing: 6) {
+                HStack(alignment: .bottom, spacing: 4) {
                     widgetMetric(entry.rain, symbol: "drop.fill")
                     widgetMetric(entry.cloudCover, symbol: "cloud.fill")
                 }
@@ -296,7 +296,7 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
     }
 
     @ViewBuilder private var windGustsMetric: some View {
-        HStack(alignment: .center, spacing: 6) {
+        HStack(alignment: .center, spacing: 4) {
             windGustsLine("Wind", symbol: "wind", value: String(entry.wind.split(separator: " ").first!))
             windDirectionIndicator
             windGustsLine("Gusts", symbol: "wind.circle", value: entry.gust)
@@ -304,10 +304,9 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
     }
 
     private var windDirectionIndicator: some View {
-        Image(systemName: "location.north.fill")
+        Text(WindDirectionDisplayMode.arrow.text(forWindFrom: entry.windDirectionDegrees))
             .font(.caption2)
             .foregroundStyle(.secondary)
-            .rotationEffect(.degrees(entry.windDirectionDegrees))
             .accessibilityLabel("Wind direction \(entry.windDirection)")
     }
 
@@ -323,7 +322,7 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                    .minimumScaleFactor(0.6)
                     .layoutPriority(1)
             }
 #endif
@@ -359,9 +358,9 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
 }
 
 #if DEBUG && !os(watchOS)
-#Preview("Small widget") {
+#Preview("Small widget · compact iPhone") {
     ForecastWidgetView(entry: .stormPreview, theme: .ocean, previewFamily: .systemSmall)
-        .frame(width: 158, height: 158)
+        .frame(width: 155, height: 155)
         .padding()
         .background(.blue.gradient)
 }

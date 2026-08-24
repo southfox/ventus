@@ -290,9 +290,8 @@ public struct WatchForecastView: View {
 
     private func directionMetric(_ title: String, degrees: Double?) -> some View {
         VStack(spacing: 2) {
-            Image(systemName: "arrow.down")
+            Text(degrees.map { WindDirectionDisplayMode.arrow.text(forWindFrom: $0) } ?? "—")
                 .font(.caption2)
-                .rotationEffect(.degrees(degrees ?? 0))
             Text(degrees.map { "\(Int($0.rounded()))°" } ?? "—").font(.caption2.monospacedDigit())
             Text(title).font(.system(size: 9)).foregroundStyle(.secondary)
         }

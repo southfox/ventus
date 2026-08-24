@@ -222,7 +222,15 @@ struct ForecastOverviewWidgetView: View, ForecastConditionsCard {
             VStack(alignment: .leading, spacing: 3) {
                 detailedHourRow("wind", hour.wind)
                 detailedHourRow("wind.circle", hour.gust)
-                detailedHourRow("arrow.down", "\(Int(hour.windDirectionDegrees.rounded()))°")
+                HStack(spacing: 4) {
+                    Text(WindDirectionDisplayMode.arrow.text(forWindFrom: hour.windDirectionDegrees))
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .frame(width: 12, alignment: .center)
+                    Text("\(Int(hour.windDirectionDegrees.rounded()))°")
+                        .font(.caption2)
+                        .lineLimit(1)
+                }
                 if let windChill = hour.windChill {
                     detailedHourRow("thermometer.snowflake", windChill)
                 }

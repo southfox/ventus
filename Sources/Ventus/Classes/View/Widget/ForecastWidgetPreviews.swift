@@ -19,8 +19,8 @@ extension ForecastWidgetEntry {
         rawTemperatureCelsius: 22,
         realTemperature: "19°C",
         realTemperatureCelsius: 19,
-        wind: "22 kt",
-        gust: "31 kt",
+        wind: "22 kmh",
+        gust: "31 kmh",
         windDirection: "WNW",
         windDirectionDegrees: 292.5,
         rain: "1.8 mm",
@@ -48,9 +48,9 @@ extension ForecastWidgetEntry {
         .background(.blue.gradient)
 }
 
-#Preview("Small widget") {
+#Preview("Small widget · compact iPhone") {
     ForecastWidgetView(entry: .stormPreview, theme: .ocean, previewFamily: .systemSmall)
-        .frame(width: 158, height: 158)
+        .frame(width: 155, height: 155)
         .padding()
         .background(.blue.gradient)
 }

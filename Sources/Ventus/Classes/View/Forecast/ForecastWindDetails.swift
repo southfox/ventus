@@ -121,10 +121,9 @@ public struct ForecastWindDetails: View {
     @ViewBuilder private func windDirectionView(_ direction: Double) -> some View {
         switch windDirectionDisplayMode {
         case .arrow:
-            Image(systemName: "arrow.down")
-                .rotationEffect(.degrees(direction))
+            Text(windDirectionDisplayMode.text(forWindFrom: direction))
         case .degrees:
-            Text(windDirectionText(direction))
+            Text(windDirectionDisplayMode.text(forWindFrom: direction))
         }
     }
 

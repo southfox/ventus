@@ -45,8 +45,7 @@ extension ForecastConditionsCard {
         Label {
             Text(title)
         } icon: {
-            expandedMetricIcon("arrow.down")
-                .rotationEffect(.degrees(degrees))
+            Text(WindDirectionDisplayMode.arrow.text(forWindFrom: degrees))
         }
         .font(.caption2)
         .foregroundStyle(.secondary)

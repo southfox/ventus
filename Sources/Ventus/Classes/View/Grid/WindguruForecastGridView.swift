@@ -14,24 +14,6 @@ import UIKit
 import AppKit
 #endif
 
-public enum WindDirectionDisplayMode: CaseIterable, Equatable, Sendable {
-    case arrow
-    case degrees
-
-    public var next: WindDirectionDisplayMode {
-        let cases = Self.allCases
-        let index = cases.firstIndex(of: self) ?? cases.startIndex
-        return cases[cases.index(after: index) == cases.endIndex ? cases.startIndex : cases.index(after: index)]
-    }
-
-    var indicator: String {
-        switch self {
-        case .arrow: "→"
-        case .degrees: "°"
-        }
-    }
-}
-
 public struct WindguruForecastGridView: View {
     public let forecast: SpotForecast
     public let coordinateLocationName: String?
@@ -992,26 +974,15 @@ public struct WindguruForecastGridView: View {
 
     private func waveDirection(_ hour: String, source: SpotForecast? = nil) -> GridCell {
         guard let value = averagedRaw(hour, source: source, raw: { weather(for: source)?.waveDirection(hh: $0) }) else { return .empty }
-        return GridCell(value: value, text: arrow(value), isDirection: true)
+        return GridCell(value: value, text: WindDirectionDisplayMode.arrow(forTravelToward: value), isDirection: true)
     }
 
     private func number(_ value: Double, precision: Int = 0) -> String {
         value.forecastFormatted(precision: precision)
     }
 
-    private func arrow(_ direction: Double) -> String {
-        let arrows = ["↑", "↗", "→", "↘", "↓", "↙", "←", "↖"]
-        return arrows[Int((direction + 22.5) / 45) % arrows.count]
-    }
-
     private func windDirectionText(_ direction: Double) -> String {
-        switch windDirectionDisplayMode {
-        case .arrow:
-            let travelDirection = (direction + 180).truncatingRemainder(dividingBy: 360)
-            return arrow(travelDirection)
-        case .degrees:
-            return "\(Int(direction.rounded()))°"
-        }
+        windDirectionDisplayMode.text(forWindFrom: direction)
     }
 
     private func windColor(_ cell: GridCell) -> Color {
