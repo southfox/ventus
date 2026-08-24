@@ -296,10 +296,12 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
     }
 
     @ViewBuilder private var windGustsMetric: some View {
-        HStack(alignment: .center, spacing: 4) {
+        HStack(alignment: .center, spacing: displayedFamily != .systemSmall ? 2 : 4) {
             windDirectionIndicator
             windGustsLine(displayedFamily == .systemSmall ? "" : "Wind", symbol: "wind", value: String(entry.wind.split(separator: " ").first!))
-            Text("-")
+            if displayedFamily != .systemSmall {
+                Text("-")
+            }
             windGustsLine("Gusts", symbol: "wind.circle", value: entry.gust)
         }
     }
@@ -314,9 +316,9 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
     private func windGustsLine(_ title: LocalizedStringKey, symbol: String, value: String) -> some View {
         HStack(spacing: 2) {
             Image(systemName: symbol)
-                .font(.body)
+                .font(displayedFamily == .systemSmall ? .caption2 : .body)
                 .foregroundStyle(.secondary)
-                .frame(width: 16, alignment: .center)
+                .frame(width: displayedFamily == .systemSmall ? 12 : 16, alignment: .center)
 #if !os(watchOS)
             if displayedFamily != .systemSmall {
                 Text(title)
@@ -328,7 +330,7 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
             }
 #endif
             Text(value)
-                .font(.subheadline.weight(.semibold))
+                .font(displayedFamily == .systemSmall ? .caption2 : .subheadline.weight(.semibold))
                 .lineLimit(1)
                 .minimumScaleFactor(widgetValueMinimumScale)
         }
