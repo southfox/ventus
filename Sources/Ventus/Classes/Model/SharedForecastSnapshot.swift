@@ -291,13 +291,12 @@ public extension SharedForecastSnapshot {
 
     private static func pressureText(_ hectopascals: Double, unit: PressureUnit) -> String {
         let value = AtmosphericPressure(hectopascals: hectopascals).value(in: unit)
-        let precision = unit == .inchesOfMercury ? 2 : 0
-        return "\(value.formatted(.number.precision(.fractionLength(precision)))) \(unit.label)"
+        return "\(value.formatted(.number.precision(.fractionLength(0)))) \(unit.label)"
     }
 
     private static func waveHeightText(_ meters: Double, unit: WaveHeightUnit) -> String {
         let value = WaveHeight(meters: meters).value(in: unit)
-        return "\(value.formatted(.number.precision(.fractionLength(1)))) \(unit.label)"
+        return "\(value.formatted(.number.precision(.fractionLength(0)))) \(unit.label)"
     }
 }
 

@@ -357,34 +357,4 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
     }
 }
 
-#if DEBUG && !os(watchOS)
-#Preview("Small widget · compact iPhone") {
-    ForecastWidgetView(entry: .stormPreview, theme: .ocean, previewFamily: .systemSmall)
-        .frame(width: 155, height: 155)
-        .padding()
-        .background(.blue.gradient)
-}
-
-#Preview("Medium widget") {
-    ForecastWidgetView(entry: .stormPreview, theme: .ocean, previewFamily: .systemMedium)
-        .frame(width: 338, height: 158)
-        .padding()
-        .background(.blue.gradient)
-}
-
-#Preview("Large widget") {
-    ForecastWidgetView(entry: .stormPreview, theme: .ocean, previewFamily: .systemLarge)
-        .frame(width: 338, height: 354)
-        .padding()
-        .background(.blue.gradient)
-}
-
-#Preview("iPad extra-large widget") {
-    ForecastWidgetView(entry: .stormPreview, theme: .ocean, previewFamily: .systemExtraLarge)
-        .frame(width: 720, height: 338)
-        .padding()
-        .background(.blue.gradient)
-}
-
-#endif
 #endif
