@@ -647,7 +647,7 @@ public struct WindguruForecastGridView: View {
             selectHour(hour)
         } label: {
             Text(cell.text)
-                .font(cell.isDirection ? .body : (cell.isSnow ? .caption.bold() : .caption))
+                .font(cell.isDirection ? .title3 : (cell.isSnow ? .caption.bold() : .caption))
                 .monospacedDigit()
                 .foregroundStyle(cell.isSnow ? .blue : .primary)
                 .frame(width: columnWidth, height: height)

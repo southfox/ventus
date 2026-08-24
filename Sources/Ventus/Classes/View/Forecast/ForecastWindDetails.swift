@@ -122,6 +122,7 @@ public struct ForecastWindDetails: View {
         switch windDirectionDisplayMode {
         case .arrow:
             Text(windDirectionDisplayMode.text(forWindFrom: direction))
+                .font(.title3)
         case .degrees:
             Text(windDirectionDisplayMode.text(forWindFrom: direction))
         }

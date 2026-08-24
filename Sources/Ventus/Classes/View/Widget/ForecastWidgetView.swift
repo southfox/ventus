@@ -305,7 +305,7 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
 
     private var windDirectionIndicator: some View {
         Text(WindDirectionDisplayMode.arrow.text(forWindFrom: entry.windDirectionDegrees))
-            .font(.caption2)
+            .font(.body)
             .foregroundStyle(.secondary)
             .accessibilityLabel("Wind direction \(entry.windDirection)")
     }

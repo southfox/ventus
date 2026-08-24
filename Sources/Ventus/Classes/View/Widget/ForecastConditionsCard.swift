@@ -46,6 +46,7 @@ extension ForecastConditionsCard {
             Text(title)
         } icon: {
             Text(WindDirectionDisplayMode.arrow.text(forWindFrom: degrees))
+                .font(.body)
         }
         .font(.caption2)
         .foregroundStyle(.secondary)

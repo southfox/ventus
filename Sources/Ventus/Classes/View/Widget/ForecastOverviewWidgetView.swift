@@ -224,9 +224,9 @@ struct ForecastOverviewWidgetView: View, ForecastConditionsCard {
                 detailedHourRow("wind.circle", hour.gust)
                 HStack(spacing: 4) {
                     Text(WindDirectionDisplayMode.arrow.text(forWindFrom: hour.windDirectionDegrees))
-                        .font(.caption2)
+                        .font(.body)
                         .foregroundStyle(.secondary)
-                        .frame(width: 12, alignment: .center)
+                        .frame(width: 18, alignment: .center)
                     Text("\(Int(hour.windDirectionDegrees.rounded()))°")
                         .font(.caption2)
                         .lineLimit(1)
