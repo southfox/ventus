@@ -19,6 +19,7 @@ struct WatchForecastSettingsView: View {
     @Binding var precipitationUnitRaw: String
     @Binding var freezingLevelUnitRaw: String
     @Binding var appLanguage: AppLanguage
+    @Binding var preferredReadingSize: PreferredReadingSize
     @Environment(\.locale) private var locale
     @Environment(\.appEnvironment) private var environment
 
@@ -53,6 +54,14 @@ struct WatchForecastSettingsView: View {
                 ForEach(FreezingLevelUnit.allCases) { unit in Text(unit.label).tag(unit.rawValue) }
             }
 
+            Section("System") {
+                NavigationLink {
+                    WatchPreferredReadingSizeView(size: $preferredReadingSize)
+                } label: {
+                    Label("Reading size", systemImage: "textformat.size")
+                }
+            }
+
             Section {
                 NavigationLink {
                     WatchForecastAlertsListView(forecastService: forecastService, environment: environment)
@@ -72,6 +81,36 @@ struct WatchForecastSettingsView: View {
             hint: "Choose the units used in the forecast dashboard.",
             identifier: "watch.settings"
         )
+    }
+}
+
+private struct WatchPreferredReadingSizeView: View {
+    @Binding var size: PreferredReadingSize
+
+    var body: some View {
+        VStack(spacing: 14) {
+            Toggle("Use device text size".localized, isOn: Binding(
+                get: { size == .system },
+                set: { useDeviceSize in size = useDeviceSize ? .system : .standard }
+            ))
+
+            Text("Example forecast text")
+                .font(.body)
+                .preferredReadingSize(size)
+                .multilineTextAlignment(.center)
+
+            HStack {
+                Button { size = size.adjusted(by: -1) } label: { Image(systemName: "minus") }
+                    .disabled(!size.canDecrease)
+                Text(size.title)
+                    .frame(minWidth: 72)
+                Button { size = size.adjusted(by: 1) } label: { Image(systemName: "plus") }
+                    .disabled(!size.canIncrease)
+            }
+            .font(.headline)
+
+        }
+        .navigationTitle("Reading size")
     }
 }
 #endif

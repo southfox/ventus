@@ -31,14 +31,20 @@ public struct SharedForecastSnapshot: Codable, Sendable {
         public let high: String
         public let lowValue: Double
         public let highValue: Double
+        public let wind: String?
+        public let gust: String?
+        public let windDirectionDegrees: Double?
 
-        public init(label: String, symbolName: String, low: String, high: String, lowValue: Double, highValue: Double) {
+        public init(label: String, symbolName: String, low: String, high: String, lowValue: Double, highValue: Double, wind: String? = nil, gust: String? = nil, windDirectionDegrees: Double? = nil) {
             self.label = label
             self.symbolName = symbolName
             self.low = low
             self.high = high
             self.lowValue = lowValue
             self.highValue = highValue
+            self.wind = wind
+            self.gust = gust
+            self.windDirectionDegrees = windDirectionDegrees
         }
     }
 
@@ -46,6 +52,7 @@ public struct SharedForecastSnapshot: Codable, Sendable {
     public let locationName: String
     public let temperature: String
     public let temperatureCelsius: Double
+    public let temperatureUnitLabel: String?
     public let rawTemperature: String
     public let rawTemperatureCelsius: Double
     public let realTemperature: String
@@ -75,6 +82,7 @@ public struct SharedForecastSnapshot: Codable, Sendable {
         locationName: String,
         temperature: String,
         temperatureCelsius: Double,
+        temperatureUnitLabel: String? = nil,
         rawTemperature: String,
         rawTemperatureCelsius: Double,
         realTemperature: String,
@@ -103,6 +111,7 @@ public struct SharedForecastSnapshot: Codable, Sendable {
         self.locationName = locationName
         self.temperature = temperature
         self.temperatureCelsius = temperatureCelsius
+        self.temperatureUnitLabel = temperatureUnitLabel
         self.rawTemperature = rawTemperature
         self.rawTemperatureCelsius = rawTemperatureCelsius
         self.realTemperature = realTemperature
@@ -144,7 +153,7 @@ public extension SharedForecastSnapshot {
         let wave = forecast.forecast?.waveHeight(hh: hour)
         let windChill = forecast.forecast?.windChill(hh: hour)
         let hourly = hourlyForecast(for: forecast, currentHour: hour, unit: units.temperatureUnit, gridHourStepStore: gridHourStepStore)
-        let daily = dailyForecast(for: forecast, unit: units.temperatureUnit)
+        let daily = dailyForecast(for: forecast, temperatureUnit: units.temperatureUnit, windSpeedUnit: units.windSpeedUnit)
         let today = daily.first
         let dailyRange = forecast.dailyTemperatureRange(hour: hour)
 
@@ -153,6 +162,7 @@ public extension SharedForecastSnapshot {
             locationName: forecast.locationDisplayName(coordinateLocationName: coordinateLocationName),
             temperature: temperatureText(temperature, unit: units.temperatureUnit),
             temperatureCelsius: temperature,
+            temperatureUnitLabel: units.temperatureUnit.label,
             rawTemperature: rawTemperature.map { temperatureText($0, unit: units.temperatureUnit) } ?? "—",
             rawTemperatureCelsius: rawTemperature ?? temperature,
             realTemperature: realTemperature.map { temperatureText($0, unit: units.temperatureUnit) } ?? "—",
@@ -219,7 +229,7 @@ public extension SharedForecastSnapshot {
         ).map(\.hour)
     }
 
-    private static func dailyForecast(for forecast: SpotForecast, unit: TemperatureUnit) -> [Day] {
+    private static func dailyForecast(for forecast: SpotForecast, temperatureUnit: TemperatureUnit, windSpeedUnit: WindSpeedUnit) -> [Day] {
         let calendar = Calendar.current
         let currentOffset = Int(forecast.currentForecastHour ?? "") ?? 0
         let grouped = Dictionary(grouping: forecast.availableForecastHours) { hour in
@@ -234,32 +244,36 @@ public extension SharedForecastSnapshot {
                 : allHours
             guard !hours.isEmpty else { return nil }
             let temperatures = hours.compactMap { hour in
-                (forecast.forecast?.temperatureReal(hh: hour) ?? forecast.forecast?.temperature(hh: hour)).map { Temperature(celsius: $0).value(in: unit) }
+                (forecast.forecast?.temperatureReal(hh: hour) ?? forecast.forecast?.temperature(hh: hour)).map { Temperature(celsius: $0).value(in: temperatureUnit) }
             }
             guard let low = temperatures.min(), let high = temperatures.max() else { return nil }
             let representativeHour = representativeHour(among: hours, forecast: forecast)
-            let label = calendar.isDateInToday(date) ? "today".localized : date.formatted(.dateTime.weekday(.abbreviated))
+            let label = calendar.isDateInToday(date)
+                ? "\("today".localized) \(calendar.component(.day, from: date))"
+                : date.forecastShortWeekdayAndDay()
             return Day(
                 label: label,
                 symbolName: forecast.weatherSymbolName(hour: representativeHour),
-                low: temperatureText(low, unit: unit, converted: true),
-                high: temperatureText(high, unit: unit, converted: true),
+                low: temperatureText(low, unit: temperatureUnit, converted: true),
+                high: temperatureText(high, unit: temperatureUnit, converted: true),
                 lowValue: low,
-                highValue: high
+                highValue: high,
+                wind: windText(forecast.forecast?.windSpeed(hh: representativeHour) ?? 0, unit: windSpeedUnit),
+                gust: windText(forecast.forecast?.windGustsKnots(hh: representativeHour) ?? 0, unit: windSpeedUnit),
+                windDirectionDegrees: forecast.forecast?.windDirection(hh: representativeHour)
             )
         }
     }
 
     private static func representativeHour(among hours: [String], forecast: SpotForecast) -> String {
         let sortedHours = hours.sorted { (Int($0) ?? 0) < (Int($1) ?? 0) }
-        func precipitation(_ hour: String) -> Double {
-            forecast.forecast?.precipitation1(hh: hour) ?? forecast.forecast?.precipitation(hh: hour) ?? 0
-        }
-        if let wettestHour = sortedHours.max(by: { precipitation($0) < precipitation($1) }),
-           precipitation(wettestHour) > 0 {
-            return wettestHour
-        }
-        return sortedHours[sortedHours.count / 2]
+        var calendar = Calendar.current
+        calendar.timeZone = forecast.timezone ?? .current
+        return sortedHours.min { lhs, rhs in
+            let lhsHour = calendar.component(.hour, from: forecast.forecastDate(hour: lhs) ?? .now)
+            let rhsHour = calendar.component(.hour, from: forecast.forecastDate(hour: rhs) ?? .now)
+            return abs(lhsHour - 12) < abs(rhsHour - 12)
+        } ?? sortedHours[sortedHours.count / 2]
     }
 
     private static func conditionText(for forecast: SpotForecast, hour: String?) -> String {

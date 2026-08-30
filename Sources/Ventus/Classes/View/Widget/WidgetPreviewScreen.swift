@@ -41,6 +41,7 @@ struct WidgetPreviewScreen: View {
                 theme: theme,
                 detailedHours: detailedHours,
                 temperatureUnit: temperatureUnit,
+                showsInlineDailyTemperatureRange: true,
                 onSelectLocation: onSelectLocation,
                 onShowMap: onShowMap
             )

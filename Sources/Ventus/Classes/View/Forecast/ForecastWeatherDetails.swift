@@ -12,18 +12,34 @@ import SwiftUI
 public struct ForecastDaylightSummary: View {
     @Environment(\.ventusTheme) private var theme
     public let forecast: SpotForecast
+    public let selectedHour: String?
 
-    public init(forecast: SpotForecast) {
+    public init(forecast: SpotForecast, selectedHour: String? = nil) {
         self.forecast = forecast
+        self.selectedHour = selectedHour
     }
 
     public var body: some View {
         if let sunrise = forecast.sunrise,
            let sunset = forecast.sunset {
-            HStack(spacing: 16) {
-                Label("\(sunrise)", systemImage: "sunrise.fill")
-                Spacer(minLength: 12)
-                Label("\(sunset)", systemImage: "sunset.fill")
+            VStack(spacing: 5) {
+                HStack(spacing: 16) {
+                    Label("\(sunrise)", systemImage: "sunrise.fill")
+                    Spacer(minLength: 12)
+                    Label("\(sunset)", systemImage: "sunset.fill")
+                }
+                if let moon = ForecastMoonCalendar.info(
+                    for: forecast,
+                    on: forecast.forecastDate(hour: selectedHour) ?? .now
+                ) {
+                    HStack(spacing: 10) {
+                        Label("\(moon.phaseName) · \(moon.illuminationText)", systemImage: moon.symbolName)
+                        Spacer(minLength: 8)
+                        if let moonrise = moon.moonrise { Label(moonrise.formatted(date: .omitted, time: .shortened), systemImage: "moonrise.fill") }
+                        if let moonset = moon.moonset { Label(moonset.formatted(date: .omitted, time: .shortened), systemImage: "moonset.fill") }
+                    }
+                    .font(.caption)
+                }
             }
             .font(.subheadline.weight(.medium))
             .foregroundStyle(theme.accentColor)

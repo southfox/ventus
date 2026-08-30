@@ -3,12 +3,13 @@
 //  upload-testflight.swift
 //  Ventus
 //
-//  Bumps the build number, archives the VentusIOS app, exports an IPA,
-//  validates it, and uploads it to App Store Connect / TestFlight.
+//  Bumps the build number, archives the iOS and Apple TV apps, exports IPAs,
+//  validates them, and uploads them to App Store Connect / TestFlight.
 //
 //  Usage:
 //    ./upload-testflight.swift
-//    ./upload-testflight.swift --ipa build/export/VentusIOS.ipa   # skip archive/export, just validate+upload
+//    ./upload-testflight.swift --ipa build/export/VentusIOS.ipa       # upload an existing iOS IPA only
+//    ./upload-testflight.swift --tv-ipa build/export/VentusTVOS.ipa   # upload an existing tvOS IPA only
 //
 
 import Foundation
@@ -16,7 +17,8 @@ import Foundation
 // MARK: - Configuration
 
 let projectPath = "App/Ventus.xcodeproj"
-let scheme = "VentusIOS"
+let iOSScheme = "VentusIOS"
+let tvOSScheme = "VentusTVOS"
 let teamID = "27XTSJS68A"
 let appInfoPlist = "App/Ventus_App-Info.plist"
 let widgetInfoPlist = "App/VentusWidgets/Info.plist"
@@ -26,8 +28,10 @@ let watchExtensionInfoPlist = "App/VentusWatch Extension-Info.plist"
 let macAppInfoPlist = "App/VentusMacOS/Info.plist"
 let tvAppInfoPlist = "App/VentusTVOS/Info.plist"
 let buildDir = "build"
-let archivePath = "\(buildDir)/VentusIOS.xcarchive"
-let exportDir = "\(buildDir)/export"
+let iOSArchivePath = "\(buildDir)/VentusIOS.xcarchive"
+let tvOSArchivePath = "\(buildDir)/VentusTVOS.xcarchive"
+let iOSExportDir = "\(buildDir)/export/ios"
+let tvOSExportDir = "\(buildDir)/export/tvos"
 let exportOptionsPlist = "\(buildDir)/ExportOptions.plist"
 let keychainItemName = ProcessInfo.processInfo.environment["ALTOOL_KEYCHAIN_ITEM"] ?? "Forescoop-AppStoreConnect"
 
@@ -184,9 +188,13 @@ func checkDSYMs(archivePath: String, appPath: String) {
 // MARK: - Argument parsing
 
 var explicitIPAPath: String? = nil
+var explicitTVIPAPath: String? = nil
 let arguments = CommandLine.arguments.dropFirst()
 if let ipaFlagIndex = arguments.firstIndex(of: "--ipa"), arguments.index(after: ipaFlagIndex) < arguments.endIndex {
     explicitIPAPath = arguments[arguments.index(after: ipaFlagIndex)]
+}
+if let ipaFlagIndex = arguments.firstIndex(of: "--tv-ipa"), arguments.index(after: ipaFlagIndex) < arguments.endIndex {
+    explicitTVIPAPath = arguments[arguments.index(after: ipaFlagIndex)]
 }
 
 // MARK: - Credentials
@@ -264,13 +272,45 @@ let altoolAuthArgs: [String] = {
 
 try? fileManager.createDirectory(atPath: buildDir, withIntermediateDirectories: true)
 
-var ipaPath: String
+struct UploadPlatform {
+    let name: String
+    let scheme: String
+    let destination: String
+    let archivePath: String
+    let exportDir: String
+    let appStorePlatform: String
+    let explicitIPAPath: String?
+}
 
-if let explicitIPAPath {
-    ipaPath = explicitIPAPath
-    guard fileManager.fileExists(atPath: ipaPath) else { fail("No IPA found at \(ipaPath)") }
-    step("Using existing IPA at \(ipaPath), skipping increment/archive/export.")
-} else {
+let allPlatforms = [
+    UploadPlatform(
+        name: "iOS",
+        scheme: iOSScheme,
+        destination: "generic/platform=iOS",
+        archivePath: iOSArchivePath,
+        exportDir: iOSExportDir,
+        appStorePlatform: "ios",
+        explicitIPAPath: explicitIPAPath
+    ),
+    UploadPlatform(
+        name: "tvOS",
+        scheme: tvOSScheme,
+        destination: "generic/platform=tvOS",
+        archivePath: tvOSArchivePath,
+        exportDir: tvOSExportDir,
+        appStorePlatform: "appletvos",
+        explicitIPAPath: explicitTVIPAPath
+    ),
+]
+
+// With no IPA arguments, ship both platforms. Supplying an IPA uploads only
+// the explicitly requested platform(s), which keeps the old --ipa workflow.
+let platforms: [UploadPlatform] = (explicitIPAPath == nil && explicitTVIPAPath == nil)
+    ? allPlatforms
+    : allPlatforms.filter { $0.explicitIPAPath != nil }
+
+let platformsToArchive = platforms.filter { $0.explicitIPAPath == nil }
+if !platformsToArchive.isEmpty {
     // 1. Increment build number
     step("Incrementing build number")
     let plistBuddy = "/usr/libexec/PlistBuddy"
@@ -284,23 +324,25 @@ if let explicitIPAPath {
         guard status == 0 else { fail("Failed to update CFBundleVersion in \(plist)") }
     }
     print("Build number: \(currentBuildNumber) -> \(newBuildNumber)")
+}
 
+func archiveAndExport(_ platform: UploadPlatform) -> String {
     // 2. Archive
-    step("Archiving \(scheme) (this can take a while)")
-    try? fileManager.removeItem(atPath: archivePath)
+    step("Archiving \(platform.name) (this can take a while)")
+    try? fileManager.removeItem(atPath: platform.archivePath)
     let archiveStatus = run("/usr/bin/xcodebuild", [
         "archive",
         "-project", projectPath,
-        "-scheme", scheme,
+        "-scheme", platform.scheme,
         "-configuration", "Release",
-        "-destination", "generic/platform=iOS",
-        "-archivePath", archivePath,
+        "-destination", platform.destination,
+        "-archivePath", platform.archivePath,
         "-allowProvisioningUpdates",
         "DEVELOPMENT_TEAM=\(teamID)",
     ] + xcodebuildAuthArgs)
     guard archiveStatus == 0 else { fail("xcodebuild archive failed (status \(archiveStatus))") }
 
-    let archivedAppsDir = "\(archivePath)/Products/Applications"
+    let archivedAppsDir = "\(platform.archivePath)/Products/Applications"
     guard let archivedAppName = (try? fileManager.contentsOfDirectory(atPath: archivedAppsDir))?.first(where: { $0.hasSuffix(".app") }) else {
         fail("No .app found in \(archivedAppsDir) after archive")
     }
@@ -313,10 +355,10 @@ if let explicitIPAPath {
 
     // 2b. Check dSYMs
     step("Checking dSYMs for embedded binaries")
-    checkDSYMs(archivePath: archivePath, appPath: archivedAppPath)
+    checkDSYMs(archivePath: platform.archivePath, appPath: archivedAppPath)
 
     // 3. Export
-    step("Exporting IPA")
+    step("Exporting \(platform.name) IPA")
     let exportOptions = """
     <?xml version="1.0" encoding="UTF-8"?>
     <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -337,40 +379,51 @@ if let explicitIPAPath {
         fail("Could not write \(exportOptionsPlist): \(error)")
     }
 
-    try? fileManager.removeItem(atPath: exportDir)
+    try? fileManager.removeItem(atPath: platform.exportDir)
     let exportStatus = run("/usr/bin/xcodebuild", [
         "-exportArchive",
-        "-archivePath", archivePath,
-        "-exportPath", exportDir,
+        "-archivePath", platform.archivePath,
+        "-exportPath", platform.exportDir,
         "-exportOptionsPlist", exportOptionsPlist,
         "-allowProvisioningUpdates",
     ] + xcodebuildAuthArgs)
     guard exportStatus == 0 else { fail("xcodebuild -exportArchive failed (status \(exportStatus))") }
 
-    guard let exportedIPA = (try? fileManager.contentsOfDirectory(atPath: exportDir))?.first(where: { $0.hasSuffix(".ipa") }) else {
-        fail("No .ipa found in \(exportDir) after export")
+    guard let exportedIPA = (try? fileManager.contentsOfDirectory(atPath: platform.exportDir))?.first(where: { $0.hasSuffix(".ipa") }) else {
+        fail("No .ipa found in \(platform.exportDir) after export")
     }
-    ipaPath = "\(exportDir)/\(exportedIPA)"
+    return "\(platform.exportDir)/\(exportedIPA)"
 }
 
-print("IPA: \(ipaPath)")
+for platform in platforms {
+    let ipaPath: String
+    if let explicitIPAPath = platform.explicitIPAPath {
+        ipaPath = explicitIPAPath
+        guard fileManager.fileExists(atPath: ipaPath) else { fail("No IPA found at \(ipaPath)") }
+        step("Using existing \(platform.name) IPA at \(ipaPath), skipping increment/archive/export.")
+    } else {
+        ipaPath = archiveAndExport(platform)
+    }
 
-// 4. Validate
-step("Validating IPA")
-let validateStatus = run("/usr/bin/xcrun", [
-    "altool", "--validate-app",
-    "-f", ipaPath,
-    "-t", "ios",
-] + altoolAuthArgs)
-guard validateStatus == 0 else { fail("Validation failed (status \(validateStatus))") }
+    print("IPA: \(ipaPath)")
 
-// 5. Upload
-step("Uploading to App Store Connect / TestFlight")
-let uploadStatus = run("/usr/bin/xcrun", [
-    "altool", "--upload-app",
-    "-f", ipaPath,
-    "-t", "ios",
-] + altoolAuthArgs)
-guard uploadStatus == 0 else { fail("Upload failed (status \(uploadStatus))") }
+    // 4. Validate
+    step("Validating \(platform.name) IPA")
+    let validateStatus = run("/usr/bin/xcrun", [
+        "altool", "--validate-app",
+        "-f", ipaPath,
+        "-t", platform.appStorePlatform,
+    ] + altoolAuthArgs)
+    guard validateStatus == 0 else { fail("\(platform.name) validation failed (status \(validateStatus))") }
 
-print("\n✅ 🚀 Uploaded \(ipaPath) to App Store Connect. It will appear in TestFlight once Apple finishes processing.")
+    // 5. Upload
+    step("Uploading \(platform.name) to App Store Connect / TestFlight")
+    let uploadStatus = run("/usr/bin/xcrun", [
+        "altool", "--upload-app",
+        "-f", ipaPath,
+        "-t", platform.appStorePlatform,
+    ] + altoolAuthArgs)
+    guard uploadStatus == 0 else { fail("\(platform.name) upload failed (status \(uploadStatus))") }
+
+    print("\n✅ 🚀 Uploaded \(platform.name) to App Store Connect. It will appear in TestFlight once Apple finishes processing.")
+}

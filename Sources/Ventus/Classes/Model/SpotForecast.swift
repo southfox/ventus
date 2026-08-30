@@ -202,7 +202,19 @@ public extension SpotForecast {
     }
 
     func weatherSymbolName(hour: String?) -> String {
-        weatherSymbolNames(hour: hour).first ?? "sun.max.fill"
+        let symbols = weatherSymbolNames(hour: hour)
+
+        // Compact views have room for only one condition. Precipitation is more
+        // useful than the accompanying wind or sky symbol when no amount is shown.
+        if let snowSymbol = symbols.first(where: { $0.contains("snow") || $0.contains("sleet") }) {
+            return snowSymbol
+        }
+        if let rainSymbol = symbols.first(where: {
+            $0.contains("rain") || $0.contains("drizzle") || $0.contains("heavyrain")
+        }) {
+            return rainSymbol
+        }
+        return symbols.first ?? "sun.max.fill"
     }
 
     static let strongWindBeaufortThreshold = 6

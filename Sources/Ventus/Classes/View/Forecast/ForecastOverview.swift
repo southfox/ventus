@@ -88,13 +88,16 @@ public struct ForecastOverview: View {
                     .foregroundStyle(.secondary)
             }
 
-            HStack(spacing: isCompact ? 6 : 12) {
-                ForEach(forecast.weatherSymbolNames(hour: selectedHour), id: \.self) { symbol in
-                    Image(systemName: symbol)
-                }
-            }
+            Image(systemName: forecast.weatherSymbolName(hour: selectedHour))
             .font(.system(size: isCompact ? 20 : 42))
             .symbolRenderingMode(.hierarchical)
+
+            if let precipitationAgreement {
+                Label("\(precipitationAgreement.percentage)%", systemImage: "cloud.rain.fill")
+                    .font(isCompact ? .caption2.weight(.semibold) : .subheadline.weight(.semibold))
+                    .foregroundStyle(.cyan.opacity(precipitationAgreement.isLow ? 0.7 : 1))
+                    .accessibilityLabel(precipitationAgreement.accessibilityLabel)
+            }
 
             VStack(spacing: isCompact ? 2 : 8) {
                 HStack(spacing: isCompact ? 6 : 12) {
@@ -103,11 +106,18 @@ public struct ForecastOverview: View {
                         selection: $temperatureUnit,
                         unitTitle: \.label
                     ) {
-                        ThermalLabel(temperature, celsius: currentCelsius)
-                            .font(.system(size: isCompact ? 22 : 44, weight: .semibold))
-                            .foregroundStyle(theme.accentColor)
+                        HStack(spacing: isCompact ? 3 : 6) {
+                            ThermalLabel(temperature, celsius: currentCelsius)
+                            Text(temperatureUnit.label)
+                        }
+                        .font(.system(size: isCompact ? 22 : 44, weight: .semibold))
+                        .foregroundStyle(theme.accentColor)
                     }
                     .accessibilityLabel("Temperature")
+
+                    if let range = dailyTemperatureRange {
+                        dailyTemperatureLabels(range)
+                    }
 
                     if supportsModelComparison {
                         Button("Compare temperature", systemImage: showsTemperatureSources ? "rectangle.compress.vertical" : "rectangle.expand.vertical") {
@@ -123,15 +133,6 @@ public struct ForecastOverview: View {
                         .font(isCompact ? .caption.weight(.medium) : .title3.weight(.medium))
                         .foregroundStyle(theme.accentColor)
                         .accessibilityLabel("Real temperature")
-                }
-
-                if let range = forecast.dailyTemperatureRange(hour: selectedHour), let highTemperatureText, let lowTemperatureText {
-                    HStack(spacing: isCompact ? 6 : 12) {
-                        ThermalLabel(lowTemperatureText, celsius: range.low)
-                        ThermalLabel(highTemperatureText, celsius: range.high)
-                    }
-                    .font(isCompact ? .caption2 : .subheadline)
-                    .foregroundStyle(.secondary)
                 }
 
                 if showsTemperatureSources {
@@ -154,20 +155,28 @@ public struct ForecastOverview: View {
         return forecast.forecast?.temperature(hh: hour) ?? forecast.forecast?.temperatureReal(hh: hour) ?? 0
     }
 
+    private var precipitationAgreement: ForecastPrecipitationAgreement? {
+        modelForecasts.precipitationAgreement(hour: selectedHour ?? forecast.currentForecastHour)
+    }
+
     private var temperature: String {
-        temperature(for: forecast)
+        temperatureValue(for: forecast)
     }
 
     private func temperature(for source: SpotForecast) -> String {
+        "\(temperatureValue(for: source))\(temperatureUnit.label)"
+    }
+
+    private func temperatureValue(for source: SpotForecast) -> String {
         let hour = selectedHour ?? source.currentForecastHour
         guard let value = source.forecast?.temperature(hh: hour) ?? source.forecast?.temperatureReal(hh: hour) else { return "—" }
-        return "\(Temperature(celsius: value).value(in: temperatureUnit).forecastFormatted(precision: 0))\(temperatureUnit.label)"
+        return Temperature(celsius: value).value(in: temperatureUnit).forecastFormatted(precision: 0)
     }
 
     private var realTemperature: String? {
         let hour = selectedHour ?? forecast.currentForecastHour
         guard let value = forecast.forecast?.temperatureReal(hh: hour) else { return nil }
-        return "\(Temperature(celsius: value).value(in: temperatureUnit).forecastFormatted(precision: 0))\(temperatureUnit.label)"
+        return Temperature(celsius: value).value(in: temperatureUnit).forecastFormatted(precision: 0)
     }
 
     private var realTemperatureCelsius: Double {
@@ -175,14 +184,26 @@ public struct ForecastOverview: View {
         return forecast.forecast?.temperatureReal(hh: hour) ?? 0
     }
 
-    private var highTemperatureText: String? {
-        guard let range = forecast.dailyTemperatureRange(hour: selectedHour) else { return nil }
-        return "\(Temperature(celsius: range.high).value(in: temperatureUnit).forecastFormatted(precision: 0))\(temperatureUnit.label)"
+    private var dailyTemperatureRange: (low: Double, high: Double)? {
+        forecast.dailyTemperatureRange(hour: selectedHour)
     }
 
-    private var lowTemperatureText: String? {
-        guard let range = forecast.dailyTemperatureRange(hour: selectedHour) else { return nil }
-        return "\(Temperature(celsius: range.low).value(in: temperatureUnit).forecastFormatted(precision: 0))\(temperatureUnit.label)"
+    @ViewBuilder
+    private func dailyTemperatureLabels(_ dayRange: (low: Double, high: Double)) -> some View {
+        HStack(spacing: 4) {
+            Label(
+                Temperature(celsius: dayRange.low).value(in: temperatureUnit).forecastFormatted(precision: 0),
+                systemImage: "thermometer.low"
+            )
+            Label(
+                Temperature(celsius: dayRange.high).value(in: temperatureUnit).forecastFormatted(precision: 0),
+                systemImage: "thermometer.high"
+            )
+        }
+        .font(isCompact ? .caption2 : .subheadline)
+        .foregroundStyle(.secondary)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Daily low \(dayRange.low.forecastFormatted(precision: 0)), high \(dayRange.high.forecastFormatted(precision: 0)).")
     }
 
     private var supportsModelComparison: Bool { isModelComparisonEnabled && modelForecasts.count > 1 }

@@ -9,6 +9,10 @@
 import SwiftUI
 
 public struct SettingsView: View {
+    private enum SettingsDestination: Hashable {
+        case readingSize
+    }
+
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
     @Environment(\.appEnvironment) private var environment
@@ -17,7 +21,10 @@ public struct SettingsView: View {
     @Binding private var theme: VentusTheme
     @Binding private var appLanguage: AppLanguage
     @Binding private var appAppearanceMode: AppAppearanceMode
+    @Binding private var preferredReadingSize: PreferredReadingSize
+    @State private var navigationPath = NavigationPath()
     @State private var notificationsEnabled: Bool
+    @State private var moonPhasesEnabled: Bool
 #if !os(watchOS)
     @Binding private var gridHourStep: Int
     private let forecastService: ForecastWindguruProtocol
@@ -31,6 +38,7 @@ public struct SettingsView: View {
         theme: Binding<VentusTheme>,
         appLanguage: Binding<AppLanguage>,
         appAppearanceMode: Binding<AppAppearanceMode>,
+        preferredReadingSize: Binding<PreferredReadingSize>,
         gridHourStep: Binding<Int>,
         forecastService: ForecastWindguruProtocol,
         account: WindguruAccount,
@@ -41,10 +49,12 @@ public struct SettingsView: View {
         _theme = theme
         _appLanguage = appLanguage
         _appAppearanceMode = appAppearanceMode
+        _preferredReadingSize = preferredReadingSize
         _gridHourStep = gridHourStep
         self.forecastService = forecastService
         self.account = account
         _notificationsEnabled = State(initialValue: environment.forecastSevereWeatherNotificationsStore.load())
+        _moonPhasesEnabled = State(initialValue: ForecastMoonPreference.isEnabled)
     }
 #else
     public init(
@@ -53,6 +63,7 @@ public struct SettingsView: View {
         theme: Binding<VentusTheme>,
         appLanguage: Binding<AppLanguage>,
         appAppearanceMode: Binding<AppAppearanceMode>,
+        preferredReadingSize: Binding<PreferredReadingSize>,
         environment: AppEnvironment
     ) {
         _weatherBackgroundStyle = weatherBackgroundStyle
@@ -60,12 +71,14 @@ public struct SettingsView: View {
         _theme = theme
         _appLanguage = appLanguage
         _appAppearanceMode = appAppearanceMode
+        _preferredReadingSize = preferredReadingSize
         _notificationsEnabled = State(initialValue: environment.forecastSevereWeatherNotificationsStore.load())
+        _moonPhasesEnabled = State(initialValue: ForecastMoonPreference.isEnabled)
     }
 #endif
 
     public var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             Group {
 #if os(macOS)
                 macColumnsBody
@@ -78,12 +91,24 @@ public struct SettingsView: View {
                     forecastHoursSection
 #endif
                     animationsSection
+                    systemSection
                     displaySection
+                    astronomySection
                     appearanceSection
                     languageSection
                     notificationsSection
                 }
 #endif
+            }
+            .navigationDestination(for: SettingsDestination.self) { destination in
+                switch destination {
+                case .readingSize:
+#if os(tvOS)
+                    tvReadingSizeScreen
+#else
+                    readingSizeScreen
+#endif
+                }
             }
             .navigationTitle("Settings".localized)
             .toolbar {
@@ -115,8 +140,14 @@ public struct SettingsView: View {
             environment.appAppearanceModeStore.save(mode)
             environment.analytics.log(.appearanceModeChanged(mode.rawValue))
         }
+        .onChange(of: preferredReadingSize) { _, size in
+            environment.preferredReadingSizeStore.save(size)
+        }
         .onChange(of: notificationsEnabled) { _, isEnabled in
             environment.forecastSevereWeatherNotificationsStore.save(isEnabled)
+        }
+        .onChange(of: moonPhasesEnabled) { _, isEnabled in
+            ForecastMoonPreference.save(isEnabled)
         }
 #if !os(watchOS)
         .onChange(of: gridHourStep) { _, step in
@@ -154,6 +185,12 @@ public struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 22) {
                     macGroup(header: "Display".localized, footer: "System follows this device's Light or Dark appearance setting.".localized) {
                         appearanceModePicker
+                    }
+                    macGroup(header: "System".localized, footer: "Choose a comfortable reading size for Ventus. Semantic text still follows Dynamic Type.".localized) {
+                        readingSizeControl
+                    }
+                    macGroup(header: "Astronomy".localized, footer: "Show moon phases, illumination, moonrise, and moonset across forecasts.".localized) {
+                        moonPhasesToggle
                     }
                     macGroup(header: "Appearance".localized, footer: "Themes change colors and font design without changing text sizes. System Default follows the current device appearance.".localized) {
                         themePicker
@@ -245,6 +282,27 @@ public struct SettingsView: View {
                     } label: {
                         tvSettingsRow(title: "Theme".localized, value: theme.title.localized, symbol: "paintpalette")
                     }
+                }
+
+                tvSettingsSection("System".localized) {
+                    NavigationLink(value: SettingsDestination.readingSize) {
+                        tvSettingsRow(
+                            title: "Preferred reading size".localized,
+                            value: preferredReadingSize.title.localized,
+                            symbol: "textformat.size"
+                        )
+                    }
+                }
+
+                tvSettingsSection("Astronomy".localized) {
+                    Button { moonPhasesEnabled.toggle() } label: {
+                        tvSettingsRow(
+                            title: "Moon phases".localized,
+                            value: moonPhasesEnabled ? "On".localized : "Off".localized,
+                            symbol: moonPhasesEnabled ? "moon.stars.fill" : "moon.zzz"
+                        )
+                    }
+                    .buttonStyle(.plain)
                 }
 
                 tvSettingsSection("Language".localized) {
@@ -370,6 +428,15 @@ public struct SettingsView: View {
         }
         .navigationTitle("Forecast hour step".localized)
     }
+
+    private var tvReadingSizeScreen: some View {
+        ScrollView {
+            readingSizeControl
+                .padding(48)
+                .frame(maxWidth: 700)
+        }
+        .navigationTitle("Preferred reading size".localized)
+    }
 #endif
 
     private var layoutPicker: some View {
@@ -394,29 +461,19 @@ public struct SettingsView: View {
 
 #if !os(watchOS)
     private var forecastHourStepControl: some View {
-        VStack(alignment: .leading, spacing: 4) {
+#if os(tvOS)
+        Picker("Forecast hour step".localized, selection: $gridHourStep) {
+            ForEach(Array(GridHourStepStore.range), id: \.self) { step in
+                Text("\(step)").tag(step)
+            }
+        }
+#else
+        Stepper(value: $gridHourStep, in: GridHourStepStore.range) {
             Text(gridHourStep == 1 ? "Hourly".localized : "Every %lld hours".localized(formatArguments: [gridHourStep]))
                 .foregroundStyle(.secondary)
-#if os(tvOS)
-            Picker("Forecast hour step".localized, selection: $gridHourStep) {
-                ForEach(Array(GridHourStepStore.range), id: \.self) { step in
-                    Text("\(step)").tag(step)
-                }
-            }
-#else
-            Slider(
-                value: Binding(get: { Double(gridHourStep) }, set: { gridHourStep = Int($0.rounded()) }),
-                in: Double(GridHourStepStore.range.lowerBound)...Double(GridHourStepStore.range.upperBound),
-                step: 1
-            ) {
-                Text("Forecast hour step".localized)
-            } minimumValueLabel: {
-                Text("1")
-            } maximumValueLabel: {
-                Text("6")
+                .accessibilityLabel("Forecast hour step".localized)
             }
 #endif
-        }
     }
 
     private var forecastHoursSection: some View {
@@ -467,6 +524,160 @@ public struct SettingsView: View {
             Text("Display".localized)
         } footer: {
             Text("System follows this device's Light or Dark appearance setting.".localized)
+        }
+    }
+
+    private var systemSection: some View {
+        Section {
+            useDeviceTextSizeToggle
+#if !os(tvOS)
+                .listRowSeparator(.visible)
+#endif
+            if !usesDeviceTextSize {
+                Text("Preferred reading size".localized)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+#if !os(tvOS)
+                    .listRowSeparator(.hidden)
+#endif
+                readingSizeButtons
+#if !os(tvOS)
+                    .listRowSeparator(.hidden)
+#endif
+                readingSizeExample
+            }
+        } header: {
+            Text("System".localized)
+        } footer: {
+            Text("Choose a comfortable reading size for Ventus. Semantic text still follows Dynamic Type.".localized)
+        }
+    }
+
+    private var readingSizeControl: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            useDeviceTextSizeToggle
+            if !usesDeviceTextSize {
+                Text("Preferred reading size".localized)
+                    .lineLimit(1)
+                readingSizeButtons
+                readingSizeExample
+            }
+        }
+    }
+
+    private var readingSizeButtons: some View {
+        HStack(spacing: 14) {
+            Spacer()
+            Button {
+                preferredReadingSize = preferredReadingSize.adjusted(by: -1)
+            } label: {
+                Image(systemName: "minus").frame(width: 28, height: 28)
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.regular)
+            .disabled(!preferredReadingSize.canDecrease)
+            .accessibilityLabel("Decrease text size".localized)
+
+            Text(preferredReadingSize.title.localized)
+                .font(.subheadline.weight(.semibold))
+                .frame(minWidth: 68)
+
+            Button {
+                preferredReadingSize = preferredReadingSize.adjusted(by: 1)
+            } label: {
+                Image(systemName: "plus").frame(width: 28, height: 28)
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.regular)
+            .disabled(!preferredReadingSize.canIncrease)
+            .accessibilityLabel("Increase text size".localized)
+        }
+    }
+
+    private var readingSizeExample: some View {
+        Text("Example forecast text: wind 12 knots, rain 1 mm, temperature 18°.")
+            .font(.body)
+            .preferredReadingSize(preferredReadingSize)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+            .accessibilityLabel("Reading-size example".localized)
+    }
+
+    private var readingSizeScreen: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 32) {
+                Text("Preferred reading size".localized)
+                    .font(.title2.weight(.semibold))
+
+                useDeviceTextSizeToggle
+
+                if !usesDeviceTextSize {
+                    Text("Example forecast text: wind 12 knots, rain 1 mm, temperature 18°.")
+                        .font(.body)
+                        .preferredReadingSize(preferredReadingSize)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityLabel("Reading-size example".localized)
+
+                    HStack(spacing: 24) {
+                        Button {
+                            preferredReadingSize = preferredReadingSize.adjusted(by: -1)
+                        } label: {
+                            Image(systemName: "minus")
+                                .frame(width: 44, height: 44)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(!preferredReadingSize.canDecrease)
+                        .accessibilityLabel("Decrease text size".localized)
+
+                        Text(preferredReadingSize.title.localized)
+                            .font(.headline)
+                            .frame(minWidth: 84)
+
+                        Button {
+                            preferredReadingSize = preferredReadingSize.adjusted(by: 1)
+                        } label: {
+                            Image(systemName: "plus")
+                                .frame(width: 44, height: 44)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(!preferredReadingSize.canIncrease)
+                        .accessibilityLabel("Increase text size".localized)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+
+            }
+            .padding()
+            .frame(maxWidth: 560, alignment: .leading)
+        }
+        .navigationTitle("Reading size".localized)
+    }
+
+    private var useDeviceTextSizeToggle: some View {
+        Toggle("Use device text size".localized, isOn: Binding(
+            get: { preferredReadingSize == .system },
+            set: { useDeviceSize in
+                preferredReadingSize = useDeviceSize ? .system : .standard
+            }
+        ))
+    }
+
+    private var usesDeviceTextSize: Bool {
+        preferredReadingSize == .system
+    }
+
+    private var moonPhasesToggle: some View {
+        Toggle("Moon phases".localized, isOn: $moonPhasesEnabled)
+    }
+
+    private var astronomySection: some View {
+        Section {
+            moonPhasesToggle
+        } header: {
+            Text("Astronomy".localized)
+        } footer: {
+            Text("Show moon phases, illumination, moonrise, and moonset across forecasts.".localized)
         }
     }
 
@@ -540,6 +751,7 @@ public struct SettingsView: View {
         theme: .constant(.system),
         appLanguage: .constant(.system),
         appAppearanceMode: .constant(.system),
+        preferredReadingSize: .constant(.standard),
         environment: .preview
     )
 }
@@ -551,6 +763,7 @@ public struct SettingsView: View {
         theme: .constant(.system),
         appLanguage: .constant(.system),
         appAppearanceMode: .constant(.system),
+        preferredReadingSize: .constant(.standard),
         gridHourStep: .constant(1),
         forecastService: ForecastWindguruMockup(),
         account: WindguruAccount(credentialStore: AppEnvironment.preview.windguruCredentialStore),
@@ -558,3 +771,4 @@ public struct SettingsView: View {
     )
 }
 #endif
+

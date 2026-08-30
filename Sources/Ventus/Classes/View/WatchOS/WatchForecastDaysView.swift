@@ -67,8 +67,10 @@ struct WatchForecastDaysView: View {
                 let temperatures = hours.compactMap { weather.temperatureReal(hh: $0) ?? weather.temperature(hh: $0) }
                 guard !temperatures.isEmpty,
                       let low = temperatures.min(), let high = temperatures.max() else { return nil }
-                let hour = representativeHour(in: hours, weather: weather)
-                let label = calendar.isDateInToday(date) ? "Today" : date.formatted(.dateTime.weekday(.abbreviated))
+                let hour = representativeHour(in: hours)
+                let label = calendar.isDateInToday(date)
+                    ? "\("today".localized) \(calendar.component(.day, from: date))"
+                    : date.forecastShortWeekdayAndDay()
                 return WatchForecastDay(
                     label: label,
                     hour: hour,
@@ -80,11 +82,14 @@ struct WatchForecastDaysView: View {
             }
     }
 
-    private func representativeHour(in hours: [String], weather: Forecast) -> String {
+    private func representativeHour(in hours: [String]) -> String {
         let sorted = hours.sorted { (Int($0) ?? 0) < (Int($1) ?? 0) }
-        return sorted.max {
-            (weather.precipitation1(hh: $0) ?? weather.precipitation(hh: $0) ?? 0)
-                < (weather.precipitation1(hh: $1) ?? weather.precipitation(hh: $1) ?? 0)
+        var calendar = Calendar.current
+        calendar.timeZone = forecast?.timezone ?? .current
+        return sorted.min { lhs, rhs in
+            let lhsHour = calendar.component(.hour, from: forecast?.forecastDate(hour: lhs) ?? .now)
+            let rhsHour = calendar.component(.hour, from: forecast?.forecastDate(hour: rhs) ?? .now)
+            return abs(lhsHour - 12) < abs(rhsHour - 12)
         } ?? sorted[sorted.count / 2]
     }
 

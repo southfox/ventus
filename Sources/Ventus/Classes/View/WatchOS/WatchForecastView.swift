@@ -29,6 +29,7 @@ public struct WatchForecastView: View {
     @State private var navigationPath = NavigationPath()
     @State private var theme: VentusTheme
     @State private var appLanguage: AppLanguage
+    @State private var preferredReadingSize: PreferredReadingSize
 
     public init(forecastService: ForecastWindguruProtocol = ForecastWindguruService(), environment: AppEnvironment) {
         self.forecastService = forecastService
@@ -36,6 +37,7 @@ public struct WatchForecastView: View {
         _locations = State(initialValue: environment.watchLocationStore.load())
         _theme = State(initialValue: environment.ventusThemeStore.load())
         _appLanguage = State(initialValue: environment.appLanguageStore.load())
+        _preferredReadingSize = State(initialValue: environment.preferredReadingSizeStore.load())
     }
 
     public var body: some View {
@@ -69,7 +71,7 @@ public struct WatchForecastView: View {
                         navigationPath = NavigationPath()
                     }
                 case .settings:
-                    WatchForecastSettingsView(forecastService: forecastService, temperatureUnitRaw: $temperatureUnitRaw, windSpeedUnitRaw: $windSpeedUnitRaw, waveHeightUnitRaw: $waveHeightUnitRaw, pressureUnitRaw: $pressureUnitRaw, precipitationUnitRaw: $precipitationUnitRaw, freezingLevelUnitRaw: $freezingLevelUnitRaw, appLanguage: $appLanguage)
+                    WatchForecastSettingsView(forecastService: forecastService, temperatureUnitRaw: $temperatureUnitRaw, windSpeedUnitRaw: $windSpeedUnitRaw, waveHeightUnitRaw: $waveHeightUnitRaw, pressureUnitRaw: $pressureUnitRaw, precipitationUnitRaw: $precipitationUnitRaw, freezingLevelUnitRaw: $freezingLevelUnitRaw, appLanguage: $appLanguage, preferredReadingSize: $preferredReadingSize)
                 case .models:
                     if let forecast {
                         WatchForecastModelPicker(forecast: forecast, selectedModelID: selectedModelID, select: selectModel)
@@ -78,6 +80,7 @@ public struct WatchForecastView: View {
             }
         }
         .modifier(VentusThemeModifier(theme: theme))
+        .preferredReadingSize(preferredReadingSize)
         .appLanguage(appLanguage)
         .task { await loadForecast() }
         .onChange(of: selectedSpotID) { _, _ in Task { await loadForecast() } }
@@ -88,6 +91,9 @@ public struct WatchForecastView: View {
         }
         .onChange(of: appLanguage) { _, appLanguage in
             environment.appLanguageStore.save(appLanguage)
+        }
+        .onChange(of: preferredReadingSize) { _, size in
+            environment.preferredReadingSizeStore.save(size)
         }
         .id(appLanguage)
     }
@@ -140,27 +146,29 @@ public struct WatchForecastView: View {
                     .accessibilityIdentifier("watch.forecast.daylight")
                 }
 
+                if let moon = ForecastMoonCalendar.info(for: forecast, on: forecast.forecastDate(hour: hour) ?? .now) {
+                    Label("\(moon.phaseName) · \(moon.illuminationText)", systemImage: moon.symbolName)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .accessibilityLabel("Moon: \(moon.phaseName), \(moon.illuminationText) illuminated")
+                }
+
                 HStack(spacing: 5) {
                     ForEach(forecast.weatherSymbolNames(hour: hour), id: \.self) { Image(systemName: $0) }
                 }
                 .font(.title2)
-                Text(temperature(weather?.temperatureReal(hh: hour) ?? weather?.temperature(hh: hour)))
-                    .font(.system(.title2, design: .rounded).weight(.semibold))
+                HStack(spacing: 6) {
+                    Text(temperature(weather?.temperatureReal(hh: hour) ?? weather?.temperature(hh: hour)))
+                        .font(.system(.title2, design: .rounded).weight(.semibold))
+
+                    if let range = forecast.dailyTemperatureRange(hour: hour) {
+                        dailyTemperatureLabels(range)
+                    }
+                }
 
                 Text(conditionText(for: forecast, hour: hour))
                     .font(.caption.weight(.medium))
                     .foregroundStyle(.secondary)
-
-                if let range = forecast.dailyTemperatureRange(hour: hour) {
-                    HStack(spacing: 12) {
-                        Label(temperature(range.low), systemImage: "thermometer.low")
-                        Label(temperature(range.high), systemImage: "thermometer.high")
-                    }
-                    .font(.caption2.monospacedDigit())
-                    .foregroundStyle(.secondary)
-                    .accessibilityElement(children: .combine)
-                    .accessibilityLabel("Daily low \(temperature(range.low)). High \(temperature(range.high)).")
-                }
 
                 hourlyOutlook(for: forecast, selectedHour: hour)
 
@@ -315,6 +323,17 @@ public struct WatchForecastView: View {
         return "Clear"
     }
 
+    private func dailyTemperatureLabels(_ dayRange: (low: Double, high: Double)) -> some View {
+        return HStack(spacing: 3) {
+            Label(temperature(dayRange.low), systemImage: "thermometer.low")
+            Label(temperature(dayRange.high), systemImage: "thermometer.high")
+        }
+        .font(.caption2)
+        .foregroundStyle(.secondary)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Daily low \(temperature(dayRange.low)). High \(temperature(dayRange.high)).")
+    }
+
     private func hourlyOutlook(for forecast: SpotForecast, selectedHour: String?) -> some View {
         let selectedOffset = Int(selectedHour ?? "") ?? 0
         let hours = forecast.availableForecastHours
@@ -373,8 +392,11 @@ enum WatchForecastFormatting {
         let formatter = DateFormatter()
         formatter.locale = .autoupdatingCurrent
         let hourTemplate = DateFormatter.dateFormat(fromTemplate: "j", options: 0, locale: .autoupdatingCurrent) ?? "H"
-        formatter.dateFormat = hourTemplate.contains("H") || hourTemplate.contains("k") ? "EEE, HH'h'" : "EEE, h a"
-        return formatter.string(from: date).replacingOccurrences(of: " AM", with: "am").replacingOccurrences(of: " PM", with: "pm")
+        formatter.dateFormat = hourTemplate.contains("H") || hourTemplate.contains("k") ? "HH'h'" : "h a"
+        let hour = formatter.string(from: date)
+            .replacingOccurrences(of: " AM", with: "am")
+            .replacingOccurrences(of: " PM", with: "pm")
+        return "\(date.forecastShortWeekday()), \(hour)"
     }
 
     static func temperature(_ value: Double?, unit: TemperatureUnit) -> String {

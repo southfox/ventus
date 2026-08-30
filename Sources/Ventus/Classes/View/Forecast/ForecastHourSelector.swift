@@ -11,6 +11,7 @@ public struct ForecastHourSelector: View {
     @Binding public var selectedHour: String?
     @Environment(\.locale) private var locale
     @Environment(\.appEnvironment) private var environment
+    @Environment(\.scenePhase) private var scenePhase
 
     public init(
         forecast: SpotForecast,
@@ -29,7 +30,23 @@ public struct ForecastHourSelector: View {
     }
 
     private var selection: String? {
-        selectedHour ?? currentHour
+        if let selectedHour, hours.contains(selectedHour) {
+            return selectedHour
+        }
+        if let currentHour, hours.contains(currentHour) {
+            return currentHour
+        }
+        return hours.first
+    }
+
+    /// A saved selection can become a past hour while the app is inactive.
+    /// A menu picker renders blank when its selection has no matching tag, so
+    /// always read a value that exists in the currently visible hours.
+    private var pickerSelection: Binding<String?> {
+        Binding(
+            get: { selection },
+            set: { selectedHour = $0 }
+        )
     }
 
     private var selectedIndex: Int? {
@@ -63,7 +80,7 @@ public struct ForecastHourSelector: View {
                 .fontWeight(selection == currentHour ? .bold : .regular)
                 .fixedSize(horizontal: false, vertical: true)
 #else
-            Picker("Forecast date and hour", selection: $selectedHour) {
+            Picker("Forecast date and hour", selection: pickerSelection) {
                 ForEach(hours, id: \.self) { hour in
                     Text(hourLabel(for: hour))
                         .fontWeight(hour == currentHour ? .bold : .regular)
@@ -97,11 +114,25 @@ public struct ForecastHourSelector: View {
         .accessibilityLabel("Forecast date and hour")
         .accessibilityHint("Use previous and next controls, or open the picker to choose a forecast hour.")
         .accessibilityIdentifier("forecast.hour.selector")
+        .onAppear(perform: synchronizeSelection)
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                synchronizeSelection()
+            }
+        }
+        .onChange(of: hours) { _, _ in
+            synchronizeSelection()
+        }
     }
 
     private func moveSelection(by offset: Int) {
         guard let selectedIndex else { return }
         selectedHour = hours[hours.index(selectedIndex, offsetBy: offset)]
+    }
+
+    private func synchronizeSelection() {
+        guard selectedHour != selection else { return }
+        selectedHour = selection
     }
 
     private func hourLabel(for hour: String) -> String {
@@ -112,7 +143,7 @@ public struct ForecastHourSelector: View {
         let calendar = Calendar.current
         let day = calendar.isDateInToday(date)
             ? "today".localized(locale: locale)
-            : date.formatted(.dateTime.weekday(.abbreviated).day())
+            : date.forecastShortWeekdayAndDay(locale: locale)
         let formatter = DateFormatter()
         formatter.locale = .autoupdatingCurrent
         formatter.setLocalizedDateFormatFromTemplate("j")

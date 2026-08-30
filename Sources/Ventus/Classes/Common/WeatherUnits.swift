@@ -228,6 +228,12 @@ public enum DeviceForecastPreferences {
 public protocol VentusForecastUnitStoring: Sendable {
     func load(fallback: ForecastUnitPreferences) -> ForecastUnitPreferences
     func save(_ preferences: ForecastUnitPreferences)
+    /// Whether the user has explicitly selected units in Ventus.
+    func hasStoredPreferences() -> Bool
+}
+
+public extension VentusForecastUnitStoring {
+    func hasStoredPreferences() -> Bool { false }
 }
 
 public final class VentusForecastUnitStore: VentusForecastUnitStoring, @unchecked Sendable {
@@ -253,6 +259,11 @@ public final class VentusForecastUnitStore: VentusForecastUnitStoring, @unchecke
             precipitationUnit: defaults.string(forKey: Self.precipitationKey).flatMap(PrecipitationUnit.init(rawValue:)) ?? fallback.precipitationUnit,
             freezingLevelUnit: defaults.string(forKey: Self.freezingLevelKey).flatMap(FreezingLevelUnit.init(rawValue:)) ?? fallback.freezingLevelUnit
         )
+    }
+
+    public func hasStoredPreferences() -> Bool {
+        defaults.string(forKey: Self.temperatureKey)
+            .flatMap(TemperatureUnit.init(rawValue:)) != nil
     }
 
     public func save(_ preferences: ForecastUnitPreferences) {

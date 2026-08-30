@@ -83,12 +83,22 @@ final class ForecastSevereWeatherNotifier {
         let location = spotForecast.locationDisplayName()
         for alert in alerts {
             guard let match = ForecastAlertEvaluator.matchingHour(for: alert, in: spotForecast) else { continue }
-            Self.scheduleNotification(
-                identifier: "forecast-custom-alert.\(alert.id).\(match.hour)",
-                categoryIdentifier: "forecast-custom-alert",
-                title: alert.name.isEmpty ? "Forecast alert near \(location)" : alert.name,
-                body: "\(alert.conditionsSummary) forecast near \(location)."
+            let facts = ForecastAlertNotificationNarrator.facts(
+                for: alert,
+                forecast: spotForecast.forecast!,
+                hour: match.hour,
+                date: match.date,
+                location: location
             )
+            Task {
+                let body = await ForecastAlertNotificationNarrator.body(for: facts)
+                Self.scheduleNotification(
+                    identifier: "forecast-custom-alert.\(alert.id).\(match.hour)",
+                    categoryIdentifier: "forecast-custom-alert",
+                    title: facts.title,
+                    body: body
+                )
+            }
         }
 #endif
     }

@@ -31,7 +31,7 @@ public enum ForecastWidgetEntryBuilder {
         let wave = forecast.forecast?.waveHeight(hh: hour)
         let windChill = forecast.forecast?.windChill(hh: hour)
         let hourly = hourlyForecast(for: forecast, currentHour: hour, unit: units.temperatureUnit, limit: hourlyLimit, environment: environment)
-        let daily = dailyForecast(for: forecast, unit: units.temperatureUnit)
+        let daily = dailyForecast(for: forecast, temperatureUnit: units.temperatureUnit, windSpeedUnit: units.windSpeedUnit)
         let today = daily.first
         let dailyRange = forecast.dailyTemperatureRange(hour: hour)
 
@@ -40,6 +40,7 @@ public enum ForecastWidgetEntryBuilder {
             locationName: forecast.locationDisplayName(coordinateLocationName: coordinateLocationName),
             temperature: temperatureText(temperature, unit: units.temperatureUnit),
             temperatureCelsius: temperature,
+            temperatureUnitLabel: units.temperatureUnit.label,
             rawTemperature: rawTemperature.map { temperatureText($0, unit: units.temperatureUnit) } ?? "—",
             rawTemperatureCelsius: rawTemperature ?? temperature,
             realTemperature: realTemperature.map { temperatureText($0, unit: units.temperatureUnit) } ?? "—",
@@ -91,6 +92,7 @@ public enum ForecastWidgetEntryBuilder {
             locationName: snapshot.locationName,
             temperature: snapshot.temperature,
             temperatureCelsius: snapshot.temperatureCelsius,
+            temperatureUnitLabel: snapshot.temperatureUnitLabel ?? TemperatureUnit.celsius.label,
             rawTemperature: snapshot.rawTemperature,
             rawTemperatureCelsius: snapshot.rawTemperatureCelsius,
             realTemperature: snapshot.realTemperature,
@@ -114,7 +116,17 @@ public enum ForecastWidgetEntryBuilder {
             insight: snapshot.insight,
             hourly: snapshot.hourly.map { ForecastWidgetHour(label: $0.label, symbolName: $0.symbolName, temperature: $0.temperature) },
             daily: snapshot.daily.map {
-                ForecastWidgetDay(label: $0.label, symbolName: $0.symbolName, low: $0.low, high: $0.high, lowValue: $0.lowValue, highValue: $0.highValue)
+                ForecastWidgetDay(
+                    label: $0.label,
+                    symbolName: $0.symbolName,
+                    low: $0.low,
+                    high: $0.high,
+                    lowValue: $0.lowValue,
+                    highValue: $0.highValue,
+                    wind: $0.wind,
+                    gust: $0.gust,
+                    windDirectionDegrees: $0.windDirectionDegrees
+                )
             },
             errorMessage: nil
         )
@@ -161,7 +173,7 @@ public enum ForecastWidgetEntryBuilder {
             }
 
             return ForecastOverviewHour(
-                dayLabel: calendar.isDateInToday(date) ? "" : date.formatted(.dateTime.weekday(.abbreviated).day()),
+                dayLabel: calendar.isDateInToday(date) ? "" : date.forecastShortWeekdayAndDay(),
                 timeLabel: hour == currentHour ? "now".localized : hourLabel(for: date),
                 symbolName: forecast.weatherSymbolName(hour: hour),
                 temperature: temperatureText(temperature, unit: units.temperatureUnit),
@@ -233,7 +245,7 @@ public enum ForecastWidgetEntryBuilder {
         ).map(\.hour)
     }
 
-    private static func dailyForecast(for forecast: SpotForecast, unit: TemperatureUnit) -> [ForecastWidgetDay] {
+    private static func dailyForecast(for forecast: SpotForecast, temperatureUnit: TemperatureUnit, windSpeedUnit: WindSpeedUnit) -> [ForecastWidgetDay] {
         let calendar = Calendar.current
         let currentOffset = Int(forecast.currentForecastHour ?? "") ?? 0
         let grouped = Dictionary(grouping: forecast.availableForecastHours) { hour in
@@ -248,32 +260,36 @@ public enum ForecastWidgetEntryBuilder {
                 : allHours
             guard !hours.isEmpty else { return nil }
             let temperatures = hours.compactMap { hour in
-                (forecast.forecast?.temperatureReal(hh: hour) ?? forecast.forecast?.temperature(hh: hour)).map { Temperature(celsius: $0).value(in: unit) }
+                (forecast.forecast?.temperatureReal(hh: hour) ?? forecast.forecast?.temperature(hh: hour)).map { Temperature(celsius: $0).value(in: temperatureUnit) }
             }
             guard let low = temperatures.min(), let high = temperatures.max() else { return nil }
             let representativeHour = representativeHour(among: hours, forecast: forecast)
-            let label = calendar.isDateInToday(date) ? "today".localized : date.formatted(.dateTime.weekday(.abbreviated))
+            let label = calendar.isDateInToday(date)
+                ? "\("today".localized) \(calendar.component(.day, from: date))"
+                : date.forecastShortWeekdayAndDay()
             return ForecastWidgetDay(
                 label: label,
                 symbolName: forecast.weatherSymbolName(hour: representativeHour),
-                low: temperatureText(low, unit: unit, converted: true),
-                high: temperatureText(high, unit: unit, converted: true),
+                low: temperatureText(low, unit: temperatureUnit, converted: true),
+                high: temperatureText(high, unit: temperatureUnit, converted: true),
                 lowValue: low,
-                highValue: high
+                highValue: high,
+                wind: windText(forecast.forecast?.windSpeed(hh: representativeHour) ?? 0, unit: windSpeedUnit),
+                gust: windText(forecast.forecast?.windGustsKnots(hh: representativeHour) ?? 0, unit: windSpeedUnit),
+                windDirectionDegrees: forecast.forecast?.windDirection(hh: representativeHour)
             )
         }
     }
 
     private static func representativeHour(among hours: [String], forecast: SpotForecast) -> String {
         let sortedHours = hours.sorted { (Int($0) ?? 0) < (Int($1) ?? 0) }
-        func precipitation(_ hour: String) -> Double {
-            forecast.forecast?.precipitation1(hh: hour) ?? forecast.forecast?.precipitation(hh: hour) ?? 0
-        }
-        if let wettestHour = sortedHours.max(by: { precipitation($0) < precipitation($1) }),
-           precipitation(wettestHour) > 0 {
-            return wettestHour
-        }
-        return sortedHours[sortedHours.count / 2]
+        var calendar = Calendar.current
+        calendar.timeZone = forecast.timezone ?? .current
+        return sortedHours.min { lhs, rhs in
+            let lhsHour = calendar.component(.hour, from: forecast.forecastDate(hour: lhs) ?? .now)
+            let rhsHour = calendar.component(.hour, from: forecast.forecastDate(hour: rhs) ?? .now)
+            return abs(lhsHour - 12) < abs(rhsHour - 12)
+        } ?? sortedHours[sortedHours.count / 2]
     }
 
     private static func conditionText(for forecast: SpotForecast, hour: String?) -> String {

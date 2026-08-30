@@ -9,11 +9,12 @@
 #if os(visionOS)
 import SwiftUI
 import Ventus
+import VentusFirebase
 
 @main
 struct VisionVentusApp: App {
     @Environment(\.scenePhase) private var scenePhase
-    private let environment = AppEnvironment()
+    private let environment = AppEnvironment(analytics: VentusFirebase())
 
     init() {
         environment.analytics.configure()

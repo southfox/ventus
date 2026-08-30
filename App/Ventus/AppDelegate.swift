@@ -7,6 +7,7 @@
 //
 
 import Ventus
+import VentusFirebase
 
 #if os(macOS)
 import Cocoa
@@ -14,7 +15,7 @@ import SwiftUI
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
-    private let environment = AppEnvironment()
+    private let environment = AppEnvironment(analytics: VentusFirebase())
     private var window: NSWindow?
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
@@ -76,7 +77,7 @@ import SwiftUI
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    let environment = AppEnvironment()
+    let environment = AppEnvironment(analytics: VentusFirebase())
 
     func application(
         _ application: UIApplication,

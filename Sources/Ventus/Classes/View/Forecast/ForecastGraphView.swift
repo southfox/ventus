@@ -75,7 +75,7 @@ public struct ForecastGraphView: View {
                     wave: wave
                 )
             }
-        return source.insertingDaylightEvents(
+        let daylightPoints = source.insertingDaylightEvents(
             into: realPoints,
             date: { $0.date },
             make: { previous, next, eventDate, symbolName in
@@ -94,6 +94,28 @@ public struct ForecastGraphView: View {
                 )
             }
         )
+        guard let firstDate = daylightPoints.first?.date, let lastDate = daylightPoints.last?.date else {
+            return daylightPoints
+        }
+
+        let moonEvents = ForecastMoonCalendar.events(for: source, from: firstDate, until: lastDate.addingTimeInterval(1))
+        let moonPoints = moonEvents.compactMap { event -> ForecastGraphPoint? in
+            guard let nearest = daylightPoints.min(by: { abs($0.date.timeIntervalSince(event.date)) < abs($1.date.timeIntervalSince(event.date)) }) else { return nil }
+            return ForecastGraphPoint(
+                id: "moon:\(event.symbolName):\(nearest.id)",
+                date: event.date,
+                wind: nearest.wind,
+                gust: nearest.gust,
+                direction: nearest.direction,
+                cloudCover: nearest.cloudCover,
+                humidity: nearest.humidity,
+                pressure: nearest.pressure,
+                temperature: nearest.temperature,
+                precipitation: nearest.precipitation,
+                wave: nearest.wave
+            )
+        }
+        return (daylightPoints + moonPoints).sorted { $0.date < $1.date }
     }
 
     private func average(_ a: Double, _ b: Double) -> Double { (a + b) / 2 }

@@ -94,6 +94,46 @@ extension ForecastConditionsCard {
         }
     }
 
+    private func windChillWithUnit(_ value: String) -> String {
+        if value.contains("°") {
+            return value.replacingOccurrences(of: "°", with: entry.temperatureUnitLabel)
+        }
+        return "\(value) \(entry.temperatureUnitLabel)"
+    }
+
+    func expandedNonWindConditions(
+        compact: Bool,
+        rowSpacing: CGFloat,
+        valueSpacing: CGFloat,
+        metricColumnCount: Int? = nil
+    ) -> some View {
+        let metricColumns = metricColumnCount ?? (compact ? 2 : 4)
+        let columns = (0..<metricColumns).flatMap { _ in
+            [
+                GridItem(.flexible(), spacing: 3, alignment: .trailing),
+                GridItem(.flexible(), spacing: valueSpacing, alignment: .leading)
+            ]
+        }
+        return LazyVGrid(columns: columns, alignment: .leading, spacing: rowSpacing) {
+            expandedMetricLabel("Rain", symbol: "drop.fill")
+            expandedMetricValue(entry.rain)
+            expandedMetricLabel("Humidity", symbol: "humidity")
+            expandedMetricValue(entry.humidity)
+            expandedMetricLabel("Clouds", symbol: "cloud.fill")
+            expandedMetricValue(entry.cloudCover)
+            expandedMetricLabel("Pressure", symbol: "gauge.medium")
+            expandedMetricValue(entry.pressure)
+            if let windChill = entry.windChill {
+                expandedMetricLabel("Wind Chill", symbol: "thermometer.snowflake")
+                expandedMetricValue(windChillWithUnit(windChill))
+            }
+            if let wave = entry.wave {
+                expandedMetricLabel("Wave", symbol: "water.waves")
+                expandedMetricValue(wave)
+            }
+        }
+    }
+
     var temperatureRange: ClosedRange<Double> {
         let lows = entry.daily.map(\.lowValue)
         let highs = entry.daily.map(\.highValue)
@@ -139,46 +179,102 @@ extension ForecastConditionsCard {
         }
     }
 
-    func dailyForecastRow(_ day: ForecastWidgetDay, range: ClosedRange<Double>, compact: Bool) -> some View {
-        HStack(spacing: compact ? 5 : 10) {
-            Text(day.label)
+    func dailyForecastRow(
+        _ day: ForecastWidgetDay,
+        range: ClosedRange<Double>,
+        compact: Bool,
+        showsDayNumber: Bool
+    ) -> some View {
+        HStack(spacing: compact ? 2 : 6) {
+            Text(dailyLabel(for: day, showsDayNumber: showsDayNumber))
                 .font((compact ? Font.caption2 : .caption).weight(.medium))
-                .frame(width: compact ? 34 : 42, alignment: .leading)
+                .frame(width: compact ? 30 : 40, alignment: .leading)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
             Image(systemName: day.symbolName)
                 .font(compact ? .caption : .body)
                 .widgetAccentable()
-                .frame(width: 22)
+                .frame(width: 20)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
             Text(day.low)
                 .font(compact ? .caption2 : .caption)
                 .foregroundStyle(.secondary)
-                .frame(width: 30, alignment: .trailing)
+                .frame(width: 26, alignment: .trailing)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
             temperatureTrack(for: day, in: range)
                 .frame(height: 5)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
             Text(day.high)
                 .font((compact ? Font.caption2 : .caption).weight(.semibold))
-                .frame(width: 30, alignment: .leading)
+                .frame(width: 26, alignment: .leading)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            dailyWindMetrics(for: day, compact: compact)
         }
         .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private func dailyLabel(for day: ForecastWidgetDay, showsDayNumber: Bool) -> String {
+        guard !showsDayNumber else { return day.label }
+
+        let components = day.label.split(separator: " ")
+        guard let last = components.last, last.allSatisfy(\.isNumber) else { return day.label }
+        return components.dropLast().joined(separator: " ")
+    }
+
+    @ViewBuilder
+    private func dailyWindMetrics(for day: ForecastWidgetDay, compact: Bool) -> some View {
+        if let degrees = day.windDirectionDegrees {
+            HStack(spacing: compact ? 3 : 5) {
+                Text(WindDirectionDisplayMode.arrow.text(forWindFrom: degrees))
+                    .font(compact ? .caption : .subheadline)
+                    .foregroundStyle(.secondary)
+                if let wind = day.wind {
+                    Image(systemName: "wind")
+                    Text(dailyWindValue(wind))
+                        .font((compact ? Font.caption2 : .caption).weight(.medium))
+                }
+                if let gust = day.gust {
+                    Image(systemName: "wind.circle")
+                    Text(dailyWindValue(gust))
+                        .font((compact ? Font.caption2 : .caption).weight(.medium))
+                }
+            }
+            .font(compact ? .caption : .subheadline)
+            .foregroundStyle(.secondary)
+            .lineLimit(1)
+            .frame(width: compact ? 72 : 108, alignment: .leading)
+            .accessibilityLabel("Wind direction \(Int(degrees.rounded())) degrees, wind \(day.wind ?? "—"), gusts \(day.gust ?? "—")")
+        }
+    }
+
+    private func dailyWindValue(_ value: String) -> String {
+        String(value.split(separator: " ").first ?? "—")
     }
 
     @ViewBuilder
     func dailyForecast(limit: Int, columns: Int = 1) -> some View {
         let range = temperatureRange
-        let days = Array(entry.daily.prefix(limit))
+        let showsDayNumber = limit >= 7
+        let sourceDays = entry.daily.dropFirst()
+        let days = Array(sourceDays.prefix(limit))
         if columns > 1 {
             LazyVGrid(
-                columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: columns),
+                columns: Array(repeating: GridItem(.flexible(), spacing: 2), count: columns),
                 alignment: .leading,
-                spacing: 5
+                spacing: 2
             ) {
                 ForEach(days) { day in
-                    dailyForecastRow(day, range: range, compact: true)
+                    dailyForecastRow(day, range: range, compact: true, showsDayNumber: showsDayNumber)
                 }
             }
         } else {
-            VStack(spacing: 8) {
+            VStack(spacing: 4) {
                 ForEach(days) { day in
-                    dailyForecastRow(day, range: range, compact: false)
+                    dailyForecastRow(day, range: range, compact: false, showsDayNumber: showsDayNumber)
                 }
             }
         }

@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		980E864B3040D6CB00F05C31 /* VentusFirebase in Frameworks */ = {isa = PBXBuildFile; productRef = F90000000000000000000003 /* VentusFirebase */; };
+		980E864C3040D6CB00F05C31 /* VentusFirebase in Frameworks */ = {isa = PBXBuildFile; productRef = F90000000000000000000005 /* VentusFirebase */; };
+		980E864D3040D6CB00F05C31 /* VentusFirebase in Frameworks */ = {isa = PBXBuildFile; productRef = F90000000000000000000004 /* VentusFirebase */; };
+		980E864E3040D6CB00F05C31 /* VentusFirebase in Frameworks */ = {isa = PBXBuildFile; productRef = F90000000000000000000001 /* VentusFirebase */; };
+		980E864F3040D6CB00F05C31 /* VentusFirebase in Frameworks */ = {isa = PBXBuildFile; productRef = F90000000000000000000002 /* VentusFirebase */; };
 		98688A0B22D5936700A09AD0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 98688A0A22D5936700A09AD0 /* Assets.xcassets */; };
 		98688A0E22D5936700A09AD0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 98688A0C22D5936700A09AD0 /* Main.storyboard */; };
 		98688A1422D5938500A09AD0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
@@ -144,6 +149,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				980E864E3040D6CB00F05C31 /* VentusFirebase in Frameworks */,
 				C0DE00000000000000000014 /* Ventus in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -152,6 +158,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				980E864F3040D6CB00F05C31 /* VentusFirebase in Frameworks */,
 				C0DE00000000000000000015 /* Ventus in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -160,6 +167,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				980E864B3040D6CB00F05C31 /* VentusFirebase in Frameworks */,
 				A0010000000000000000000B /* Ventus in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -168,6 +176,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				980E864D3040D6CB00F05C31 /* VentusFirebase in Frameworks */,
 				AA0100000000000000000002 /* Ventus in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -176,6 +185,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				980E864C3040D6CB00F05C31 /* VentusFirebase in Frameworks */,
 				B0010000000000000000000B /* Ventus in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -243,7 +253,7 @@
 				E00100000000000000000002 /* Assets.xcassets */,
 				FB0100000000000000000001 /* GoogleService-Info.plist */,
 				FB0200000000000000000001 /* GoogleService-Info.plist */,
-				D0010000000000000000000A /* VentusWidgets */,
+				D0010000000000000000000A /* ../VentusWidgets */,
 				607FACDC1AFB9204008FA782 /* Images.xcassets */,
 				607FACDE1AFB9204008FA782 /* LaunchScreen.xib */,
 				607FACD31AFB9204008FA782 /* Supporting Files */,
@@ -298,7 +308,7 @@
 			path = VentusTVOS;
 			sourceTree = "<group>";
 		};
-		D0010000000000000000000A /* VentusWidgets */ = {
+		D0010000000000000000000A /* ../VentusWidgets */ = {
 			isa = PBXGroup;
 			children = (
 				D00100000000000000000002 /* VentusWidgetBundle.swift */,
@@ -328,6 +338,7 @@
 			name = VentusMacOS;
 			packageProductDependencies = (
 				C0DE00000000000000000004 /* Ventus */,
+				F90000000000000000000001 /* VentusFirebase */,
 			);
 			productName = VentusMacOS;
 			productReference = 98688A0422D5936400A09AD0 /* VentusMacOS.app */;
@@ -348,6 +359,7 @@
 			name = VentusTVOS;
 			packageProductDependencies = (
 				C0DE00000000000000000005 /* Ventus */,
+				F90000000000000000000002 /* VentusFirebase */,
 			);
 			productName = VentusTVOS;
 			productReference = 987A6DC522D595D200662010 /* VentusTVOS.app */;
@@ -370,6 +382,7 @@
 			name = VentusIOS;
 			packageProductDependencies = (
 				A0010000000000000000000C /* Ventus */,
+				F90000000000000000000003 /* VentusFirebase */,
 			);
 			productName = VentusIOS;
 			productReference = A0010000000000000000000D /* VentusIOS.app */;
@@ -392,6 +405,7 @@
 			name = VentusWatchOnly;
 			packageProductDependencies = (
 				AA0100000000000000000009 /* Ventus */,
+				F90000000000000000000004 /* VentusFirebase */,
 			);
 			productName = VentusWatchOnly;
 			productReference = AA0100000000000000000011 /* VentusWatchOnly.app */;
@@ -412,6 +426,7 @@
 			name = VentusVisionOS;
 			packageProductDependencies = (
 				B0010000000000000000000C /* Ventus */,
+				F90000000000000000000005 /* VentusFirebase */,
 			);
 			productName = VentusVisionOS;
 			productReference = B0010000000000000000000D /* VentusVisionOS.app */;
@@ -484,13 +499,6 @@
 				LastUpgradeCheck = 1420;
 				ORGANIZATIONNAME = Ventus;
 				TargetAttributes = {
-					70BAA9A41F276B4F004CD577 = {
-						LastSwiftMigration = "";
-					};
-					70BAA9BE1F276B6F004CD577 = {
-						LastSwiftMigration = "";
-						TestTargetID = 70BAA9A41F276B4F004CD577;
-					};
 					98688A0322D5936400A09AD0 = {
 						CreatedOnToolsVersion = 10.2.1;
 						ProvisioningStyle = Automatic;
@@ -505,7 +513,6 @@
 					};
 					987A6DC422D595D200662010 = {
 						CreatedOnToolsVersion = 10.2.1;
-						DevelopmentTeam = 27XTSJS68A;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -913,7 +920,7 @@
 				);
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.jfuchs.forescoop-tvos.ForescoopTVOS";
+				PRODUCT_BUNDLE_IDENTIFIER = com.forescoop.tvos;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -935,7 +942,6 @@
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = VentusTVOS/VentusTVOS.entitlements;
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 27XTSJS68A;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -945,7 +951,7 @@
 					"@executable_path/Frameworks",
 				);
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.jfuchs.forescoop-tvos.ForescoopTVOS";
+				PRODUCT_BUNDLE_IDENTIFIER = com.forescoop.tvos;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
 				SWIFT_VERSION = 5.0;
@@ -1346,6 +1352,31 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C0DE00000000000000000000 /* XCLocalSwiftPackageReference ".." */;
 			productName = VentusWidgets;
+		};
+		F90000000000000000000001 /* VentusFirebase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C0DE00000000000000000000 /* XCLocalSwiftPackageReference ".." */;
+			productName = VentusFirebase;
+		};
+		F90000000000000000000002 /* VentusFirebase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C0DE00000000000000000000 /* XCLocalSwiftPackageReference ".." */;
+			productName = VentusFirebase;
+		};
+		F90000000000000000000003 /* VentusFirebase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C0DE00000000000000000000 /* XCLocalSwiftPackageReference ".." */;
+			productName = VentusFirebase;
+		};
+		F90000000000000000000004 /* VentusFirebase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C0DE00000000000000000000 /* XCLocalSwiftPackageReference ".." */;
+			productName = VentusFirebase;
+		};
+		F90000000000000000000005 /* VentusFirebase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C0DE00000000000000000000 /* XCLocalSwiftPackageReference ".." */;
+			productName = VentusFirebase;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

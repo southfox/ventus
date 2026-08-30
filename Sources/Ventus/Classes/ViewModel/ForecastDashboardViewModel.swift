@@ -151,6 +151,9 @@ public final class ForecastDashboardViewModel: ObservableObject {
 
     public func applyUserProfile(_ profile: User) {
         userProfile = profile
+        // A Windguru profile is useful as a first-run default, but it must not
+        // replace a unit choice the user has already made in Ventus.
+        guard !ventusForecastUnitStore.hasStoredPreferences() else { return }
         if let unit = WindSpeedUnit(windguruPreference: profile.windUnits) {
             windSpeedUnit = unit
         }

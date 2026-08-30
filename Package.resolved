@@ -1,5 +1,5 @@
 {
-  "originHash" : "a815d1d7ebed958e9e98d48c77db8419c8e18bd7415c26628f98fc98610e2b76",
+  "originHash" : "540f90203ac4037b671eff69eb7237bb2267b801eeb0509527de80057838ca90",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -17,6 +17,15 @@
       "state" : {
         "revision" : "3e33dd27dd4c69bd81c7c81fe61d8ccf58846902",
         "version" : "11.3.1"
+      }
+    },
+    {
+      "identity" : "astronomykit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/heirloomlogic/AstronomyKit.git",
+      "state" : {
+        "revision" : "aa94f880dfdda22bb8270234504ce9b2f8b1478f",
+        "version" : "1.1.0+upstream-2.1.19"
       }
     },
     {

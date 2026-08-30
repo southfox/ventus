@@ -10,6 +10,7 @@
 import SwiftUI
 import WatchKit
 import Ventus
+import VentusFirebase
 
 @main
 struct VentusWatchOnlyApp: App {
@@ -23,7 +24,7 @@ struct VentusWatchOnlyApp: App {
 }
 
 class WatchExtensionDelegate: NSObject, WKApplicationDelegate {
-    let environment = AppEnvironment()
+    let environment = AppEnvironment(analytics: VentusFirebase())
 
     func applicationDidFinishLaunching() {
         environment.analytics.configure()

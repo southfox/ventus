@@ -40,7 +40,9 @@ public struct ForecastDashboardView: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 #endif
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.dynamicTypeSize) private var deviceDynamicTypeSize
     @State private var selectedSpotID: String
+    @State private var selectedCoordinate: SelectedForecastCoordinate?
     @StateObject private var account: WindguruAccount
     @StateObject private var viewModel: ForecastDashboardViewModel
     @State private var windDirectionDisplayMode: WindDirectionDisplayMode = .arrow
@@ -51,6 +53,7 @@ public struct ForecastDashboardView: View {
     @State private var theme: VentusTheme
     @State private var appLanguage: AppLanguage
     @State private var appAppearanceMode: AppAppearanceMode
+    @State private var preferredReadingSize: PreferredReadingSize
     @State private var showsDashboardModelComparison = false
     @State private var iPadMapPosition: MapCameraPosition = .automatic
     @State private var selectedMapLocationID: SavedMapLocation.ID?
@@ -74,6 +77,7 @@ public struct ForecastDashboardView: View {
         usesPreviewForecast = previewForecast != nil
         let initialSpotID = previewForecast?.identifier ?? environment.selectedSpotStore.load()
         _selectedSpotID = State(initialValue: initialSpotID)
+        _selectedCoordinate = State(initialValue: previewForecast == nil ? environment.selectedSpotStore.selectedCoordinate : nil)
         _weatherBackgroundStyle = State(
             initialValue: initialWeatherBackgroundStyle ?? environment.weatherBackgroundStyleStore.load()
         )
@@ -82,6 +86,7 @@ public struct ForecastDashboardView: View {
         _gridHourStep = State(initialValue: environment.gridHourStepStore.load())
         _appLanguage = State(initialValue: environment.appLanguageStore.load())
         _appAppearanceMode = State(initialValue: environment.appAppearanceModeStore.load())
+        _preferredReadingSize = State(initialValue: environment.preferredReadingSizeStore.load())
         let viewModel = ForecastDashboardViewModel(forecastService: forecastService, environment: environment)
         if let previewForecast {
             viewModel.usePreviewForecast(previewForecast, spotID: initialSpotID, modelForecasts: previewModelForecasts)
@@ -240,6 +245,7 @@ public struct ForecastDashboardView: View {
         analytics.log(.logoutTapped)
         account.signOut()
         selectedSpotID = SavedMapLocationStore.primarySpotID
+        selectedCoordinate = nil
         viewModel.resetSessionForecastState()
         viewModel.clearPersistedSessionData()
         favoriteMapLocations = []
@@ -248,7 +254,7 @@ public struct ForecastDashboardView: View {
         applyDevicePreferences()
 
         activeSheet = nil
-        Task { await loadForecast() }
+        Task { await refreshForecast() }
     }
 
     private func startSession(username: String, isProUser: Bool) {
@@ -354,7 +360,7 @@ public struct ForecastDashboardView: View {
                     HStack {
 #if os(tvOS)
                         Button {
-                            Task { await loadForecast() }
+                            Task { await refreshForecast() }
                         } label: {
                             Image(systemName: "arrow.clockwise")
                         }
@@ -362,7 +368,7 @@ public struct ForecastDashboardView: View {
                         .accessibilityLabel("Refresh forecast")
 #else
                         Button("Refresh", systemImage: "arrow.clockwise") {
-                            Task { await loadForecast() }
+                            Task { await refreshForecast() }
                         }
 #endif
                         if (content == .dashboard || content == .graph), displayedModelForecasts.count > 1 {
@@ -410,16 +416,16 @@ public struct ForecastDashboardView: View {
                     onSpotSelected: { spot in
                         guard let spotId = spot.identifier else { return }
                         activeSheet = nil
-                        Task { await loadForecast(spotId: spotId) }
+                        Task { await selectSpot(spotId) }
                     },
                     onSpotIDSelected: { spotID in
                         activeSheet = nil
-                        Task { await loadForecast(spotId: spotID) }
+                        Task { await selectSpot(spotID) }
                     },
                     onFavoriteSelected: { spot in
                         guard let spotID = spot.identifier else { return }
                         activeSheet = nil
-                        Task { await loadForecast(spotId: spotID) }
+                        Task { await selectSpot(spotID) }
                     },
                     onCoordinateSelected: { coordinate, locationName in
                         activeSheet = nil
@@ -467,6 +473,7 @@ public struct ForecastDashboardView: View {
                     },
                     onProfileLoaded: applyUserPreferences
                 )
+                .preferredReadingSize(preferredReadingSize)
 #if os(macOS)
                 .macSheetFrame(widthFraction: 0.4, minWidth: 520, heightFraction: 0.45, minHeight: 420)
 #endif
@@ -480,7 +487,7 @@ public struct ForecastDashboardView: View {
                     onSpotSelected: { spot in
                         guard let spotID = spot.identifier else { return }
                         activeSheet = nil
-                        Task { await loadForecast(spotId: spotID) }
+                        Task { await selectSpot(spotID) }
                     }
                 )
 #if os(macOS)
@@ -494,11 +501,15 @@ public struct ForecastDashboardView: View {
                     theme: $theme,
                     appLanguage: $appLanguage,
                     appAppearanceMode: $appAppearanceMode,
+                    preferredReadingSize: $preferredReadingSize,
                     gridHourStep: $gridHourStep,
                     forecastService: forecastService,
                     account: account,
                     environment: environment
                 )
+                // Keep Settings stable while its own reading-size controls
+                // change; only the controls and sample text should update.
+                .dynamicTypeSize(deviceDynamicTypeSize)
 #if os(tvOS)
                 .presentationSizing(.page)
 #endif
@@ -507,12 +518,14 @@ public struct ForecastDashboardView: View {
                 NavigationStack {
                     VentusHelpView()
                 }
+                .preferredReadingSize(preferredReadingSize)
 #if os(tvOS)
                 .presentationSizing(.page)
 #endif
             }
             .sheet(isPresented: sheetBinding(.about)) {
                 aboutSheet
+                    .preferredReadingSize(preferredReadingSize)
             }
 #if !os(tvOS)
             .sheet(isPresented: sheetBinding(.forecastMap)) {
@@ -533,6 +546,7 @@ public struct ForecastDashboardView: View {
 #endif
         }
         .modifier(VentusThemeModifier(theme: theme))
+        .preferredReadingSize(preferredReadingSize)
         .appLanguage(appLanguage)
         .appAppearance(appAppearanceMode)
         .id(appLanguage)
@@ -611,7 +625,7 @@ public struct ForecastDashboardView: View {
 #if os(tvOS)
                 .prefersDefaultFocus(true, in: tvDashboardFocus)
 #endif
-                ForecastDaylightSummary(forecast: forecast)
+                ForecastDaylightSummary(forecast: forecast, selectedHour: selectedHour)
 
                 if usesWideLayout {
                     HStack(alignment: .top, spacing: 56) {
@@ -839,8 +853,9 @@ public struct ForecastDashboardView: View {
 
     @MainActor
     private func loadSavedLocation(_ location: SavedMapLocation) async {
+        environment.selectedSpotStore.saveUsesCurrentLocation(false)
         if let spotID = location.spotID, spotID != "0" {
-            await loadForecast(spotId: spotID)
+            await selectSpot(spotID)
             return
         }
 
@@ -868,7 +883,7 @@ public struct ForecastDashboardView: View {
                 errorMessage = "No Windguru spot was found near the selected map location."
                 return
             }
-            await loadForecast(spotId: spotID)
+            await selectSpot(spotID)
         } catch {
             errorMessage = viewModel.forecastErrorMessage(for: error)
         }
@@ -914,6 +929,13 @@ public struct ForecastDashboardView: View {
                 return
             }
             await loadCurrentLocationForecast()
+            return
+        }
+        if let coordinate = selectedCoordinate {
+            await loadForecast(
+                coordinate: CLLocationCoordinate2D(latitude: coordinate.latitude, longitude: coordinate.longitude),
+                locationName: coordinate.locationName
+            )
             return
         }
         guard !environment.selectedSpotStore.hasSavedSelection else {
@@ -978,11 +1000,42 @@ public struct ForecastDashboardView: View {
     }
 
     @MainActor
+    private func selectSpot(_ spotID: String) async {
+        selectedCoordinate = nil
+        environment.selectedSpotStore.saveUsesCurrentLocation(false)
+        // Persist immediately as the spot can already be selected, in which case
+        // the selectedSpotID change observer would not run to clear a prior map coordinate.
+        environment.selectedSpotStore.save(spotID)
+        await loadForecast(spotId: spotID)
+    }
+
+    @MainActor
+    private func refreshForecast() async {
+        if environment.selectedSpotStore.usesCurrentLocation {
+            await loadCurrentLocationForecast()
+        } else if let coordinate = selectedCoordinate {
+            await loadForecast(
+                coordinate: CLLocationCoordinate2D(latitude: coordinate.latitude, longitude: coordinate.longitude),
+                locationName: coordinate.locationName
+            )
+        } else {
+            await loadForecast()
+        }
+    }
+
+    @MainActor
     private func loadForecast(
         coordinate: CLLocationCoordinate2D,
         locationName: String? = nil,
         modelIDs: [String]? = nil
     ) async {
+        let savedCoordinate = SelectedForecastCoordinate(
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude,
+            locationName: locationName
+        )
+        selectedCoordinate = savedCoordinate
+        environment.selectedSpotStore.saveSelectedCoordinate(savedCoordinate)
         await viewModel.loadCoordinateForecast(
             coordinate: coordinate,
             locationName: locationName,
@@ -997,15 +1050,27 @@ public struct ForecastDashboardView: View {
     private func unavailableForecastContent(errorMessage: String) -> some View {
 #if DEBUG
         ForecastOfflineView(retry: {
-            Task { await loadForecast() }
+            Task { await refreshForecast() }
         }, debugError: errorMessage)
 #else
         ForecastOfflineView {
-            Task { await loadForecast() }
+            Task { await refreshForecast() }
         }
 #endif
     }
 
+}
+
+#Preview("Preview") {
+    let mockup = ForecastWindguruMockup()
+    ForecastDashboardView(
+        forecastService: mockup,
+        initialViewMode: .dashboard,
+        initialWeatherBackgroundStyle: .animated,
+        previewForecast: mockup.dashboardPreviewForecast,
+        previewModelForecasts: mockup.dashboardPreviewForecasts,
+        environment: .preview
+    )
 }
 
 #Preview("Forecast Dashboard · macOS", traits: .fixedLayout(width: 1_280, height: 900)) {

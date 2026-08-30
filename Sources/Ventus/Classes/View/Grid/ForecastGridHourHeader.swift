@@ -18,6 +18,8 @@ struct ForecastGridHourHeader: View {
     let time: (String) -> String
     let weatherSymbols: (String) -> [String]
     let daylightSymbol: (String) -> String?
+    let precipitationAgreement: (String) -> ForecastPrecipitationAgreement?
+    let precipitationSymbol: (String) -> String
     let daylightOverlay: (String) -> Color
     let selectedHour: String?
     let onSelectHour: (String) -> Void
@@ -37,6 +39,8 @@ struct ForecastGridHourHeader: View {
                     time: time,
                     weatherSymbols: weatherSymbols,
                     daylightSymbol: daylightSymbol,
+                    precipitationAgreement: precipitationAgreement,
+                    precipitationSymbol: precipitationSymbol,
                     daylightOverlay: daylightOverlay,
                     isSelected: selectedHour == hour,
                     onSelect: onSelectHour,
@@ -51,6 +55,8 @@ struct ForecastGridHourHeader: View {
                     time: time,
                     weatherSymbols: weatherSymbols,
                     daylightSymbol: daylightSymbol,
+                    precipitationAgreement: precipitationAgreement,
+                    precipitationSymbol: precipitationSymbol,
                     daylightOverlay: daylightOverlay,
                     isSelected: selectedHour == hour,
                     onSelect: onSelectHour
@@ -77,6 +83,8 @@ struct ForecastGridHourCell: View {
     let time: (String) -> String
     let weatherSymbols: (String) -> [String]
     let daylightSymbol: (String) -> String?
+    let precipitationAgreement: (String) -> ForecastPrecipitationAgreement?
+    let precipitationSymbol: (String) -> String
     let daylightOverlay: (String) -> Color
     let isSelected: Bool
     let onSelect: (String) -> Void
@@ -89,23 +97,39 @@ struct ForecastGridHourCell: View {
             onSelect(hour)
         } label: {
             VStack(spacing: 2) {
+                let agreement = precipitationAgreement(hour)
+                let isMoonPhase = daylightSymbol(hour)?.hasPrefix("moonphase.") == true
+                let showsPrecipitationInWeatherRow = !isMoonPhase && weatherSymbols(hour).isEmpty && (agreement?.percentage ?? 0) > 0
+                let spreadsWeatherSymbols = !isMoonPhase &&
+                    (agreement?.percentage ?? 0) == 0 &&
+                    weatherSymbols(hour).count > 1
                 Text(day(hour))
                     .font(dayFont)
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
+                    .frame(height: 13)
                 Text(time(hour))
                     .font(timeFont)
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
+                    .frame(height: 15)
                 HStack(spacing: 2) {
                     if let daylightSymbol = daylightSymbol(hour) {
                         Image(systemName: daylightSymbol)
                             .font(.title3)
-                            .foregroundStyle(.orange)
-                    } else {
-                        let n = weatherSymbols(hour).count
-                        ForEach(weatherSymbols(hour).prefix(3), id: \.self) { symbol in
+                            .foregroundStyle(daylightSymbol.hasPrefix("moon") ? .indigo : .orange)
+                    }
+                    if !isMoonPhase {
+                        let displayedWeatherSymbols = spreadsWeatherSymbols
+                            ? weatherSymbols(hour).prefix(1)
+                            : weatherSymbols(hour).prefix(3)
+                        let n = displayedWeatherSymbols.count + (showsPrecipitationInWeatherRow ? 1 : 0)
+                        ForEach(displayedWeatherSymbols, id: \.self) { symbol in
                             Image(systemName: symbol)
+                                .font(n == 1 ? .title3 : .caption)
+                        }
+                        if showsPrecipitationInWeatherRow {
+                            Image(systemName: precipitationSymbol(hour))
                                 .font(n == 1 ? .title3 : .caption)
                         }
                     }
@@ -113,6 +137,39 @@ struct ForecastGridHourCell: View {
                 .font(.caption2)
                 .symbolRenderingMode(.hierarchical)
                 .foregroundStyle(.secondary)
+                .frame(height: 22)
+                if isMoonPhase, agreement?.percentage == 0 {
+                    HStack(spacing: 2) {
+                        ForEach(weatherSymbols(hour).prefix(1), id: \.self) { symbol in
+                            Image(systemName: symbol)
+                        }
+                    }
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .frame(height: 11)
+                } else if spreadsWeatherSymbols {
+                    HStack(spacing: 2) {
+                        ForEach(weatherSymbols(hour).dropFirst().prefix(2), id: \.self) { symbol in
+                            Image(systemName: symbol)
+                        }
+                    }
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .frame(height: 11)
+                } else if let agreement, agreement.percentage > 0 {
+                    HStack(spacing: 0) {
+                        Text("\(agreement.percentage)%")
+                        if !showsPrecipitationInWeatherRow {
+                            Image(systemName: precipitationSymbol(hour))
+                        }
+                    }
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.cyan.opacity(agreement.isLow ? 0.7 : 1))
+                        .accessibilityLabel(agreement.accessibilityLabel)
+                        .frame(height: 11)
+                } else {
+                    Color.clear.frame(height: 11)
+                }
             }
             .frame(width: columnWidth, height: height)
             .background {
@@ -141,7 +198,7 @@ struct ForecastGridHourCell: View {
         .focused(focusedHour, equals: hour)
 #endif
         .foregroundStyle(accentColor)
-        .accessibilityLabel("\(day(hour)), \(time(hour))\(daylightSymbol(hour).map { ", \($0 == "sunrise.fill" ? "sunrise" : "sunset")" } ?? ""), \(weatherSymbols(hour).count) weather symbol\(weatherSymbols(hour).count == 1 ? "" : "s")")
+        .accessibilityLabel("\(day(hour)), \(time(hour))\(daylightSymbol(hour).map { ", \(eventAccessibilityName($0))" } ?? "")\(precipitationAgreement(hour).map { ", \($0.accessibilityLabel)" } ?? ""), \(weatherSymbols(hour).count) weather symbol\(weatherSymbols(hour).count == 1 ? "" : "s")")
         .accessibilityHint(isSelected ? "Selected forecast hour" : "Select forecast hour")
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
@@ -166,6 +223,16 @@ struct ForecastGridHourCell: View {
 
     private func hasPrecipitation(_ hour: String) -> Bool {
         weatherSymbols(hour).contains { $0.contains("snow") || $0.contains("rain") || $0.contains("drizzle") }
+    }
+
+    private func eventAccessibilityName(_ symbolName: String) -> String {
+        switch symbolName {
+        case "sunrise.fill": "sunrise"
+        case "sunset.fill": "sunset"
+        case "moonrise.fill": "moonrise"
+        case "moonset.fill": "moonset"
+        default: symbolName.hasPrefix("moonphase.") ? "moon phase" : symbolName
+        }
     }
 }
 
@@ -225,6 +292,10 @@ struct ForecastGridDataSelectionBorder: Shape {
             time: { hour in "\(hour)h" },
             weatherSymbols: { _ in ["cloud.sun.fill", "wind"] },
             daylightSymbol: { hour in hour == "1" ? "sunrise.fill" : nil },
+            precipitationAgreement: { hour in
+                hour == "2" ? ForecastPrecipitationAgreement(rainyModelCount: 1, modelCount: 4) : nil
+            },
+            precipitationSymbol: { _ in "cloud.rain.fill" },
             daylightOverlay: { _ in .clear },
             selectedHour: "1",
             onSelectHour: { _ in }

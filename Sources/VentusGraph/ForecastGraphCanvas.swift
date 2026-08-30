@@ -85,6 +85,7 @@ public struct ForecastGraphCanvas: View {
 
     private func axisLabel(for date: Date) -> String {
         let weekday = date.formatted(.dateTime.weekday(.abbreviated))
+            .lowercased(with: .autoupdatingCurrent)
         let formatter = DateFormatter()
         formatter.locale = .autoupdatingCurrent
         formatter.setLocalizedDateFormatFromTemplate("j")
@@ -111,11 +112,12 @@ public struct ForecastGraphCanvas: View {
         }
 
         for index in points.indices {
-            guard let symbolName = sunSymbolName(for: points[index].id) else { continue }
+            guard let symbolName = astronomySymbolName(for: points[index].id) else { continue }
             var marker = Path(); marker.move(to: CGPoint(x: x(index), y: wind.minY)); marker.addLine(to: CGPoint(x: x(index), y: bottomY))
-            context.stroke(marker, with: .color(.orange.opacity(0.55)), style: StrokeStyle(lineWidth: 1, dash: [2, 2]))
+            let color: Color = points[index].id.hasPrefix("moon:") ? .indigo : .orange
+            context.stroke(marker, with: .color(color.opacity(0.55)), style: StrokeStyle(lineWidth: 1, dash: [2, 2]))
             context.draw(
-                Text(Image(systemName: symbolName)).font(.caption).foregroundStyle(.orange),
+                Text(Image(systemName: symbolName)).font(.caption).foregroundStyle(color),
                 at: CGPoint(x: x(index), y: wind.minY - 8)
             )
         }
@@ -203,15 +205,21 @@ public struct ForecastGraphCanvas: View {
         [.purple, .orange, .pink, .teal, .indigo][index % 5]
     }
 
-    private func sunSymbolName(for id: String) -> String? {
-        guard id.hasPrefix("sun:") else { return nil }
+    private func astronomySymbolName(for id: String) -> String? {
+        guard id.hasPrefix("sun:") || id.hasPrefix("moon:") else { return nil }
         let parts = id.split(separator: ":", omittingEmptySubsequences: false).map(String.init)
-        return parts.count == 4 ? parts[1] : nil
+        return parts.count >= 3 ? parts[1] : nil
     }
 
     private func realID(for id: String) -> String {
-        guard id.hasPrefix("sun:") else { return id }
+        guard id.hasPrefix("sun:") || id.hasPrefix("moon:") else { return id }
         let parts = id.split(separator: ":", omittingEmptySubsequences: false).map(String.init)
-        return parts.count == 4 ? parts[2] : id
+        if id.hasPrefix("sun:"), parts.count == 4 {
+            return parts[2]
+        }
+        if id.hasPrefix("moon:"), parts.count == 3 {
+            return parts[2]
+        }
+        return id
     }
 }

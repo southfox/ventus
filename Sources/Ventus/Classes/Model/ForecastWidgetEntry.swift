@@ -15,6 +15,7 @@ public struct ForecastWidgetEntry: TimelineEntry, Sendable {
     public let locationName: String
     public let temperature: String
     public let temperatureCelsius: Double
+    public let temperatureUnitLabel: String
     public let rawTemperature: String
     public let rawTemperatureCelsius: Double
     public let realTemperature: String
@@ -35,6 +36,7 @@ public struct ForecastWidgetEntry: TimelineEntry, Sendable {
         locationName: String,
         temperature: String,
         temperatureCelsius: Double,
+        temperatureUnitLabel: String = TemperatureUnit.celsius.label,
         rawTemperature: String,
         rawTemperatureCelsius: Double,
         realTemperature: String,
@@ -64,6 +66,7 @@ public struct ForecastWidgetEntry: TimelineEntry, Sendable {
         self.locationName = locationName
         self.temperature = temperature
         self.temperatureCelsius = temperatureCelsius
+        self.temperatureUnitLabel = temperatureUnitLabel
         self.rawTemperature = rawTemperature
         self.rawTemperatureCelsius = rawTemperatureCelsius
         self.realTemperature = realTemperature
@@ -183,6 +186,31 @@ public struct ForecastWidgetDay: Identifiable, Sendable {
     public let high: String
     public let lowValue: Double
     public let highValue: Double
+    public let wind: String?
+    public let gust: String?
+    public let windDirectionDegrees: Double?
+
+    public init(
+        label: String,
+        symbolName: String,
+        low: String,
+        high: String,
+        lowValue: Double,
+        highValue: Double,
+        wind: String? = nil,
+        gust: String? = nil,
+        windDirectionDegrees: Double? = nil
+    ) {
+        self.label = label
+        self.symbolName = symbolName
+        self.low = low
+        self.high = high
+        self.lowValue = lowValue
+        self.highValue = highValue
+        self.wind = wind
+        self.gust = gust
+        self.windDirectionDegrees = windDirectionDegrees
+    }
 
     public var id: String { "\(label)-\(lowValue)-\(highValue)" }
 

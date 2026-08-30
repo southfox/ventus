@@ -1,36 +1,36 @@
 //
 //  VentusFirebase.swift
-//  Ventus package
+//  VentusFirebase package target
 //
-//  Created by Javier Fuchs on 08/20/26.
-//  Copyright © 2026 Mobile Patagonia. All rights reserved.
+//  Firebase is deliberately isolated from the core Ventus UI target. This
+//  prevents a SwiftUI preview from linking the Firebase dependency graph.
 //
 
 import Foundation
-#if canImport(FirebaseCore)
-import FirebaseCore
-#endif
+import Ventus
+
 #if canImport(FirebaseAnalytics)
 import FirebaseAnalytics
+#endif
+#if canImport(FirebaseCore)
+import FirebaseCore
 #endif
 #if canImport(FirebaseCrashlytics)
 import FirebaseCrashlytics
 #endif
 
-public final class VentusFirebase: AnalyticsLogging {
+public final class VentusFirebase: AnalyticsLogging, @unchecked Sendable {
     private static let deviceIdentifierKey = "ventusFirebaseDeviceIdentifier"
-    private let preferenceStore: VentusPreferenceStoring
 
-    init(preferenceStore: VentusPreferenceStoring) {
-        self.preferenceStore = preferenceStore
-    }
+    public init() {}
 
     private var deviceIdentifier: String {
-        if let existing = preferenceStore.value(forKey: Self.deviceIdentifierKey) {
+        if let existing = UserDefaults.standard.string(forKey: Self.deviceIdentifierKey) {
             return existing
         }
+
         let generated = UUID().uuidString
-        preferenceStore.save(generated, forKey: Self.deviceIdentifierKey)
+        UserDefaults.standard.set(generated, forKey: Self.deviceIdentifierKey)
         return generated
     }
 

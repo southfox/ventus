@@ -15,6 +15,7 @@ struct ForecastOverviewWidgetView: View, ForecastConditionsCard {
     let theme: VentusTheme
     var detailedHours: [ForecastOverviewHour] = []
     var temperatureUnit: Binding<TemperatureUnit> = .constant(.celsius)
+    var showsInlineDailyTemperatureRange = false
     var onSelectLocation: () -> Void = {}
     var onShowMap: () -> Void = {}
 
@@ -152,18 +153,37 @@ struct ForecastOverviewWidgetView: View, ForecastConditionsCard {
                 )
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
+                if !showsInlineDailyTemperatureRange, entry.low != entry.high {
+                    HStack(spacing: 10) {
+                        Label(entry.low, systemImage: "thermometer.low")
+                        Label(entry.high, systemImage: "thermometer.high")
+                    }
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.secondary)
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("Daily low \(entry.low), high \(entry.high)")
+                }
                 ForecastUnitSelector(
                     "Temperature unit",
                     selection: temperatureUnit,
                     unitTitle: \.label
                 ) {
                     HStack(spacing: 10) {
-                        ThermalLabel(entry.temperature, celsius: entry.temperatureCelsius)
+                        ThermalLabel(temperatureNumber(entry.temperature), celsius: entry.temperatureCelsius)
                             .font(.system(.title, design: .rounded).weight(.light))
                             .minimumScaleFactor(0.5)
-                        RealTemperatureLabel(entry.realTemperature, celsius: entry.realTemperatureCelsius)
-                            .font(.system(.title, design: .rounded).weight(.light))
-                            .minimumScaleFactor(0.5)
+                        if entry.temperatureCelsius != entry.realTemperatureCelsius {
+                            RealTemperatureLabel(temperatureNumber(entry.realTemperature), celsius: entry.realTemperatureCelsius)
+                                .font(.system(.title, design: .rounded).weight(.light))
+                                .minimumScaleFactor(0.5)
+                        }
+                        if entry.low != entry.high, showsInlineDailyTemperatureRange {
+                            Label(temperatureNumber(entry.low), systemImage: "thermometer.low")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Label(temperatureNumber(entry.high), systemImage: "thermometer.high")
+                                .font(.caption)
+                        }
                         Text(temperatureUnit.wrappedValue.label)
                             .font(.system(.title, design: .rounded).weight(.light))
                             .foregroundStyle(theme.accentColor(for: colorScheme))
@@ -175,6 +195,10 @@ struct ForecastOverviewWidgetView: View, ForecastConditionsCard {
                 .foregroundStyle(.secondary)
             }
         }
+    }
+
+    private func temperatureNumber(_ value: String) -> String {
+        value.replacingOccurrences(of: "°", with: "")
     }
 
     @ViewBuilder private var hourlyForecast: some View {

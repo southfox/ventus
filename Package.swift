@@ -27,10 +27,17 @@ let package = Package(
         .library(
             name: "VentusWidgets",
             targets: ["VentusWidgets"]),
+        // Firebase stays outside the UI package.  This keeps Xcode previews
+        // for individual Ventus views from JIT-linking Analytics,
+        // Crashlytics, and all of their transitive dependencies.
+        .library(
+            name: "VentusFirebase",
+            targets: ["VentusFirebase"]),
     ],
     dependencies: [
         .package(url: "https://github.com/airbnb/lottie-spm.git", from: "4.6.1"),
         .package(url: "https://github.com/firebase/firebase-ios-sdk.git", from: "12.0.0"),
+        .package(url: "https://github.com/heirloomlogic/AstronomyKit.git", from: "1.0.0"),
     ],
     targets: [
         .target(
@@ -45,6 +52,18 @@ let package = Package(
                     package: "lottie-spm",
                     condition: .when(platforms: [.iOS, .tvOS, .visionOS])
                 ),
+                .product(name: "AstronomyKit", package: "AstronomyKit"),
+            ],
+            path: "Sources/Ventus",
+            resources: [.process("Resources")]),
+        .target(
+            name: "VentusWidgets",
+            dependencies: ["Ventus"],
+            path: "Sources/VentusWidgets"),
+        .target(
+            name: "VentusFirebase",
+            dependencies: [
+                "Ventus",
                 .product(
                     name: "FirebaseAnalytics",
                     package: "firebase-ios-sdk",
@@ -56,12 +75,7 @@ let package = Package(
                     condition: .when(platforms: [.iOS, .macOS, .tvOS, .watchOS])
                 ),
             ],
-            path: "Sources/Ventus",
-            resources: [.process("Resources")]),
-        .target(
-            name: "VentusWidgets",
-            dependencies: ["Ventus"],
-            path: "Sources/VentusWidgets"),
+            path: "Sources/VentusFirebase"),
         .testTarget(
             name: "VentusTests",
             dependencies: ["Ventus"],

@@ -33,6 +33,7 @@ public struct WindguruForecastGridView: View {
     @State private var showsCloudLayers = false
     @State private var showsRowTitles = true
     @Environment(\.displayScale) private var displayScale
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.ventusTheme) private var theme
     @Environment(\.colorScheme) private var colorScheme
     @State private var horizontalGridOffset: CGFloat = 0
@@ -149,13 +150,66 @@ public struct WindguruForecastGridView: View {
     }
 
     private var displayedHours: [String] {
-        forecast.insertingDaylightEvents(
-            into: hours,
-            date: { forecast.forecastDate(hour: $0) ?? .distantPast },
-            make: { previous, next, _, symbolName in
-                SunEventKey(symbolName: symbolName, previousHour: previous, nextHour: next).encoded
+        guard hours.count > 1 else { return hours }
+
+        var result = [String]()
+        var displayedDaylightSymbols = Set<String>()
+        var displayedMoonPhaseDays = Set<Date>()
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = forecast.timezone
+            ?? TimeZone(secondsFromGMT: forecast.gmtHourOffset * 3_600)
+            ?? .current
+        if let firstDate = forecast.forecastDate(hour: hours.first) {
+            displayedMoonPhaseDays.insert(calendar.startOfDay(for: firstDate))
+        }
+        result.reserveCapacity(hours.count + 8)
+        for index in hours.indices {
+            let previousHour = hours[index]
+            result.append(previousHour)
+            guard index < hours.count - 1,
+                  let start = forecast.forecastDate(hour: previousHour),
+                  let end = forecast.forecastDate(hour: hours[index + 1]),
+                  start < end else { continue }
+
+            let daylightEvents = forecast.insertingDaylightEvents(
+                into: [previousHour, hours[index + 1]],
+                date: { forecast.forecastDate(hour: $0) ?? .distantPast },
+                make: { previous, next, eventDate, symbolName in
+                    ForecastEventKey(symbolName: symbolName, date: eventDate, previousHour: previous, nextHour: next).encoded
+                }
+            ).compactMap(ForecastEventKey.decode).filter { event in
+                displayedDaylightSymbols.insert(event.symbolName).inserted
             }
-        )
+
+            let moonEvents = ForecastMoonCalendar.events(for: forecast, from: start, until: end).map {
+                ForecastEventKey(symbolName: $0.symbolName, date: $0.date, previousHour: previousHour, nextHour: hours[index + 1])
+            }
+
+            // A moon phase is a day-level value, unlike moonrise/moonset. Put
+            // it in its own event column at the first forecast hour of each
+            // new local day, so its averaged data column behaves just like a
+            // sunrise or sunset column.
+            let moonPhaseEvents: [ForecastEventKey]
+            let nextDay = calendar.startOfDay(for: end)
+            if displayedMoonPhaseDays.insert(nextDay).inserted,
+               let moon = ForecastMoonCalendar.info(for: forecast, on: end) {
+                moonPhaseEvents = [
+                    ForecastEventKey(
+                        symbolName: moon.symbolName,
+                        date: end,
+                        previousHour: previousHour,
+                        nextHour: hours[index + 1]
+                    )
+                ]
+            } else {
+                moonPhaseEvents = []
+            }
+
+            result += (daylightEvents + moonEvents + moonPhaseEvents)
+                .sorted { $0.date < $1.date }
+                .map(\.encoded)
+        }
+        return result
     }
 
     private var weather: Forecast? { forecast.forecast }
@@ -309,7 +363,7 @@ public struct WindguruForecastGridView: View {
         } label: {
             Image(systemName: "sidebar.leading")
                 .font(.caption.bold())
-                .padding(.horizontal, 8)
+                .padding(.horizontal, 4)
                 .frame(width: rowLabelWidth, height: gridHeaderHeight, alignment: displaysRowTitles ? .leading : .center)
                 .background(gridLabelBackground)
                 .ventusGlassEffect(theme: theme, in: Rectangle())
@@ -339,6 +393,8 @@ public struct WindguruForecastGridView: View {
             time: time(for:),
             weatherSymbols: weatherSymbols(for:),
             daylightSymbol: daylightSymbol(for:),
+            precipitationAgreement: precipitationAgreement(for:),
+            precipitationSymbol: precipitationSymbol(for:),
             daylightOverlay: daylightColumnOverlay(for:),
             selectedHour: viewModel.selectedHour,
             onSelectHour: selectHour
@@ -374,20 +430,21 @@ public struct WindguruForecastGridView: View {
         case value(String)
     }
 
-    private struct SunEventKey {
+    private struct ForecastEventKey {
         let symbolName: String
+        let date: Date
         let previousHour: String
         let nextHour: String
 
-        private static let prefix = "sun:"
+        private static let prefix = "event:"
 
-        var encoded: String { "\(Self.prefix)\(symbolName):\(previousHour):\(nextHour)" }
+        var encoded: String { "\(Self.prefix)\(symbolName):\(Int(date.timeIntervalSince1970)):\(previousHour):\(nextHour)" }
 
-        static func decode(_ key: String) -> SunEventKey? {
+        static func decode(_ key: String) -> ForecastEventKey? {
             guard key.hasPrefix(prefix) else { return nil }
             let parts = key.dropFirst(prefix.count).split(separator: ":", omittingEmptySubsequences: false).map(String.init)
-            guard parts.count == 3 else { return nil }
-            return SunEventKey(symbolName: parts[0], previousHour: parts[1], nextHour: parts[2])
+            guard parts.count == 4, let timestamp = TimeInterval(parts[1]) else { return nil }
+            return ForecastEventKey(symbolName: parts[0], date: Date(timeIntervalSince1970: timestamp), previousHour: parts[2], nextHour: parts[3])
         }
     }
 
@@ -447,7 +504,7 @@ public struct WindguruForecastGridView: View {
         switch column {
         case .labels:
             VStack(spacing: cellSpacing) {
-                HStack(spacing: 4) {
+                HStack(alignment: .center, spacing: 4) {
                     if showsComparisonControl, isModelComparisonEnabled, viewModel.displayedModelForecasts.count > 1 {
                         Button {
                             toggleComparisonRow(id)
@@ -458,9 +515,13 @@ public struct WindguruForecastGridView: View {
                         .foregroundStyle(gridAccentColor)
                     }
                     label
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .font(gridRowTitleFont)
-                .padding(.horizontal, 8)
+                .padding(.horizontal, 2)
                 .frame(width: rowLabelWidth, height: gridRowHeight, alignment: displaysRowTitles ? .leading : .center)
                 .background(gridLabelBackground)
 
@@ -469,7 +530,7 @@ public struct WindguruForecastGridView: View {
                         Text(modelName(for: source))
                             .font(.caption2)
                             .lineLimit(1)
-                            .padding(.horizontal, 8)
+                            .padding(.horizontal, 2)
                             .frame(width: rowLabelWidth, height: comparisonRowHeight, alignment: displaysRowTitles ? .leading : .center)
                             .background(gridLabelBackground)
                     }
@@ -519,16 +580,43 @@ public struct WindguruForecastGridView: View {
                     Button {
                         showsCloudLayers.toggle()
                     } label: {
-                        VStack(alignment: .leading, spacing: 2) {
-                            HStack(spacing: 4) {
-                                rowIcon("cloud.fill")
-                                Text("Cloud cover (%)")
+                        ZStack(alignment: .topLeading) {
+                            VStack(alignment: .leading, spacing: cellSpacing) {
+                                HStack(spacing: 4) {
+                                    Color.clear.frame(width: 16)
+                                    Text("Cloud cover (%)")
+                                        .lineLimit(2)
+                                        .multilineTextAlignment(.leading)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                        .layoutPriority(1)
+                                        .offset(x: -6)
+                                    Spacer(minLength: 4)
+                                    Image(systemName: "arrow.up")
+                                        .frame(width: 16, alignment: .center)
+                                }
+                                .frame(height: gridRowHeight)
+                                HStack(spacing: 4) {
+                                    Spacer()
+                                    Image(systemName: "arrow.left.and.right")
+                                        .frame(width: 16, alignment: .center)
+                                }
+                                .frame(height: gridRowHeight)
+
+                                HStack(spacing: 4) {
+                                    Spacer()
+                                    Image(systemName: "arrow.down")
+                                        .frame(width: 16, alignment: .center)
+                                }
+                                .frame(height: gridRowHeight)
                             }
-                            Text("high / mid / low")
-                                .frame(maxWidth: .infinity, alignment: .center)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+
+                            rowIcon("cloud.fill")
+                                .frame(height: gridRowHeight, alignment: .leading)
+                                .offset(x: -6)
                         }
                         .foregroundStyle(gridAccentColor)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
                     }
                     .buttonStyle(.plain)
 #if os(tvOS)
@@ -538,7 +626,7 @@ public struct WindguruForecastGridView: View {
                 }
                 .font(gridRowTitleFont)
                 .padding(.horizontal, 8)
-                .frame(width: rowLabelWidth, height: gridRowHeight * 3, alignment: .leading)
+                .frame(width: rowLabelWidth, height: gridRowHeight * 3 + cellSpacing * 2, alignment: .leading)
                 .background(gridLabelBackground)
 
                 if isComparisonExpanded {
@@ -550,7 +638,7 @@ public struct WindguruForecastGridView: View {
                         }
                         .font(.caption2)
                         .padding(.horizontal, 8)
-                        .frame(width: rowLabelWidth, height: comparisonRowHeight * 3, alignment: .leading)
+                        .frame(width: rowLabelWidth, height: comparisonRowHeight * 3 + cellSpacing * 2, alignment: .leading)
                         .background(gridLabelBackground)
                     }
                 }
@@ -571,7 +659,7 @@ public struct WindguruForecastGridView: View {
     @ViewBuilder private func cloudLayerValueRows(
         hour: String,
         source: SpotForecast? = nil,
-        height: CGFloat = 30
+        height: CGFloat? = nil
     ) -> some View {
         forecastValueCell(hour: hour, values: { cloudCoverHigh($0, source: source) }, background: cloudColor, height: height)
         forecastValueCell(hour: hour, values: { cloudCoverMid($0, source: source) }, background: cloudColor, height: height)
@@ -597,6 +685,8 @@ public struct WindguruForecastGridView: View {
                     time: time(for:),
                     weatherSymbols: weatherSymbols(for:),
                     daylightSymbol: daylightSymbol(for:),
+                    precipitationAgreement: precipitationAgreement(for:),
+                    precipitationSymbol: precipitationSymbol(for:),
                     daylightOverlay: daylightColumnOverlay(for:),
                     isSelected: viewModel.selectedHour == hour,
                     onSelect: selectHour,
@@ -611,6 +701,8 @@ public struct WindguruForecastGridView: View {
                     time: time(for:),
                     weatherSymbols: weatherSymbols(for:),
                     daylightSymbol: daylightSymbol(for:),
+                    precipitationAgreement: precipitationAgreement(for:),
+                    precipitationSymbol: precipitationSymbol(for:),
                     daylightOverlay: daylightColumnOverlay(for:),
                     isSelected: viewModel.selectedHour == hour,
                     onSelect: selectHour
@@ -631,15 +723,16 @@ public struct WindguruForecastGridView: View {
         hour: String,
         values: @escaping (String) -> GridCell,
         background: @escaping (GridCell) -> Color,
-        height: CGFloat = 30
+        height: CGFloat? = nil
     ) -> some View {
         let cell = values(hour)
+        let cellHeight = height ?? gridRowHeight
 #if os(tvOS)
         return Text(cell.text)
             .font(cell.isDirection ? .title3 : (cell.isSnow ? .body.bold() : .body))
             .monospacedDigit()
             .foregroundStyle(cell.isSnow ? .blue : .primary)
-            .frame(width: columnWidth, height: height == 30 ? gridRowHeight : height)
+            .frame(width: columnWidth, height: cellHeight)
             .background(background(cell))
             .focusable(false)
 #else
@@ -650,7 +743,7 @@ public struct WindguruForecastGridView: View {
                 .font(cell.isDirection ? .title3 : (cell.isSnow ? .caption.bold() : .caption))
                 .monospacedDigit()
                 .foregroundStyle(cell.isSnow ? .blue : .primary)
-                .frame(width: columnWidth, height: height)
+                .frame(width: columnWidth, height: cellHeight)
                 .background(background(cell))
         }
         .buttonStyle(.plain)
@@ -720,6 +813,7 @@ public struct WindguruForecastGridView: View {
                 HStack(spacing: 4) {
                     rowIcon(icon)
                     Text(title)
+                        .lineLimit(2)
                 }
             } else {
                 rowIcon(icon)
@@ -728,11 +822,9 @@ public struct WindguruForecastGridView: View {
         .foregroundStyle(isInteractive ? gridAccentColor : Color.primary)
     }
 
-    /// A fixed symbol slot keeps every row title aligned despite SF Symbols
-    /// having different intrinsic widths.
     private func rowIcon(_ name: String) -> some View {
         Image(systemName: name)
-            .symbolRenderingMode(name.hasPrefix("thermometer") ? .multicolor : .monochrome)
+            .foregroundColor(.blue)
             .frame(width: 16, alignment: .center)
     }
 
@@ -740,29 +832,60 @@ public struct WindguruForecastGridView: View {
 #if os(tvOS)
         return displaysRowTitles ? 250 : 64
 #else
-        guard displaysRowTitles else { return 44 }
-        return 152
+        guard displaysRowTitles else { return isModelComparisonEnabled ? 44 : 24 }
+        switch dynamicTypeSize {
+        case .accessibility1, .accessibility2:
+            return 208
+        case .accessibility3, .accessibility4, .accessibility5:
+            return 240
+        case .xxxLarge:
+            return 180
+        default:
+            return 152
+        }
 #endif
     }
     private var gridHeaderHeight: CGFloat {
 #if os(tvOS)
-        112
+        124
 #else
-        64
+        76
 #endif
     }
     private var gridRowHeight: CGFloat {
 #if os(tvOS)
         52
 #else
-        30
+        switch dynamicTypeSize {
+        case .xSmall, .small, .medium, .large:
+            return 30
+        case .xLarge, .xxLarge:
+            return 38
+        case .xxxLarge:
+            return 46
+        case .accessibility1, .accessibility2:
+            return 60
+        case .accessibility3, .accessibility4, .accessibility5:
+            return 78
+        @unknown default:
+            return 46
+        }
 #endif
     }
     private var comparisonRowHeight: CGFloat {
 #if os(tvOS)
         42
 #else
-        24
+        switch dynamicTypeSize {
+        case .accessibility1, .accessibility2:
+            return 36
+        case .accessibility3, .accessibility4, .accessibility5:
+            return 44
+        case .xxxLarge:
+            return 30
+        default:
+            return 24
+        }
 #endif
     }
     private var cellSpacing: CGFloat { 1 / displayScale }
@@ -800,16 +923,13 @@ public struct WindguruForecastGridView: View {
     }
 
     private func displayDate(for hour: String) -> Date? {
-        if let event = SunEventKey.decode(hour) {
-            guard let start = forecast.forecastDate(hour: event.previousHour) else { return nil }
-            return event.symbolName == "sunrise.fill" ? forecast.sunriseDate(on: start) : forecast.sunsetDate(on: start)
-        }
+        if let event = ForecastEventKey.decode(hour) { return event.date }
         return forecast.forecastDate(hour: hour)
     }
 
     private func day(for hour: String) -> String {
         guard let date = displayDate(for: hour) else { return "" }
-        return date.formatted(.dateTime.weekday(.abbreviated).day())
+        return date.forecastShortWeekdayAndDay()
     }
 
     private func time(for hour: String) -> String {
@@ -819,13 +939,13 @@ public struct WindguruForecastGridView: View {
         // Sunrise/sunset rarely land on the hour, so those columns need
         // minute precision ("jm") — real forecast hours are always on the
         // hour, so "j" alone is enough for them.
-        formatter.setLocalizedDateFormatFromTemplate(SunEventKey.decode(hour) != nil ? "jm" : "j")
+        formatter.setLocalizedDateFormatFromTemplate(ForecastEventKey.decode(hour) != nil ? "jm" : "j")
         let timeString = formatter.string(from: date)
         return formatter.dateFormat.contains("a") ? timeString : "\(timeString)h"
     }
 
     private func daylightColumnOverlay(for hour: String) -> Color {
-        guard SunEventKey.decode(hour) == nil, let date = forecast.forecastDate(hour: hour) else { return .clear }
+        guard ForecastEventKey.decode(hour) == nil, let date = forecast.forecastDate(hour: hour) else { return .clear }
         switch forecast.daylightPhase(at: date) {
         case .night:
             return .black.opacity(theme.usesMaterial ? 0.22 : 0.30)
@@ -835,16 +955,44 @@ public struct WindguruForecastGridView: View {
     }
 
     private func daylightSymbol(for hour: String) -> String? {
-        SunEventKey.decode(hour)?.symbolName
+        ForecastEventKey.decode(hour)?.symbolName
     }
 
     private func weatherSymbols(for hour: String) -> [String] {
-        guard SunEventKey.decode(hour) == nil else { return [] }
-        return forecast.weatherSymbolNames(hour: hour)
+        let sourceHour: String
+        if let event = ForecastEventKey.decode(hour) {
+            guard event.symbolName.hasPrefix("moonphase.") else { return [] }
+            sourceHour = event.nextHour
+        } else {
+            sourceHour = hour
+        }
+        return forecast.weatherSymbolNames(hour: sourceHour).filter { symbol in
+            !symbol.contains("rain") &&
+            !symbol.contains("drizzle") &&
+            !symbol.contains("snow") &&
+            !symbol.contains("sleet")
+        }
+    }
+
+    private func precipitationAgreement(for hour: String) -> ForecastPrecipitationAgreement? {
+        if let event = ForecastEventKey.decode(hour) {
+            guard event.symbolName.hasPrefix("moonphase.") else { return nil }
+            return viewModel.displayedModelForecasts.precipitationAgreement(hour: event.nextHour)
+        }
+        return viewModel.displayedModelForecasts.precipitationAgreement(hour: hour)
+    }
+
+    private func precipitationSymbol(for hour: String) -> String {
+        let sourceHour = ForecastEventKey.decode(hour)?.nextHour ?? hour
+        return switch forecast.precipitationPhase(hh: sourceHour) {
+        case .rain: "cloud.rain.fill"
+        case .sleet: "cloud.sleet.fill"
+        case .snow: "snowflake"
+        }
     }
 
     private func selectHour(_ hour: String) {
-        if let event = SunEventKey.decode(hour) {
+        if let event = ForecastEventKey.decode(hour) {
             onSelectHour(event.previousHour)
         } else {
             onSelectHour(hour)
@@ -852,7 +1000,7 @@ public struct WindguruForecastGridView: View {
     }
 
     private func averagedRaw(_ hour: String, source: SpotForecast?, raw: (String) -> Double?) -> Double? {
-        if let event = SunEventKey.decode(hour) {
+        if let event = ForecastEventKey.decode(hour) {
             guard let a = raw(hh(event.previousHour, source: source)), let b = raw(hh(event.nextHour, source: source)) else { return nil }
             return (a + b) / 2
         }
@@ -921,7 +1069,7 @@ public struct WindguruForecastGridView: View {
     }
 
     private func precipitation(_ hour: String, source: SpotForecast? = nil) -> GridCell {
-        if let event = SunEventKey.decode(hour) {
+        if let event = ForecastEventKey.decode(hour) {
             let a = precipitation(event.previousHour, source: source)
             let b = precipitation(event.nextHour, source: source)
             guard let av = a.value, let bv = b.value else { return .empty }

@@ -45,6 +45,8 @@ public struct ThermalLabel: View {
                 .symbolRenderingMode(.palette)
                 .foregroundStyle(palette.primary, palette.secondary)
             Text(title)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
         }
     }
 

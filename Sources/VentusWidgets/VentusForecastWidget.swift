@@ -11,7 +11,11 @@ public struct VentusForecastWidget: Widget {
 
     public var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: ForecastWidgetProvider()) { entry in
-            ForecastWidgetView(entry: entry, theme: environment.ventusThemeStore.load())
+            ForecastWidgetView(
+                entry: entry,
+                theme: environment.ventusThemeStore.load(),
+                preferredReadingSize: environment.preferredReadingSizeStore.load()
+            )
         }
         .configurationDisplayName("Forecast")
         .description("Current weather at your selected forecast location.")

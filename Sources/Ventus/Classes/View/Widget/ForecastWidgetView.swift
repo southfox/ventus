@@ -19,15 +19,18 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
     @Environment(\.verticalSizeClass) private var verticalSizeClass
 #endif
     let theme: VentusTheme
+    let preferredReadingSize: PreferredReadingSize
     private let previewFamily: WidgetFamily?
 
     public init(
         entry: ForecastWidgetEntry,
         theme: VentusTheme,
+        preferredReadingSize: PreferredReadingSize = .standard,
         previewFamily: WidgetFamily? = nil
     ) {
         self.entry = entry
         self.theme = theme
+        self.preferredReadingSize = preferredReadingSize
         self.previewFamily = previewFamily
     }
 
@@ -47,6 +50,7 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
         .foregroundStyle(theme.primaryTextColor(for: colorScheme))
         .tint(theme.accentColor(for: colorScheme))
         .modifier(ForecastWidgetFontDesign(design: theme.fontDesign))
+        .preferredReadingSize(preferredReadingSize)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityDescription)
         .accessibilityHint("Open Ventus for the full forecast.")
@@ -54,9 +58,38 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
     }
 
     private var displayedFamily: WidgetFamily { previewFamily ?? family }
+    private var usesSmallSystemWidgetFamily: Bool {
+#if os(watchOS)
+        false
+#else
+        displayedFamily != .systemExtraLarge
+#endif
+    }
 
     @ViewBuilder private var normalContent: some View {
-#if os(watchOS) || os(iOS)
+#if os(watchOS)
+        switch displayedFamily {
+        case .accessoryCircular:
+            Image(systemName: entry.symbolName)
+                .font(.title2)
+                .widgetAccentable()
+        case .accessoryInline:
+            Text("\(entry.temperature) · \(entry.wind)")
+                .lineLimit(0)
+        case .accessoryRectangular:
+            HStack {
+                Image(systemName: entry.symbolName).widgetAccentable()
+                VStack(alignment: .leading) {
+                    Text(entry.locationName)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                    Text("\(entry.temperature) · \(entry.wind)").font(.caption)
+                }
+            }
+        default:
+            mediumWidgetContent
+        }
+#elseif os(iOS)
         switch displayedFamily {
         case .accessoryCircular:
             Image(systemName: entry.symbolName)
@@ -124,24 +157,38 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
 
     private var smallWidgetContent: some View {
         VStack(alignment: .leading, spacing: 4) {
-#if !os(watchOS)
-            ForecastLocationHeader(locationName: entry.locationName)
-                .lineLimit(1)
-                .minimumScaleFactor(0.5)
-#else
-            Text(entry.locationName)
-                .font(.headline)
-                .lineLimit(1)
-                .minimumScaleFactor(0.5)
-#endif
-
             HStack(spacing: 6) {
                 Image(systemName: entry.symbolName)
                     .font(.default)
                     .widgetAccentable()
+#if !os(watchOS)
+                ForecastLocationHeader(locationName: entry.locationName)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+#else
+                Text(entry.locationName)
+                    .font(.headline)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+#endif
+            }
+
+            HStack(spacing: 4) {
                 ThermalLabel(entry.temperature, celsius: entry.temperatureCelsius)
                     .font(.system(.title3, design: .rounded).weight(.light))
                     .minimumScaleFactor(0.5)
+
+                if entry.low != entry.high {
+                    VStack(alignment: .leading, spacing: 1) {
+                        Label(entry.low, systemImage: "thermometer.low")
+                        Label(entry.high, systemImage: "thermometer.high")
+                    }
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .accessibilityLabel("Low \(entry.low), high \(entry.high)")
+                }
             }
             VStack(alignment: .leading, spacing: 4) {
                 windGustsMetric
@@ -157,7 +204,7 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
         VStack(alignment: .leading, spacing: 5) {
             weatherHeader
             Divider()
-            hourlyForecast(limit: 6)
+            hourlyForecast(limit: 6, skippingCurrentHour: true)
         }
     }
 
@@ -165,7 +212,7 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
         VStack(alignment: .leading, spacing: 8) {
             weatherHeader
             Divider()
-            hourlyForecast(limit: 6)
+            hourlyForecast(limit: 6, skippingCurrentHour: true)
             Divider()
             dailyForecast(limit: 5)
         }
@@ -192,8 +239,15 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
             HStack(alignment: .top, spacing: 22) {
                 VStack(alignment: .leading, spacing: 14) {
                     weatherHeader
-                        Divider()
-                    hourlyForecast(limit: 10)
+                    Divider()
+                    hourlyForecast(limit: 10, skippingCurrentHour: true)
+                    Divider()
+                    expandedNonWindConditions(
+                        compact: true,
+                        rowSpacing: 4,
+                        valueSpacing: 6,
+                        metricColumnCount: 2
+                    )
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -201,18 +255,9 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
                     Label("10-Day Forecast".localized, systemImage: "calendar")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(theme.accentColor(for: colorScheme))
-                    dailyForecast(limit: 10, columns: 2)
+                    dailyForecast(limit: 10)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            Divider()
-
-            VStack(alignment: .leading, spacing: 2) {
-                Label("Conditions", systemImage: "list.bullet.rectangle")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(theme.accentColor(for: colorScheme))
-
-                expandedConditions(compact: false, rowSpacing: 4, valueSpacing: 4)
             }
             Divider()
             insightCard
@@ -224,7 +269,7 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
         VStack(alignment: .leading, spacing: 4) {
             weatherHeader
             Divider()
-            hourlyForecast(limit: 10)
+            hourlyForecast(limit: 10, skippingCurrentHour: true)
 
             Divider()
             Label("10-Day Forecast".localized, systemImage: "calendar")
@@ -263,30 +308,47 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
     private var weatherHeader: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 6) {
+                    Image(systemName: entry.symbolName)
+                        .font(.title3)
+                        .widgetAccentable()
 #if !os(watchOS)
-                ForecastLocationHeader(locationName: entry.locationName)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.6)
+                    ForecastLocationHeader(locationName: entry.locationName)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
 #else
-                Text(entry.locationName)
-                    .font(.headline)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.6)
+                    Text(entry.locationName)
+                        .font(.headline)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
 #endif
-                HStack(spacing: 10) {
-                    ThermalLabel(entry.temperature, celsius: entry.temperatureCelsius)
+                }
+                HStack(spacing: 4) {
+                    ThermalLabel(entry.temperature, celsius: entry.temperatureCelsius, spacing: 2)
                         .font(.system(.title2, design: .rounded).weight(.light))
-                        .minimumScaleFactor(0.5)
 
+                    if entry.low != entry.high {
+                        VStack(alignment: .leading, spacing: 1) {
+                            Label(entry.low, systemImage: "thermometer.low")
+                            Label(entry.high, systemImage: "thermometer.high")
+                        }
+                        .font(.caption2.weight(.medium))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                        .accessibilityLabel("Low \(entry.low), high \(entry.high)")
+                    }
 #if !os(watchOS)
-                    if displayedFamily == .systemMedium || displayedFamily == .systemLarge {
+                    if displayedFamily == .systemMedium || displayedFamily == .systemLarge || displayedFamily == .systemExtraLarge {
                         Spacer()
                         windGustsMetric
                             .layoutPriority(1)
                     }
 #else
-                    ThermalLabel(entry.low, celsius: entry.lowCelsius)
-                    ThermalLabel(entry.high, celsius: entry.highCelsius)
+                    if entry.low != entry.high {
+                        ThermalLabel(entry.low, celsius: entry.lowCelsius)
+                        ThermalLabel(entry.high, celsius: entry.highCelsius)
+                    }
 #endif
                 }
                 .font(.caption)
@@ -296,11 +358,11 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
     }
 
     @ViewBuilder private var windGustsMetric: some View {
-        HStack(alignment: .center, spacing: displayedFamily != .systemSmall ? 2 : 4) {
+        HStack(alignment: .center, spacing: usesSmallSystemWidgetFamily ? 4 : 2) {
             windDirectionIndicator
-            windGustsLine(displayedFamily == .systemSmall ? "" : "Wind", symbol: "wind", value: String(entry.wind.split(separator: " ").first!))
-            if displayedFamily != .systemSmall {
-                Text("-")
+            windGustsLine(usesSmallSystemWidgetFamily ? "" : "Wind", symbol: "wind", value: String(entry.wind.split(separator: " ").first!))
+            if !usesSmallSystemWidgetFamily {
+                Text("·")
             }
             windGustsLine("Gusts", symbol: "wind.circle", value: entry.gust)
         }
@@ -316,9 +378,9 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
     private func windGustsLine(_ title: LocalizedStringKey, symbol: String, value: String) -> some View {
         HStack(spacing: 2) {
             Image(systemName: symbol)
-                .font(displayedFamily == .systemSmall ? .caption2 : .body)
+                .font(usesSmallSystemWidgetFamily ? .caption2 : .body)
                 .foregroundStyle(.secondary)
-                .frame(width: displayedFamily == .systemSmall ? 12 : 16, alignment: .center)
+                .frame(width: usesSmallSystemWidgetFamily ? 12 : 16, alignment: .center)
 #if !os(watchOS)
             if displayedFamily != .systemSmall {
                 Text(title)
@@ -330,7 +392,7 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
             }
 #endif
             Text(value)
-                .font(displayedFamily == .systemSmall ? .caption2 : .subheadline.weight(.semibold))
+                .font(usesSmallSystemWidgetFamily ? .caption2 : .subheadline.weight(.semibold))
                 .lineLimit(1)
                 .minimumScaleFactor(widgetValueMinimumScale)
         }
@@ -340,13 +402,14 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
 #if os(watchOS)
         0.7
 #else
-        displayedFamily == .systemSmall ? 0.6 : 0.7
+        usesSmallSystemWidgetFamily ? 0.6 : 0.7
 #endif
     }
 
-    private func hourlyForecast(limit: Int) -> some View {
+    private func hourlyForecast(limit: Int, skippingCurrentHour: Bool = false) -> some View {
         HStack(alignment: .top, spacing: 5) {
-            ForEach(Array(entry.hourly.prefix(limit))) { hour in
+            let sourceHours = skippingCurrentHour ? entry.hourly.dropFirst() : entry.hourly[...]
+            ForEach(Array(sourceHours.prefix(limit))) { hour in
                 hourlyForecastHour(hour)
             }
         }

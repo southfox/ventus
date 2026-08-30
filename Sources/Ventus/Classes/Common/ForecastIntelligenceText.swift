@@ -402,7 +402,7 @@ struct ForecastIntelligenceSnapshot: Hashable, Sendable {
             let condition = conditionWord(for: forecast, hour: representativeHour, locale: locale)
             let label = calendar.isDateInToday(day)
                 ? "today".localized(locale: locale)
-                : day.formatted(.dateTime.weekday(.abbreviated).locale(locale))
+                : day.forecastShortWeekday(locale: locale)
 
             return DayDetail(
                 label: label,
@@ -559,7 +559,7 @@ struct ForecastIntelligenceSnapshot: Hashable, Sendable {
         let calendar = Calendar.current
         let day = calendar.isDateInToday(date)
             ? "today".localized(locale: locale)
-            : date.formatted(.dateTime.weekday(.abbreviated).day().locale(locale))
+            : date.forecastShortWeekdayAndDay(locale: locale)
         let formatter = DateFormatter()
         formatter.locale = locale
         formatter.setLocalizedDateFormatFromTemplate("jm")
