@@ -30,7 +30,7 @@ import Foundation
  * }
  */
 
-public class Regions: Object, Mappable {
+public class Regions: Object, Mappable, @unchecked Sendable {
 
     var content: [Region]?
 

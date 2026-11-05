@@ -86,7 +86,7 @@ import CoreLocation
  *
  */
 
-public class SpotInfo: Spot {
+public class SpotInfo: Spot, @unchecked Sendable {
 
     var id_country: Int = 0
     var latitude: Double = 0

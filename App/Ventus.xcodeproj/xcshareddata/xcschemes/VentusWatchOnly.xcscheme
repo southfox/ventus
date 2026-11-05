@@ -45,7 +45,6 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "AA0100000000000000000005"
             BuildableName = "VentusWatchOnly.app"
-            BlueprintName = "VentusWatchOnly"
             ReferencedContainer = "container:Ventus.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

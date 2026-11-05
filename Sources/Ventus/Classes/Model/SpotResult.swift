@@ -33,7 +33,7 @@ import Foundation
  * }
  */
 
-public class SpotResult: Object, Mappable {
+public class SpotResult: Object, Mappable, @unchecked Sendable {
     //
     // count: number of results obtained
     //

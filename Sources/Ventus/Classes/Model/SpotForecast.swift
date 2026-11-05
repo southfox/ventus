@@ -38,7 +38,7 @@ import Foundation
  *
  */
 
-public class SpotForecast: SpotInfo {
+public class SpotForecast: SpotInfo, @unchecked Sendable {
     
     var currentModel: String? = nil
 
@@ -218,6 +218,67 @@ public extension SpotForecast {
     }
 
     static let strongWindBeaufortThreshold = 6
+    /// Widgets have a single compact condition icon. Preserve precipitation and
+    /// sky context until wind reaches storm force, where it becomes the most
+    /// actionable condition on its own.
+    static let widgetWindOverrideBeaufortThreshold = 10
+
+    func widgetWeatherSymbolName(hour: String?) -> String {
+        let symbols = weatherSymbolNames(hour: hour)
+
+        if let snowSymbol = symbols.first(where: { $0.contains("snow") || $0.contains("sleet") }) {
+            return Self.widgetDisplaySymbol(snowSymbol)
+        }
+        if let rainSymbol = symbols.first(where: {
+            $0.contains("rain") || $0.contains("drizzle") || $0.contains("heavyrain")
+        }) {
+            return Self.widgetDisplaySymbol(rainSymbol)
+        }
+
+        if widgetWindBeaufort(hour: hour) >= SpotForecast.widgetWindOverrideBeaufortThreshold,
+           let windSymbol = symbols.first(where: Self.isWindSymbol) {
+            return Self.widgetDisplaySymbol(windSymbol)
+        }
+
+        // `weatherSymbolNames` intentionally puts strong wind first for views
+        // that can present several symbols. A widget has one slot, so choose
+        // the sky condition before a merely strong wind symbol.
+        if let skySymbol = symbols.first(where: { !Self.isWindSymbol($0) }) {
+            return Self.widgetDisplaySymbol(skySymbol)
+        }
+        return Self.widgetDisplaySymbol(symbols.first ?? "sun.max.fill")
+    }
+
+    /// Choose one icon for a daily widget row from every forecast hour in the
+    /// day. This keeps a later rain or snow period from being hidden by the
+    /// representative temperature hour.
+    func widgetWeatherSymbolName(hours: [String]) -> String {
+        let sortedHours = hours.sorted { (Int($0) ?? 0) < (Int($1) ?? 0) }
+        let symbols = sortedHours.flatMap { weatherSymbolNames(hour: $0) }
+
+        if let snowSymbol = symbols.first(where: { $0.contains("snow") || $0.contains("sleet") }) {
+            return Self.widgetDisplaySymbol(snowSymbol)
+        }
+        if let rainSymbol = symbols.first(where: {
+            $0.contains("rain") || $0.contains("drizzle") || $0.contains("heavyrain")
+        }) {
+            return Self.widgetDisplaySymbol(rainSymbol)
+        }
+
+        if let peakWindHour = sortedHours.max(by: { widgetWindBeaufort(hour: $0) < widgetWindBeaufort(hour: $1) }),
+           widgetWindBeaufort(hour: peakWindHour) >= SpotForecast.widgetWindOverrideBeaufortThreshold,
+           let windSymbol = weatherSymbolNames(hour: peakWindHour).first(where: Self.isWindSymbol) {
+            return Self.widgetDisplaySymbol(windSymbol)
+        }
+
+        let skySymbols = symbols.filter { !Self.isWindSymbol($0) }
+        if let partlyCloudySymbol = skySymbols.first(where: {
+            $0.hasPrefix("cloud.sun") || $0.hasPrefix("cloud.moon")
+        }) {
+            return Self.widgetDisplaySymbol(partlyCloudySymbol)
+        }
+        return Self.widgetDisplaySymbol(skySymbols.first ?? symbols.first ?? "sun.max.fill")
+    }
 
     private func skyObscuringCloudCover(hh hour: String?) -> Int {
         let low = forecast?.cloudCoverLow(hh: hour) ?? 0
@@ -277,6 +338,32 @@ public extension SpotForecast {
         }
 
         return symbols
+    }
+
+    private func widgetWindBeaufort(hour: String?) -> Int {
+        let windSpeed = forecast?.windSpeed(hh: hour) ?? 0
+        let windGusts = forecast?.windGustsKnots(hh: hour) ?? 0
+        return max(Knots(windSpeed).bft ?? 0, Knots(windGusts).bft ?? 0)
+    }
+
+    private static func isWindSymbol(_ symbol: String) -> Bool {
+        symbol.hasPrefix("wind")
+            || symbol.hasPrefix("tornado")
+            || symbol.hasPrefix("tropicalstorm")
+            || symbol.hasPrefix("hurricane")
+    }
+
+    private static func widgetDisplaySymbol(_ symbol: String) -> String {
+        switch symbol {
+        case "cloud.moon.rain.fill":
+            "cloud.sun.rain.fill"
+        case "cloud.moon.fill":
+            "cloud.sun.fill"
+        case "moon.stars.fill":
+            "sun.max.fill"
+        default:
+            symbol
+        }
     }
 
     static func windSymbolName(forBeaufort beaufort: Int) -> String? {

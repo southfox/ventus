@@ -11,15 +11,14 @@ import SwiftUI
 
 struct ForecastOfflineView: View {
     let retry: () -> Void
-    let debugError: String?
+    let errorMessage: String?
 
     @Environment(\.colorScheme) private var colorScheme
     @State private var isAnimating = false
-    @State private var showsError = false
 
-    init(retry: @escaping () -> Void, debugError: String? = nil) {
+    init(retry: @escaping () -> Void, errorMessage: String? = nil) {
         self.retry = retry
-        self.debugError = debugError
+        self.errorMessage = errorMessage
     }
 
     var body: some View {
@@ -70,22 +69,24 @@ struct ForecastOfflineView: View {
                     .foregroundStyle(.white.opacity(0.88))
                     .frame(maxWidth: 310)
 
+                if let errorMessage, !errorMessage.isEmpty {
+                    Text(errorMessage)
+                        .font(.caption)
+                        .multilineTextAlignment(.center)
+                        .foregroundStyle(.white.opacity(0.82))
+                        .lineLimit(4)
+                        .frame(maxWidth: 310)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(.black.opacity(0.16), in: RoundedRectangle(cornerRadius: 10))
+                }
+
                 Button("Try Again", systemImage: "arrow.clockwise", action: retry)
                     .buttonStyle(.borderedProminent)
                     .tint(.white.opacity(0.92))
                     .foregroundStyle(Color.orange)
                     .padding(.top, 8)
 
-#if DEBUG
-                if let debugError, !debugError.isEmpty {
-                    Button("Show Error", systemImage: "exclamationmark.magnifyingglass") {
-                        showsError = true
-                    }
-                    .buttonStyle(.bordered)
-                    .tint(.white)
-                    .foregroundStyle(.white)
-                }
-#endif
             }
             .padding(28)
         }
@@ -93,11 +94,6 @@ struct ForecastOfflineView: View {
             withAnimation(.easeInOut(duration: 2.8).repeatForever(autoreverses: false)) {
                 isAnimating = true
             }
-        }
-        .alert("Forecast Error", isPresented: $showsError) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text(debugError ?? "No error details are available.")
         }
     }
 

@@ -7,7 +7,7 @@
 
 import Foundation
 
-public class ForecastWindguruMockup: ForecastWindguruProtocol {
+public class ForecastWindguruMockup: ForecastWindguruProtocol, @unchecked Sendable {
 
     required public init() {}
 

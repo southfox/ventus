@@ -44,7 +44,7 @@ import CoreLocation
  * }
  */
 
-public class WSpotForecast: Object, Mappable {
+public class WSpotForecast: Object, Mappable, @unchecked Sendable {
 
     var id_spot = 0
     var id_user = 0

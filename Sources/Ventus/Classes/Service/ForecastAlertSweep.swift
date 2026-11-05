@@ -36,6 +36,7 @@ public enum ForecastAlertSweep {
         }
     }
 
+    @MainActor
     private static func fetchForecast(
         service: ForecastWindguruProtocol,
         spotID: String,

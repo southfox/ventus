@@ -24,7 +24,7 @@ public final class VentusPersistenceController: Sendable {
     ///   the real App Group store on disk.
     public init(inMemory: Bool = false) {
         mapLocationsContainer = Self.makeContainer(
-            schema: Schema([SavedMapLocationRecord.self, VentusPreferenceRecord.self]),
+            schema: Schema([SavedMapLocationRecord.self, VentusPreferenceRecord.self, ForecastCacheRecord.self]),
             fileName: "SavedMapLocations.store",
             inMemory: inMemory
         )

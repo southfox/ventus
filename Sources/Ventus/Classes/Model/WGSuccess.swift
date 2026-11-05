@@ -19,7 +19,7 @@ import Foundation
  * }
  */
 
-public class WGSuccess: Object, Mappable {
+public class WGSuccess: Object, Mappable, @unchecked Sendable {
 
     var returnString: String?
     var message: String?

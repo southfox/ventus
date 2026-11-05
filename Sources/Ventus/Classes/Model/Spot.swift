@@ -23,7 +23,7 @@ import Foundation
  */
 
 
-public class Spot: Object, Mappable {
+public class Spot: Object, Mappable, @unchecked Sendable {
 
     var id_spot: String?
     var spotname: String?

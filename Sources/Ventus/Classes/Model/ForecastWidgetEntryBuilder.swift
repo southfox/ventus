@@ -55,7 +55,7 @@ public enum ForecastWidgetEntryBuilder {
             pressure: pressureText(pressure, unit: units.pressureUnit),
             wave: wave.map { waveHeightText($0, unit: units.waveHeightUnit) },
             windChill: windChill.map { temperatureText($0, unit: units.temperatureUnit) },
-            symbolName: forecast.weatherSymbolName(hour: hour),
+            symbolName: forecast.widgetWeatherSymbolName(hour: hour),
             condition: conditionText(for: forecast, hour: hour),
             high: today?.high ?? temperatureText(temperature, unit: units.temperatureUnit),
             highCelsius: dailyRange?.high ?? temperature,
@@ -175,7 +175,7 @@ public enum ForecastWidgetEntryBuilder {
             return ForecastOverviewHour(
                 dayLabel: calendar.isDateInToday(date) ? "" : date.forecastShortWeekdayAndDay(),
                 timeLabel: hour == currentHour ? "now".localized : hourLabel(for: date),
-                symbolName: forecast.weatherSymbolName(hour: hour),
+                symbolName: forecast.widgetWeatherSymbolName(hour: hour),
                 temperature: temperatureText(temperature, unit: units.temperatureUnit),
                 wind: windText(wind, unit: units.windSpeedUnit),
                 gust: windText(gust, unit: units.windSpeedUnit),
@@ -229,7 +229,7 @@ public enum ForecastWidgetEntryBuilder {
                     celsius: celsius,
                     hour: ForecastWidgetHour(
                         label: label,
-                        symbolName: forecast.weatherSymbolName(hour: item.hour),
+                        symbolName: forecast.widgetWeatherSymbolName(hour: item.hour),
                         temperature: temperatureText(celsius, unit: unit)
                     )
                 )
@@ -269,7 +269,7 @@ public enum ForecastWidgetEntryBuilder {
                 : date.forecastShortWeekdayAndDay()
             return ForecastWidgetDay(
                 label: label,
-                symbolName: forecast.weatherSymbolName(hour: representativeHour),
+                symbolName: forecast.widgetWeatherSymbolName(hours: hours),
                 low: temperatureText(low, unit: temperatureUnit, converted: true),
                 high: temperatureText(high, unit: temperatureUnit, converted: true),
                 lowValue: low,

@@ -28,6 +28,7 @@ public final class AppEnvironment: Sendable {
     public let ventusThemeStore: VentusThemeStoring
     public let ventusForecastUnitStore: VentusForecastUnitStoring
     public let sharedForecastSnapshotStore: SharedForecastSnapshotStoring
+    let forecastCacheStore: ForecastCacheStoring
     public let windguruCredentialStore: WindguruCredentialStoring
     let forecastWorkspaceSplitStore: ForecastWorkspaceSplitStoring
     let severeWeatherNotifier: ForecastSevereWeatherNotifier
@@ -70,6 +71,7 @@ public final class AppEnvironment: Sendable {
         self.ventusThemeStore = VentusThemeStore(defaults: groupDefaults)
         self.ventusForecastUnitStore = VentusForecastUnitStore(defaults: groupDefaults)
         self.sharedForecastSnapshotStore = SharedForecastSnapshotStore()
+        self.forecastCacheStore = ForecastCacheStore(container: persistence.mapLocationsContainer)
         self.windguruCredentialStore = WindguruCredentialStore()
     }
 
@@ -103,6 +105,7 @@ public final class AppEnvironment: Sendable {
         self.ventusThemeStore = VentusThemeStore(defaults: ephemeralDefaults)
         self.ventusForecastUnitStore = VentusForecastUnitStore(defaults: ephemeralDefaults)
         self.sharedForecastSnapshotStore = NoOpSharedForecastSnapshotStore()
+        self.forecastCacheStore = ForecastCacheStore(container: persistence.mapLocationsContainer)
         self.windguruCredentialStore = NoOpWindguruCredentialStore()
     }
 

@@ -17,7 +17,7 @@ import Foundation
  *    in the world using http://windguru.cz json rest api.
  */
 
-public class ForecastWindguruService: ForecastWindguruProtocol {
+public class ForecastWindguruService: ForecastWindguruProtocol, @unchecked Sendable {
     required public init() {}
     
     public struct Http {

@@ -29,7 +29,7 @@ import Foundation
  * }
  */
 
-public class Countries: Object, Mappable {
+public class Countries: Object, Mappable, @unchecked Sendable {
     
     var content: [Country]?
 

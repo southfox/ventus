@@ -47,7 +47,7 @@ public extension SpotForecast {
                 var weightTotal = 0.0
                 for (index, source) in sources.enumerated() {
                     guard let nativeHour = sourceHourMaps[index][hour],
-                          let value = numericValue(source.weathers?[key]?.info[nativeHour]) else { continue }
+                          let value = numericValue(source.weathers?[key]?.info[nativeHour], for: key) else { continue }
                     values.append(value)
                     weightedSum += value * weights[index]
                     weightTotal += weights[index]
@@ -100,13 +100,23 @@ public extension SpotForecast {
     }
 }
 
-private func numericValue(_ value: Any?) -> Double? {
+private func numericValue(_ value: Any?, for weatherKey: String) -> Double? {
+    let number: Double?
     switch value {
-    case let value as Double: value
-    case let value as Int: Double(value)
-    case let value as NSNumber: value.doubleValue
-    default: nil
+    case let value as Double:
+        number = value
+    case let value as Int:
+        number = Double(value)
+    case let value as NSNumber:
+        number = value.doubleValue
+    default:
+        number = nil
     }
+    guard let number, number.isFinite else { return nil }
+    if weatherKey == TypeOfWeather.TMP.rawValue || weatherKey == TypeOfWeather.TMPE.rawValue {
+        return (-100.0 ... 100.0).contains(number) ? number : nil
+    }
+    return number
 }
 
 private let integerWeatherKeys: Set<String> = [

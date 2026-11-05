@@ -142,121 +142,47 @@ extension ForecastConditionsCard {
         return lower...upper
     }
 
-    var temperatureGradient: LinearGradient {
-        LinearGradient(
-            colors: [
-                Color(red: 0.36, green: 0.78, blue: 0.98),
-                Color(red: 0.42, green: 0.85, blue: 0.62),
-                .yellow,
-                .orange,
-                .red
-            ],
-            startPoint: .leading,
-            endPoint: .trailing
-        )
-    }
-
-    func temperatureTrack(for day: ForecastWidgetDay, in range: ClosedRange<Double>) -> some View {
-        GeometryReader { proxy in
-            let width = max(proxy.size.width, 1)
-            let span = max(range.upperBound - range.lowerBound, 1)
-            let lowFraction = min(max((day.lowValue - range.lowerBound) / span, 0), 1)
-            let highFraction = min(max((day.highValue - range.lowerBound) / span, 0), 1)
-            let segmentWidth = max(width * CGFloat(highFraction - lowFraction), 6)
-            let leading = min(max(width * CGFloat(lowFraction), 0), width - segmentWidth)
-
-            ZStack(alignment: .leading) {
-                Capsule()
-                    .fill(theme.accentColor(for: colorScheme).opacity(0.16))
-
-                temperatureGradient
-                    .mask(alignment: .leading) {
-                        Capsule()
-                            .frame(width: segmentWidth)
-                            .offset(x: leading)
-                    }
-            }
-        }
-    }
-
     func dailyForecastRow(
         _ day: ForecastWidgetDay,
         range: ClosedRange<Double>,
         compact: Bool,
-        showsDayNumber: Bool
+        showsDayNumber: Bool,
+        pointSizeReduction: CGFloat = 0,
+        dayLabelWidth: CGFloat? = nil,
+        dayIconGroupWidth: CGFloat? = nil,
+        windOffset: CGFloat = 0,
+        windMetricsWidth: CGFloat? = nil,
+        windMetricSpacing: CGFloat? = nil,
+        windValueColumnWidth: CGFloat? = nil
     ) -> some View {
-        HStack(spacing: compact ? 2 : 6) {
-            Text(dailyLabel(for: day, showsDayNumber: showsDayNumber))
-                .font((compact ? Font.caption2 : .caption).weight(.medium))
-                .frame(width: compact ? 30 : 40, alignment: .leading)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-            Image(systemName: day.symbolName)
-                .font(compact ? .caption : .body)
-                .widgetAccentable()
-                .frame(width: 20)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-            Text(day.low)
-                .font(compact ? .caption2 : .caption)
-                .foregroundStyle(.secondary)
-                .frame(width: 26, alignment: .trailing)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-            temperatureTrack(for: day, in: range)
-                .frame(height: 5)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-            Text(day.high)
-                .font((compact ? Font.caption2 : .caption).weight(.semibold))
-                .frame(width: 26, alignment: .leading)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-            dailyWindMetrics(for: day, compact: compact)
-        }
-        .fixedSize(horizontal: false, vertical: true)
-    }
-
-    private func dailyLabel(for day: ForecastWidgetDay, showsDayNumber: Bool) -> String {
-        guard !showsDayNumber else { return day.label }
-
-        let components = day.label.split(separator: " ")
-        guard let last = components.last, last.allSatisfy(\.isNumber) else { return day.label }
-        return components.dropLast().joined(separator: " ")
+        ForecastWidgetDailyForecastRow(
+            day: day,
+            range: range,
+            compact: compact,
+            showsDayNumber: showsDayNumber,
+            theme: theme,
+            pointSizeReduction: pointSizeReduction,
+            dayLabelWidth: dayLabelWidth,
+            dayIconGroupWidth: dayIconGroupWidth,
+            windOffset: windOffset,
+            windMetricsWidth: windMetricsWidth,
+            windMetricSpacing: windMetricSpacing,
+            windValueColumnWidth: windValueColumnWidth
+        )
     }
 
     @ViewBuilder
-    private func dailyWindMetrics(for day: ForecastWidgetDay, compact: Bool) -> some View {
-        if let degrees = day.windDirectionDegrees {
-            HStack(spacing: compact ? 3 : 5) {
-                Text(WindDirectionDisplayMode.arrow.text(forWindFrom: degrees))
-                    .font(compact ? .caption : .subheadline)
-                    .foregroundStyle(.secondary)
-                if let wind = day.wind {
-                    Image(systemName: "wind")
-                    Text(dailyWindValue(wind))
-                        .font((compact ? Font.caption2 : .caption).weight(.medium))
-                }
-                if let gust = day.gust {
-                    Image(systemName: "wind.circle")
-                    Text(dailyWindValue(gust))
-                        .font((compact ? Font.caption2 : .caption).weight(.medium))
-                }
-            }
-            .font(compact ? .caption : .subheadline)
-            .foregroundStyle(.secondary)
-            .lineLimit(1)
-            .frame(width: compact ? 72 : 108, alignment: .leading)
-            .accessibilityLabel("Wind direction \(Int(degrees.rounded())) degrees, wind \(day.wind ?? "—"), gusts \(day.gust ?? "—")")
-        }
-    }
-
-    private func dailyWindValue(_ value: String) -> String {
-        String(value.split(separator: " ").first ?? "—")
-    }
-
-    @ViewBuilder
-    func dailyForecast(limit: Int, columns: Int = 1) -> some View {
+    func dailyForecast(
+        limit: Int,
+        columns: Int = 1,
+        pointSizeReduction: CGFloat = 0,
+        dayLabelWidth: CGFloat? = nil,
+        dayIconGroupWidth: CGFloat? = nil,
+        windOffset: CGFloat = 0,
+        windMetricsWidth: CGFloat? = nil,
+        windMetricSpacing: CGFloat? = nil,
+        windValueColumnWidth: CGFloat? = nil
+    ) -> some View {
         let range = temperatureRange
         let showsDayNumber = limit >= 7
         let sourceDays = entry.daily.dropFirst()
@@ -268,13 +194,13 @@ extension ForecastConditionsCard {
                 spacing: 2
             ) {
                 ForEach(days) { day in
-                    dailyForecastRow(day, range: range, compact: true, showsDayNumber: showsDayNumber)
+                    dailyForecastRow(day, range: range, compact: true, showsDayNumber: showsDayNumber, pointSizeReduction: pointSizeReduction, dayLabelWidth: dayLabelWidth, dayIconGroupWidth: dayIconGroupWidth, windOffset: windOffset, windMetricsWidth: windMetricsWidth, windMetricSpacing: windMetricSpacing, windValueColumnWidth: windValueColumnWidth)
                 }
             }
         } else {
             VStack(spacing: 4) {
                 ForEach(days) { day in
-                    dailyForecastRow(day, range: range, compact: false, showsDayNumber: showsDayNumber)
+                    dailyForecastRow(day, range: range, compact: false, showsDayNumber: showsDayNumber, pointSizeReduction: pointSizeReduction, dayLabelWidth: dayLabelWidth, dayIconGroupWidth: dayIconGroupWidth, windOffset: windOffset, windMetricsWidth: windMetricsWidth, windMetricSpacing: windMetricSpacing, windValueColumnWidth: windValueColumnWidth)
                 }
             }
         }

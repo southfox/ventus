@@ -111,7 +111,7 @@ enum TypeOfColor: String {
 }
 
 
-public class User: Object, Mappable {
+public class User: Object, Mappable, @unchecked Sendable {
     
     var id_user : Int = 0
     var username: String?

@@ -27,7 +27,7 @@ import Foundation
  * }
  */
 
-public class GeoRegions: Object, Mappable {
+public class GeoRegions: Object, Mappable, @unchecked Sendable {
 
     typealias ListGeoRegion = Array<GeoRegion>
     var content: ListGeoRegion?
@@ -59,6 +59,5 @@ public extension GeoRegions {
         content?.sorted(by: {$0.name ?? "" < $1.name ?? ""}) ?? []
     }
 }
-
 
 

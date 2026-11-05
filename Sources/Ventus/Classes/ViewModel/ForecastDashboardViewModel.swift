@@ -16,6 +16,7 @@ public final class ForecastDashboardViewModel: ObservableObject {
     @Published public private(set) var userProfile: User?
     @Published var forecast: SpotForecast?
     @Published var coordinateLocationName: String?
+    @Published var lastUpdatedAt: Date?
     @Published var errorMessage: String?
     @Published var isLoading = false
     @Published var selectedHour: String?
@@ -69,6 +70,7 @@ public final class ForecastDashboardViewModel: ObservableObject {
     private let savedMapLocationStore: SavedMapLocationStoring
     private let ventusForecastUnitStore: VentusForecastUnitStoring
     private let sharedForecastSnapshotStore: SharedForecastSnapshotStoring
+    private let forecastCacheStore: ForecastCacheStoring
     private let gridHourStepStore: GridHourStepStoring
     private let severeWeatherNotifier: ForecastSevereWeatherNotifier
     private let profileLoader: @MainActor (String, String) async throws -> User?
@@ -93,6 +95,7 @@ public final class ForecastDashboardViewModel: ObservableObject {
         self.savedMapLocationStore = environment.savedMapLocationStore
         self.ventusForecastUnitStore = environment.ventusForecastUnitStore
         self.sharedForecastSnapshotStore = environment.sharedForecastSnapshotStore
+        self.forecastCacheStore = environment.forecastCacheStore
         self.gridHourStepStore = environment.gridHourStepStore
         self.severeWeatherNotifier = environment.severeWeatherNotifier
         self.preferencesProvider = preferencesProvider
@@ -199,8 +202,12 @@ public final class ForecastDashboardViewModel: ObservableObject {
         persistWidgetSnapshot()
     }
 
-    private func persistWidgetSnapshot() {
+    private func persistWidgetSnapshot(savingForecastCache: Bool = false) {
         guard let forecast else { return }
+        if savingForecastCache {
+            forecastCacheStore.save(forecast, coordinateLocationName: coordinateLocationName)
+            lastUpdatedAt = .now
+        }
         let preferences = ForecastUnitPreferences(
             temperatureUnit: temperatureUnit,
             windSpeedUnit: windSpeedUnit,
@@ -212,8 +219,55 @@ public final class ForecastDashboardViewModel: ObservableObject {
         sharedForecastSnapshotStore.save(.make(from: forecast, units: preferences, gridHourStepStore: gridHourStepStore, coordinateLocationName: coordinateLocationName))
     }
 
+    /// Restores the complete, last-successful forecast before networking starts.
+    /// The caller immediately renders its selected layout using this data.
+    @discardableResult
+    func restoreCachedForecast() -> Bool {
+        guard forecast == nil,
+              let cached = forecastCacheStore.load(),
+              Calendar.autoupdatingCurrent.isDateInToday(cached.savedAt) else {
+            return false
+        }
+        forecast = cached.forecast
+        coordinateLocationName = cached.coordinateLocationName
+        lastUpdatedAt = cached.savedAt
+        displayedModelForecasts = [cached.forecast]
+        let modelIDs = cached.forecast.forecasts.compactMap(\.model)
+        usableModelIDs = modelIDs
+        selectedModelIDs = modelIDs
+        displayedForecastSpotID = cached.forecast.identifier
+        if let spotID = cached.forecast.identifier {
+            modelIDsBySpot[spotID] = modelIDs
+            selectedModelIDsBySpot[spotID] = modelIDs
+        }
+        selectedHour = closestHour(to: Date(), in: cached.forecast)
+        return true
+    }
+
     public func clearUserProfile() {
         userProfile = nil
+    }
+
+    public func beginForecastLoad() {
+        isLoading = true
+        errorMessage = nil
+    }
+
+    /// The surrounding view owns the task, while the view model owns the
+    /// visible loading state. Cancelling makes the cached forecast interactive
+    /// again immediately; URLSession observes the task cancellation too.
+    public func cancelForecastLoad() {
+        isLoading = false
+        errorMessage = nil
+    }
+
+    public func finishForecastLoad() {
+        isLoading = false
+    }
+
+    public func showNoInternetConnection() {
+        isLoading = false
+        errorMessage = "No internet connection.".localized
     }
 
     func resetSessionForecastState() {
@@ -311,7 +365,23 @@ public final class ForecastDashboardViewModel: ObservableObject {
                let password = account.password,
                !account.username.isEmpty {
                 selectedForecastLoader = { modelID in
-                    try await self.proSpotForecastLoader(spotID, modelID, account.username, password)
+                    // A stored PRO flag can temporarily be stale (for example,
+                    // after reconnecting before the profile has been refreshed).
+                    // A permission response from wforecast must not block the
+                    // normal spot forecast that is still available publicly.
+                    do {
+                        if let proForecast = try await self.proSpotForecastLoader(
+                            spotID,
+                            modelID,
+                            account.username,
+                            password
+                        ) {
+                            return proForecast
+                        }
+                    } catch {
+                        return try await self.forecastLoader(spotID, modelID)
+                    }
+                    return try await self.forecastLoader(spotID, modelID)
                 }
             } else {
                 selectedForecastLoader = { modelID in
@@ -331,6 +401,8 @@ public final class ForecastDashboardViewModel: ObservableObject {
                     lastModelError = error
                 }
             }
+
+            try Task.checkCancellation()
 
             if validForecasts.isEmpty, configuredModelIDs.isEmpty,
                let loadedForecast = try await selectedForecastLoader(nil),
@@ -360,21 +432,26 @@ public final class ForecastDashboardViewModel: ObservableObject {
                 ? [forecast.model ?? Model.defaultModel]
                 : loadedModelIDs
             displayedForecastSpotID = spotID
-            if isDiscoveringSpotModels || modelIDsBySpot[spotID] == nil {
-                modelIDsBySpot[spotID] = currentSpotModelIDs
-            }
+            // Available models and selected models are deliberately separate.
+            // A refresh for a smaller selected set must not make deselected
+            // models disappear from the grid selector.
+            let availableSpotModelIDs = isDiscoveringSpotModels
+                ? orderedUnique(requestedModelIDs + currentSpotModelIDs)
+                : orderedUnique((modelIDsBySpot[spotID] ?? []) + requestedModelIDs)
+            modelIDsBySpot[spotID] = availableSpotModelIDs
             selectedModelIDsBySpot[spotID] = currentSpotModelIDs
             if persistSelection {
-                usableModelIDs = currentSpotModelIDs
+                usableModelIDs = availableSpotModelIDs
                 selectedModelIDs = currentSpotModelIDs
             }
             selectedHour = closestHour(to: Date(), in: forecast)
             severeWeatherAlert = severeWeatherNotifier.evaluate(forecast)
             severeWeatherNotifier.evaluateCustomAlerts(forecast)
-            persistWidgetSnapshot()
+            persistWidgetSnapshot(savingForecastCache: true)
             analytics.log(.forecastLoadSucceeded(spotID: spotID, modelCount: displayedModelForecasts.count))
             return true
         } catch {
+            guard !Task.isCancelled, !(error is CancellationError) else { return false }
             errorMessage = forecastErrorMessage(for: error)
             analytics.log(.forecastLoadFailed(spotID: spotID, reason: "\(error)"))
             analytics.recordError(error)
@@ -405,6 +482,9 @@ public final class ForecastDashboardViewModel: ObservableObject {
         do {
             let discoveredModelIDs = try await loadModelIDs(latitude: coordinate.latitude, longitude: coordinate.longitude)
             let requestedModelIDs = modelIDs ?? (discoveredModelIDs.isEmpty ? [Model.defaultModel] : discoveredModelIDs)
+            let availableCoordinateModelIDs = orderedUnique(
+                usableModelIDs + discoveredModelIDs + requestedModelIDs
+            )
             var coordinateForecasts = [SpotForecast]()
             var lastModelError: Error?
             for modelID in requestedModelIDs {
@@ -423,21 +503,25 @@ public final class ForecastDashboardViewModel: ObservableObject {
                     lastModelError = error
                 }
             }
+            try Task.checkCancellation()
             guard !coordinateForecasts.isEmpty else { throw lastModelError ?? CustomError.notMappeable }
             forecast = coordinateForecasts.count == 1
                 ? coordinateForecasts[0]
                 : try SpotForecast.blended(coordinateForecasts)
             displayedModelForecasts = coordinateForecasts
             selectedModelIDs = coordinateForecasts.compactMap(\.model)
-            usableModelIDs = selectedModelIDs
+            // Keep all models reported for this coordinate available in the
+            // picker; only selectedModelIDs controls which boxes are on.
+            usableModelIDs = availableCoordinateModelIDs
             selectedHour = forecast.flatMap { closestHour(to: Date(), in: $0) }
             severeWeatherAlert = forecast.flatMap(severeWeatherNotifier.evaluate)
             if let forecast {
                 severeWeatherNotifier.evaluateCustomAlerts(forecast)
             }
-            persistWidgetSnapshot()
+            persistWidgetSnapshot(savingForecastCache: true)
             analytics.log(.coordinateLocationSelected)
         } catch {
+            guard !Task.isCancelled, !(error is CancellationError) else { return }
             errorMessage = forecastErrorMessage(for: error)
             analytics.log(.forecastLoadFailed(spotID: "coordinate", reason: "\(error)"))
             analytics.recordError(error)

@@ -177,7 +177,7 @@ public extension SharedForecastSnapshot {
             pressure: pressureText(pressure, unit: units.pressureUnit),
             wave: wave.map { waveHeightText($0, unit: units.waveHeightUnit) },
             windChill: windChill.map { temperatureText($0, unit: units.temperatureUnit) },
-            symbolName: forecast.weatherSymbolName(hour: hour),
+            symbolName: forecast.widgetWeatherSymbolName(hour: hour),
             condition: conditionText(for: forecast, hour: hour),
             high: today?.high ?? temperatureText(temperature, unit: units.temperatureUnit),
             highCelsius: dailyRange?.high ?? temperature,
@@ -213,7 +213,7 @@ public extension SharedForecastSnapshot {
                     celsius: celsius,
                     hour: Hour(
                         label: label,
-                        symbolName: forecast.weatherSymbolName(hour: item.hour),
+                        symbolName: forecast.widgetWeatherSymbolName(hour: item.hour),
                         temperature: temperatureText(celsius, unit: unit)
                     )
                 )
@@ -253,7 +253,7 @@ public extension SharedForecastSnapshot {
                 : date.forecastShortWeekdayAndDay()
             return Day(
                 label: label,
-                symbolName: forecast.weatherSymbolName(hour: representativeHour),
+                symbolName: forecast.widgetWeatherSymbolName(hours: hours),
                 low: temperatureText(low, unit: temperatureUnit, converted: true),
                 high: temperatureText(high, unit: temperatureUnit, converted: true),
                 lowValue: low,

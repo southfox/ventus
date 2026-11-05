@@ -58,6 +58,9 @@ public struct ForecastDashboardView: View {
     @State private var iPadMapPosition: MapCameraPosition = .automatic
     @State private var selectedMapLocationID: SavedMapLocation.ID?
     @State private var favoriteMapLocations = [SavedMapLocation]()
+    @State private var cachedSnapshot: SharedForecastSnapshot?
+    @State private var forecastLoadTask: Task<Void, Never>?
+    @StateObject private var networkConnection: NetworkConnectionMonitor
 #if os(tvOS)
     @Namespace private var tvDashboardFocus
     @State private var showsTVMenu = false
@@ -87,11 +90,24 @@ public struct ForecastDashboardView: View {
         _appLanguage = State(initialValue: environment.appLanguageStore.load())
         _appAppearanceMode = State(initialValue: environment.appAppearanceModeStore.load())
         _preferredReadingSize = State(initialValue: environment.preferredReadingSizeStore.load())
+        let cachedSnapshot = environment.sharedForecastSnapshotStore.load()
         let viewModel = ForecastDashboardViewModel(forecastService: forecastService, environment: environment)
+        let restoredCurrentForecast: Bool
         if let previewForecast {
             viewModel.usePreviewForecast(previewForecast, spotID: initialSpotID, modelForecasts: previewModelForecasts)
+            restoredCurrentForecast = true
+        } else {
+            restoredCurrentForecast = viewModel.restoreCachedForecast()
         }
+        // A previous-day forecast must never be presented as current data. A
+        // same-day widget snapshot remains a lightweight fallback while its
+        // complete cache is restored or the network request is in flight.
+        let hasCurrentSnapshot = cachedSnapshot.map {
+            Calendar.autoupdatingCurrent.isDateInToday($0.date)
+        } ?? false
+        _cachedSnapshot = State(initialValue: restoredCurrentForecast || hasCurrentSnapshot ? cachedSnapshot : nil)
         _viewModel = StateObject(wrappedValue: viewModel)
+        _networkConnection = StateObject(wrappedValue: NetworkConnectionMonitor())
         _showsDashboardModelComparison = State(initialValue: false)
         _account = StateObject(wrappedValue: WindguruAccount(credentialStore: environment.windguruCredentialStore))
         spotSearch = { try await forecastService.searchSpots(byLocation: $0) }
@@ -101,6 +117,7 @@ public struct ForecastDashboardView: View {
 
     private var forecast: SpotForecast? { get { viewModel.forecast } nonmutating set { viewModel.forecast = newValue } }
     private var coordinateLocationName: String? { get { viewModel.coordinateLocationName } nonmutating set { viewModel.coordinateLocationName = newValue } }
+    private var lastUpdatedAt: Date? { viewModel.lastUpdatedAt }
     private var errorMessage: String? { get { viewModel.errorMessage } nonmutating set { viewModel.errorMessage = newValue } }
     private var isLoading: Bool { get { viewModel.isLoading } nonmutating set { viewModel.isLoading = newValue } }
     private var selectedHour: String? { get { viewModel.selectedHour } nonmutating set { viewModel.selectedHour = newValue } }
@@ -295,6 +312,8 @@ public struct ForecastDashboardView: View {
                             forecastContent(for: forecast)
                         }
                     }
+                } else if let cachedSnapshot {
+                    ForecastCachedSnapshotView(snapshot: cachedSnapshot, viewMode: content)
                 } else if isLoading {
                     ProgressView("Loading forecast…")
                 } else if let errorMessage {
@@ -305,15 +324,18 @@ public struct ForecastDashboardView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .safeAreaInset(edge: .top) {
-                if let severeWeatherAlert {
-                    Label(severeWeatherAlert.title, systemImage: "exclamationmark.triangle.fill")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal)
-                        .padding(.vertical, 8)
-                        .background(.red.gradient)
-                        .accessibilityLabel(severeWeatherAlert.title + ". " + severeWeatherAlert.body)
+                VStack(spacing: 0) {
+                    if let severeWeatherAlert {
+                        Label(severeWeatherAlert.title, systemImage: "exclamationmark.triangle.fill")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal)
+                            .padding(.vertical, 8)
+                            .background(.red.gradient)
+                            .accessibilityLabel(severeWeatherAlert.title + ". " + severeWeatherAlert.body)
+                    }
+                    forecastLoadStatusBanner
                 }
             }
             .background {
@@ -360,15 +382,21 @@ public struct ForecastDashboardView: View {
                     HStack {
 #if os(tvOS)
                         Button {
-                            Task { await refreshForecast() }
+                            if isLoading {
+                                cancelForecastLoad()
+                            } else {
+                                startForecastRefresh()
+                            }
                         } label: {
-                            Image(systemName: "arrow.clockwise")
+                            Image(systemName: isLoading ? "xmark" : "arrow.clockwise")
                         }
                         .buttonStyle(.plain)
-                        .accessibilityLabel("Refresh forecast")
+                        .accessibilityLabel(isLoading ? "Stop loading forecast" : "Refresh forecast")
 #else
-                        Button("Refresh", systemImage: "arrow.clockwise") {
-                            Task { await refreshForecast() }
+                        if isLoading {
+                            Button("Stop", systemImage: "xmark") { cancelForecastLoad() }
+                        } else {
+                            Button("Refresh", systemImage: "arrow.clockwise") { startForecastRefresh() }
                         }
 #endif
                         if (content == .dashboard || content == .graph), displayedModelForecasts.count > 1 {
@@ -393,9 +421,11 @@ public struct ForecastDashboardView: View {
             }
             .task {
                 guard !usesPreviewForecast else { return }
-                await loadUserPreferences()
-                await loadFavoriteMapLocations()
-                await loadPreferredForecast()
+                startInitialForecastLoad()
+            }
+            .onChange(of: networkConnection.isDisconnected) { _, isDisconnected in
+                guard isDisconnected, isLoading else { return }
+                presentOfflineForecast()
             }
             .onChange(of: selectedSpotID) { _, spotID in environment.selectedSpotStore.save(spotID) }
             .onChange(of: content) { _, mode in environment.forecastViewModeStore.save(mode) }
@@ -1023,6 +1053,118 @@ public struct ForecastDashboardView: View {
         }
     }
 
+    private func startInitialForecastLoad() {
+        startForecastLoad {
+            await loadUserPreferences()
+            guard !Task.isCancelled else { return }
+            await loadFavoriteMapLocations()
+            guard !Task.isCancelled else { return }
+            await loadPreferredForecast()
+        }
+    }
+
+    private func startForecastRefresh() {
+        startForecastLoad {
+            await refreshForecast()
+        }
+    }
+
+    private func startForecastLoad(_ operation: @escaping @MainActor () async -> Void) {
+        forecastLoadTask?.cancel()
+        viewModel.beginForecastLoad()
+        forecastLoadTask = Task {
+            guard !networkConnection.isDisconnected else {
+                presentOfflineForecast()
+                return
+            }
+            await operation()
+            if !Task.isCancelled {
+                viewModel.finishForecastLoad()
+                forecastLoadTask = nil
+            }
+        }
+    }
+
+    private func cancelForecastLoad() {
+        forecastLoadTask?.cancel()
+        forecastLoadTask = nil
+        viewModel.cancelForecastLoad()
+    }
+
+    private func presentOfflineForecast() {
+        cancelForecastLoad()
+        // Keep a same-day forecast visible if one is already available. The
+        // offline view is reserved for launches without current forecast data.
+        viewModel.showNoInternetConnection()
+    }
+
+    @ViewBuilder
+    private var forecastLoadStatusBanner: some View {
+        if isLoading {
+            HStack(spacing: 10) {
+                ProgressView()
+                    .controlSize(.small)
+                Text(forecast == nil ? "Loading forecast…" : "Updating forecast…")
+                    .font(.subheadline)
+                Spacer(minLength: 8)
+                Button { cancelForecastLoad() } label: {
+                    Image(systemName: "xmark")
+                }
+                    .buttonStyle(.borderless)
+                    .accessibilityLabel("Stop")
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 8)
+            .background(.thinMaterial)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Forecast is updating")
+        } else if let errorMessage, forecast != nil {
+            HStack(spacing: 10) {
+                Image(systemName: "wifi.exclamationmark")
+                Text(errorMessage)
+                    .font(.subheadline)
+                    .lineLimit(2)
+                Spacer(minLength: 8)
+                Button { self.errorMessage = nil } label: {
+                    Image(systemName: "xmark")
+                }
+                    .buttonStyle(.borderless)
+                    .accessibilityLabel("Dismiss")
+            }
+            .foregroundStyle(.primary)
+            .padding(.horizontal)
+            .padding(.vertical, 8)
+            .background(.thinMaterial)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Forecast update unavailable. \(errorMessage)")
+        } else if let lastUpdatedAt {
+            TimelineView(.periodic(from: .now, by: 1)) { context in
+                HStack(spacing: 5) {
+                    Image(systemName: "clock")
+                    Text("Updated")
+                    Text(forecastUpdateDescription(for: lastUpdatedAt, now: context.date))
+                    Spacer(minLength: 0)
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal)
+                .padding(.vertical, 6)
+            }
+        }
+    }
+
+    private func forecastUpdateDescription(for date: Date, now: Date) -> String {
+        let elapsed = max(0, now.timeIntervalSince(date))
+        if elapsed < 60 {
+            return RelativeDateTimeFormatter().localizedString(fromTimeInterval: -elapsed)
+        }
+        if elapsed < 3_600 {
+            return RelativeDateTimeFormatter().localizedString(fromTimeInterval: -elapsed)
+        }
+        let time = date.formatted(date: .omitted, time: .shortened)
+        return "\("Today".localized), \(time)"
+    }
+
     @MainActor
     private func loadForecast(
         coordinate: CLLocationCoordinate2D,
@@ -1048,15 +1190,9 @@ public struct ForecastDashboardView: View {
     }
 
     private func unavailableForecastContent(errorMessage: String) -> some View {
-#if DEBUG
         ForecastOfflineView(retry: {
-            Task { await refreshForecast() }
-        }, debugError: errorMessage)
-#else
-        ForecastOfflineView {
-            Task { await refreshForecast() }
-        }
-#endif
+            startForecastRefresh()
+        }, errorMessage: errorMessage)
     }
 
 }

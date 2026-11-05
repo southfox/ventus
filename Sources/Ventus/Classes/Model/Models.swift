@@ -17,7 +17,7 @@ import Foundation
  * { [ <Model> ] }
  */
 
-public class Models: Object, Mappable {
+public class Models: Object, Mappable, @unchecked Sendable {
     
     typealias ListModel = Array<Model>
 

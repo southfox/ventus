@@ -149,12 +149,12 @@ public extension Forecast {
     
     /// TMP:  temperature
     func temperature(hh: String?) -> Double? {
-        weathers?[TypeOfWeather.TMP.rawValue]?.value(hh: hh)
+        plausibleCelsius(weathers?[TypeOfWeather.TMP.rawValue]?.value(hh: hh))
     }
 
     /// TMPE:  temperature in 2 meters above ground with correction to real altitude of the spot.
     func temperatureReal(hh: String?) -> Double? {
-        weathers?[TypeOfWeather.TMPE.rawValue]?.value(hh: hh)
+        plausibleCelsius(weathers?[TypeOfWeather.TMPE.rawValue]?.value(hh: hh))
     }
     
     /// TCDC: Cloud cover (%) Total
@@ -254,4 +254,12 @@ public extension Forecast {
     var numberOfWeathers: Int {
         weathers?.count ?? 0
     }
+}
+
+/// Reject corrupt temperature values returned by an upstream model. The range is
+/// deliberately wider than any surface forecast we expect to show, while keeping
+/// invalid encoded values from leaking into the grid or weather calculations.
+private func plausibleCelsius(_ value: Double?) -> Double? {
+    guard let value, value.isFinite, (-100.0 ... 100.0).contains(value) else { return nil }
+    return value
 }

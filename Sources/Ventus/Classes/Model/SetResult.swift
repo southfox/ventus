@@ -23,7 +23,7 @@ import Foundation
  */
 
 
-public class SetResult: Object, Mappable {
+public class SetResult: Object, Mappable, @unchecked Sendable {
 
     // count: number of results obtained
     var count: Int = 0

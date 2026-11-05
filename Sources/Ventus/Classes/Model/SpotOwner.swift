@@ -28,7 +28,7 @@ import Foundation
  *
  */
 
-public class SpotOwner: Spot {
+public class SpotOwner: Spot, @unchecked Sendable {
 
     var id_user: String? = nil
 
@@ -52,4 +52,3 @@ public extension SpotOwner {
         id_user
     }
 }
-

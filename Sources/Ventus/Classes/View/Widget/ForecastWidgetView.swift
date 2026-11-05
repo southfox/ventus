@@ -214,7 +214,16 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
             Divider()
             hourlyForecast(limit: 6, skippingCurrentHour: true)
             Divider()
-            dailyForecast(limit: 5)
+            dailyForecast(
+                limit: 5,
+                pointSizeReduction: 1,
+                dayLabelWidth: 24,
+                dayIconGroupWidth: 48,
+                windOffset: 8,
+                windMetricsWidth: 86,
+                windMetricSpacing: 2,
+                windValueColumnWidth: 14
+            )
         }
     }
 
@@ -358,14 +367,45 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
     }
 
     @ViewBuilder private var windGustsMetric: some View {
-        HStack(alignment: .center, spacing: usesSmallSystemWidgetFamily ? 4 : 2) {
-            windDirectionIndicator
-            windGustsLine(usesSmallSystemWidgetFamily ? "" : "Wind", symbol: "wind", value: String(entry.wind.split(separator: " ").first!))
-            if !usesSmallSystemWidgetFamily {
-                Text("·")
+        let wind = windMeasurement(entry.wind)
+        let gust = windMeasurement(entry.gust)
+        let unit = wind.unit ?? gust.unit
+
+        VStack(alignment: .leading, spacing: 3) {
+            HStack(spacing: 4) {
+                Text("Wind")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                windDirectionIndicator
+                Image(systemName: "wind")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(wind.value)
+                    .font(.caption.weight(.semibold))
+                if let unit {
+                    Text(unit)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
             }
-            windGustsLine("Gusts", symbol: "wind.circle", value: entry.gust)
+            HStack(spacing: 4) {
+                Text("Gusts")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                Image(systemName: "wind.circle")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(gust.value)
+                    .font(.caption.weight(.semibold))
+                if let unit {
+                    Text(unit)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            }
         }
+        .lineLimit(1)
+        .minimumScaleFactor(widgetValueMinimumScale)
     }
 
     private var windDirectionIndicator: some View {
@@ -375,27 +415,11 @@ public struct ForecastWidgetView: View, ForecastConditionsCard {
             .accessibilityLabel("Wind direction \(entry.windDirection)")
     }
 
-    private func windGustsLine(_ title: LocalizedStringKey, symbol: String, value: String) -> some View {
-        HStack(spacing: 2) {
-            Image(systemName: symbol)
-                .font(usesSmallSystemWidgetFamily ? .caption2 : .body)
-                .foregroundStyle(.secondary)
-                .frame(width: usesSmallSystemWidgetFamily ? 12 : 16, alignment: .center)
-#if !os(watchOS)
-            if displayedFamily != .systemSmall {
-                Text(title)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.6)
-                    .layoutPriority(1)
-            }
-#endif
-            Text(value)
-                .font(usesSmallSystemWidgetFamily ? .caption2 : .subheadline.weight(.semibold))
-                .lineLimit(1)
-                .minimumScaleFactor(widgetValueMinimumScale)
-        }
+    private func windMeasurement(_ measurement: String) -> (value: String, unit: String?) {
+        let components = measurement.split(whereSeparator: \Character.isWhitespace)
+        guard let value = components.first else { return ("—", nil) }
+        let unit = components.dropFirst().joined(separator: " ")
+        return (String(value), unit.isEmpty ? nil : unit)
     }
 
     private var widgetValueMinimumScale: CGFloat {
