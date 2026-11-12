@@ -23,6 +23,10 @@
 		A0010000000000000000000B /* Ventus in Frameworks */ = {isa = PBXBuildFile; productRef = A0010000000000000000000C /* Ventus */; };
 		AA0100000000000000000001 /* WatchOnlyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000012 /* WatchOnlyApp.swift */; };
 		AA0100000000000000000002 /* Ventus in Frameworks */ = {isa = PBXBuildFile; productRef = AA0100000000000000000009 /* Ventus */; };
+		AC1C00000000000000000001 /* VentusClipApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC1C00000000000000000011 /* VentusClipApp.swift */; };
+		AC1C00000000000000000002 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
+		AC1C00000000000000000003 /* VentusClip.app in Embed App Clips */ = {isa = PBXBuildFile; fileRef = AC1C00000000000000000010 /* VentusClip.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		AC1C00000000000000000015 /* Ventus in Frameworks */ = {isa = PBXBuildFile; productRef = AC1C00000000000000000016 /* Ventus */; };
 		B00100000000000000000007 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		B00100000000000000000009 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		B0010000000000000000000A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
@@ -73,9 +77,27 @@
 			remoteGlobalIDString = D0010000000000000000000D;
 			remoteInfo = VentusWatchWidgets;
 		};
+		AC1C00000000000000000004 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 607FACC81AFB9204008FA782 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AC1C0000000000000000000F;
+			remoteInfo = VentusClip;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		AC1C00000000000000000005 /* Embed App Clips */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/AppClips";
+			dstSubfolderSpec = 16;
+			files = (
+				AC1C00000000000000000003 /* VentusClip.app in Embed App Clips */,
+			);
+			name = "Embed App Clips";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D0010000000000000000000B /* Embed App Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -128,6 +150,10 @@
 		A0010000000000000000000D /* VentusIOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VentusIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0100000000000000000011 /* VentusWatchOnly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VentusWatchOnly.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0100000000000000000012 /* WatchOnlyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchOnlyApp.swift; sourceTree = "<group>"; };
+		AC1C00000000000000000010 /* VentusClip.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VentusClip.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AC1C00000000000000000011 /* VentusClipApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VentusClipApp.swift; sourceTree = "<group>"; };
+		AC1C00000000000000000012 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AC1C00000000000000000013 /* VentusClip.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VentusClip.entitlements; sourceTree = "<group>"; };
 		B0010000000000000000000D /* VentusVisionOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VentusVisionOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0DE00000000000000000100 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = Localizable.xcstrings; path = ../Sources/Ventus/Resources/Localizable.xcstrings; sourceTree = "<group>"; };
 		D00100000000000000000002 /* VentusWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VentusWidgetBundle.swift; sourceTree = "<group>"; };
@@ -181,6 +207,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AC1C00000000000000000007 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AC1C00000000000000000015 /* Ventus in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B0010000000000000000000E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -220,6 +254,7 @@
 		607FACC71AFB9204008FA782 = {
 			isa = PBXGroup;
 			children = (
+				AC1C00000000000000000014 /* VentusClip */,
 				607FACD21AFB9204008FA782 /* App */,
 				607FACE81AFB9204008FA782 /* Tests */,
 				98688A0522D5936400A09AD0 /* VentusMacOS */,
@@ -232,6 +267,7 @@
 		607FACD11AFB9204008FA782 /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				AC1C00000000000000000010 /* VentusClip.app */,
 				A0010000000000000000000D /* VentusIOS.app */,
 				B0010000000000000000000D /* VentusVisionOS.app */,
 				AA0100000000000000000011 /* VentusWatchOnly.app */,
@@ -308,6 +344,16 @@
 			path = VentusTVOS;
 			sourceTree = "<group>";
 		};
+		AC1C00000000000000000014 /* VentusClip */ = {
+			isa = PBXGroup;
+			children = (
+				AC1C00000000000000000011 /* VentusClipApp.swift */,
+				AC1C00000000000000000012 /* Info.plist */,
+				AC1C00000000000000000013 /* VentusClip.entitlements */,
+			);
+			path = VentusClip;
+			sourceTree = "<group>";
+		};
 		D0010000000000000000000A /* ../VentusWidgets */ = {
 			isa = PBXGroup;
 			children = (
@@ -373,11 +419,13 @@
 				A0010000000000000000000E /* Frameworks */,
 				A00100000000000000000012 /* Resources */,
 				E10100000000000000000008 /* Embed App Extensions */,
+				AC1C00000000000000000005 /* Embed App Clips */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				E10100000000000000000009 /* PBXTargetDependency */,
+				AC1C00000000000000000009 /* PBXTargetDependency */,
 			);
 			name = VentusIOS;
 			packageProductDependencies = (
@@ -410,6 +458,26 @@
 			productName = VentusWatchOnly;
 			productReference = AA0100000000000000000011 /* VentusWatchOnly.app */;
 			productType = "com.apple.product-type.application";
+		};
+		AC1C0000000000000000000F /* VentusClip */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AC1C00000000000000000020 /* Build configuration list for PBXNativeTarget "VentusClip" */;
+			buildPhases = (
+				AC1C00000000000000000006 /* Sources */,
+				AC1C00000000000000000007 /* Frameworks */,
+				AC1C00000000000000000008 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = VentusClip;
+			packageProductDependencies = (
+				AC1C00000000000000000016 /* Ventus */,
+			);
+			productName = VentusClip;
+			productReference = AC1C00000000000000000010 /* VentusClip.app */;
+			productType = "com.apple.product-type.application.on-demand-install-capable";
 		};
 		B0010000000000000000000F /* VentusVisionOS */ = {
 			isa = PBXNativeTarget;
@@ -515,6 +583,24 @@
 						CreatedOnToolsVersion = 10.2.1;
 						ProvisioningStyle = Automatic;
 					};
+					A0010000000000000000000F = {
+						SystemCapabilities = {
+							com.apple.AssociatedDomains = {
+								enabled = 1;
+							};
+						};
+					};
+					AC1C0000000000000000000F = {
+						CreatedOnToolsVersion = 2700;
+						SystemCapabilities = {
+							com.apple.AssociatedDomains = {
+								enabled = 1;
+							};
+							com.apple.OnDemandInstallCapable = {
+								enabled = 1;
+							};
+						};
+					};
 				};
 			};
 			buildConfigurationList = 607FACCB1AFB9204008FA782 /* Build configuration list for PBXProject "Ventus" */;
@@ -537,6 +623,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				AC1C0000000000000000000F /* VentusClip */,
 				A0010000000000000000000F /* VentusIOS */,
 				B0010000000000000000000F /* VentusVisionOS */,
 				AA0100000000000000000005 /* VentusWatchOnly */,
@@ -579,6 +666,14 @@
 				A0010000000000000000000A /* Images.xcassets in Resources */,
 				C0DE00000000000000000106 /* Localizable.xcstrings in Resources */,
 				FB0100000000000000000002 /* GoogleService-Info.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AC1C00000000000000000008 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AC1C00000000000000000002 /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -637,6 +732,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AC1C00000000000000000006 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AC1C00000000000000000001 /* VentusClipApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B00100000000000000000011 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -673,6 +776,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		AC1C00000000000000000009 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AC1C0000000000000000000F /* VentusClip */;
+			targetProxy = AC1C00000000000000000004 /* PBXContainerItemProxy */;
+		};
 		D0010000000000000000000C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D0010000000000000000000D /* VentusWatchWidgets */;
@@ -986,7 +1094,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Ventus_App.entitlements;
-				DEVELOPMENT_TEAM = 27XTSJS68A;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 27XTSJS68A;
 				INFOPLIST_FILE = "Ventus_App-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -996,6 +1107,8 @@
 				MODULE_NAME = VentusApp;
 				PRODUCT_BUNDLE_IDENTIFIER = org.forescoop.iOSnowatch;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Ventus iOS App Store";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1036,6 +1149,58 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
 				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Release;
+		};
+		AC1C00000000000000000021 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = VentusClip/VentusClip.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 27XTSJS68A;
+				INFOPLIST_FILE = VentusClip/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.forescoop.iOSnowatch.Clip;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		AC1C00000000000000000022 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = VentusClip/VentusClip.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 27XTSJS68A;
+				INFOPLIST_FILE = VentusClip/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.forescoop.iOSnowatch.Clip;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Ventus Clip App Store";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -1111,12 +1276,13 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = VentusWidgets/VentusWidgets.entitlements;
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 27XTSJS68A;
 				INFOPLIST_FILE = VentusWidgets/Info.plist;
 				PRODUCT_BUNDLE_IDENTIFIER = org.forescoop.iOSnowatch.ForescoopWatchOnly.ForescoopWidgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "watchos watchsimulator";
@@ -1155,8 +1321,10 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = VentusWidgets/VentusWidgets.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 27XTSJS68A;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 27XTSJS68A;
 				INFOPLIST_FILE = VentusWidgets/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1166,6 +1334,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.forescoop.iOSnowatch.ForescoopWidgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Ventus iOS Widgets App Store";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1267,6 +1437,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		AC1C00000000000000000020 /* Build configuration list for PBXNativeTarget "VentusClip" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AC1C00000000000000000021 /* Debug */,
+				AC1C00000000000000000022 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		B00100000000000000000010 /* Build configuration list for PBXNativeTarget "VentusVisionOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -1319,6 +1498,11 @@
 			productName = Ventus;
 		};
 		AA0100000000000000000009 /* Ventus */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C0DE00000000000000000000 /* XCLocalSwiftPackageReference ".." */;
+			productName = Ventus;
+		};
+		AC1C00000000000000000016 /* Ventus */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = C0DE00000000000000000000 /* XCLocalSwiftPackageReference ".." */;
 			productName = Ventus;

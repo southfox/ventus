@@ -8,6 +8,7 @@
 //
 //  Usage:
 //    ./upload-testflight.swift
+//    ./upload-testflight.swift --ios-only
 //    ./upload-testflight.swift --ipa build/export/VentusIOS.ipa       # upload an existing iOS IPA only
 //    ./upload-testflight.swift --tv-ipa build/export/VentusTVOS.ipa   # upload an existing tvOS IPA only
 //
@@ -21,6 +22,7 @@ let iOSScheme = "VentusIOS"
 let tvOSScheme = "VentusTVOS"
 let teamID = "27XTSJS68A"
 let appInfoPlist = "App/Ventus_App-Info.plist"
+let clipInfoPlist = "App/VentusClip/Info.plist"
 let widgetInfoPlist = "App/VentusWidgets/Info.plist"
 let watchAppInfoPlist = "App/VentusWatchOnly-Info.plist"
 let watchCompanionInfoPlist = "App/VentusWatch-Info.plist"
@@ -37,6 +39,7 @@ let keychainItemName = ProcessInfo.processInfo.environment["ALTOOL_KEYCHAIN_ITEM
 
 let bundleVersionPlists = [
     appInfoPlist,
+    clipInfoPlist,
     widgetInfoPlist,
     watchAppInfoPlist,
     watchCompanionInfoPlist,
@@ -190,11 +193,16 @@ func checkDSYMs(archivePath: String, appPath: String) {
 var explicitIPAPath: String? = nil
 var explicitTVIPAPath: String? = nil
 let arguments = CommandLine.arguments.dropFirst()
+let iOSOnly = arguments.contains("--ios-only")
 if let ipaFlagIndex = arguments.firstIndex(of: "--ipa"), arguments.index(after: ipaFlagIndex) < arguments.endIndex {
     explicitIPAPath = arguments[arguments.index(after: ipaFlagIndex)]
 }
 if let ipaFlagIndex = arguments.firstIndex(of: "--tv-ipa"), arguments.index(after: ipaFlagIndex) < arguments.endIndex {
     explicitTVIPAPath = arguments[arguments.index(after: ipaFlagIndex)]
+}
+
+if iOSOnly, explicitTVIPAPath != nil {
+    fail("--ios-only cannot be combined with --tv-ipa")
 }
 
 // MARK: - Credentials
@@ -305,9 +313,14 @@ let allPlatforms = [
 
 // With no IPA arguments, ship both platforms. Supplying an IPA uploads only
 // the explicitly requested platform(s), which keeps the old --ipa workflow.
-let platforms: [UploadPlatform] = (explicitIPAPath == nil && explicitTVIPAPath == nil)
-    ? allPlatforms
-    : allPlatforms.filter { $0.explicitIPAPath != nil }
+let platforms: [UploadPlatform]
+if iOSOnly {
+    platforms = [allPlatforms[0]]
+} else if explicitIPAPath == nil && explicitTVIPAPath == nil {
+    platforms = allPlatforms
+} else {
+    platforms = allPlatforms.filter { $0.explicitIPAPath != nil }
+}
 
 let platformsToArchive = platforms.filter { $0.explicitIPAPath == nil }
 if !platformsToArchive.isEmpty {
@@ -359,6 +372,28 @@ func archiveAndExport(_ platform: UploadPlatform) -> String {
 
     // 3. Export
     step("Exporting \(platform.name) IPA")
+    // The App Store profiles are deliberately selected for iOS. Automatic
+    // export signing attempts to use Apple's cloud-managed certificates, which
+    // is unavailable for this team even though local distribution profiles
+    // are installed.
+    let manualIOSProfileOptions = platform.name == "iOS" ? """
+        <key>signingStyle</key>
+        <string>manual</string>
+        <key>signingCertificate</key>
+        <string>Apple Distribution</string>
+        <key>provisioningProfiles</key>
+        <dict>
+            <key>org.forescoop.iOSnowatch</key>
+            <string>Ventus iOS App Store</string>
+            <key>org.forescoop.iOSnowatch.Clip</key>
+            <string>Ventus Clip App Store</string>
+            <key>org.forescoop.iOSnowatch.ForescoopWidgets</key>
+            <string>Ventus iOS Widgets App Store</string>
+        </dict>
+    """ : """
+        <key>signingStyle</key>
+        <string>automatic</string>
+    """
     let exportOptions = """
     <?xml version="1.0" encoding="UTF-8"?>
     <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -368,8 +403,7 @@ func archiveAndExport(_ platform: UploadPlatform) -> String {
         <string>app-store-connect</string>
         <key>teamID</key>
         <string>\(teamID)</string>
-        <key>signingStyle</key>
-        <string>automatic</string>
+    \(manualIOSProfileOptions)
     </dict>
     </plist>
     """
@@ -380,13 +414,17 @@ func archiveAndExport(_ platform: UploadPlatform) -> String {
     }
 
     try? fileManager.removeItem(atPath: platform.exportDir)
-    let exportStatus = run("/usr/bin/xcodebuild", [
+    var exportArguments = [
         "-exportArchive",
         "-archivePath", platform.archivePath,
         "-exportPath", platform.exportDir,
         "-exportOptionsPlist", exportOptionsPlist,
-        "-allowProvisioningUpdates",
-    ] + xcodebuildAuthArgs)
+    ]
+    if platform.name != "iOS" {
+        exportArguments.append("-allowProvisioningUpdates")
+        exportArguments += xcodebuildAuthArgs
+    }
+    let exportStatus = run("/usr/bin/xcodebuild", exportArguments)
     guard exportStatus == 0 else { fail("xcodebuild -exportArchive failed (status \(exportStatus))") }
 
     guard let exportedIPA = (try? fileManager.contentsOfDirectory(atPath: platform.exportDir))?.first(where: { $0.hasSuffix(".ipa") }) else {
