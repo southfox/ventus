@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#07131e">
+    <meta name="description" content="Ventus brings the weather and wind forecast for your next session.">
+    <title>Ventus — Forecasts that move with you</title>
+    <!--
+      Enable the native Safari App Clip card after the full app has an App Store ID:
+      <meta name="apple-itunes-app" content="app-id=YOUR_APP_STORE_ID, app-clip-bundle-id=org.forescoop.iOSnowatch.Clip, app-clip-display=card">
+    -->
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main>
+      <nav aria-label="Primary navigation">
+        <a class="brand" href="/" aria-label="Ventus home">
+          <span class="brand-mark" aria-hidden="true">≋</span>
+          <span>Ventus</span>
+        </a>
+        <a class="quiet-link" href="#app-clip">Open on iPhone</a>
+      </nav>
+
+      <section class="hero" aria-labelledby="hero-title">
+        <p class="eyebrow">Wind · weather · your next session</p>
+        <h1 id="hero-title">Know what the wind is doing.</h1>
+        <p class="lede">Ventus turns detailed forecasts into a clear picture of the conditions ahead — whether you’re planning a ride, a sail, or a day in the mountains.</p>
+        <div class="actions">
+          <a class="button primary" href="#app-clip">Try Ventus on iPhone <span aria-hidden="true">→</span></a>
+          <a class="button secondary" href="#forecast">See the forecast</a>
+        </div>
+      </section>
+
+      <section class="forecast-card" id="forecast" aria-label="Example weather forecast">
+        <div class="spot-heading">
+          <div>
+            <p class="eyebrow">Example forecast</p>
+            <h2>Bariloche</h2>
+          </div>
+          <span class="condition" aria-label="Partly cloudy">⛅</span>
+        </div>
+        <div class="now">
+          <strong>12°</strong>
+          <span>Partly cloudy<br><b>Feels like 9°</b></span>
+        </div>
+        <dl class="metrics">
+          <div><dt>Wind</dt><dd>↗ 18 km/h</dd></div>
+          <div><dt>Gusts</dt><dd>32 km/h</dd></div>
+          <div><dt>Rain</dt><dd>0.2 mm</dd></div>
+        </dl>
+      </section>
+
+      <section class="clip" id="app-clip" aria-labelledby="clip-title">
+        <div class="clip-icon" aria-hidden="true">≋</div>
+        <div>
+          <p class="eyebrow">Ventus App Clip</p>
+          <h2 id="clip-title">A forecast, without the download.</h2>
+          <p>Open a specific spot from Safari or a shared link, see its forecast immediately, then install the full app when you’re ready.</p>
+        </div>
+      </section>
+    </main>
+    <footer>Ventus · Weather forecasts powered by Windguru</footer>
+  </body>
+</html>
