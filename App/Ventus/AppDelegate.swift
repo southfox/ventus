@@ -128,6 +128,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
+    private var environment: AppEnvironment?
 
     func scene(
         _ scene: UIScene,
@@ -137,10 +138,31 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = scene as? UIWindowScene else { return }
 
         let environment = (UIApplication.shared.delegate as? AppDelegate)?.environment ?? AppEnvironment()
+        openForecast(
+            from: connectionOptions.userActivities.first(where: { $0.activityType == NSUserActivityTypeBrowsingWeb })?.webpageURL,
+            in: environment
+        )
         let window = UIWindow(windowScene: windowScene)
         window.rootViewController = UIHostingController(rootView: ForecastDashboardView(environment: environment))
         window.makeKeyAndVisible()
         self.window = window
+        self.environment = environment
+    }
+
+    func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+        guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
+              let environment else { return }
+
+        openForecast(from: userActivity.webpageURL, in: environment)
+        window?.rootViewController = UIHostingController(rootView: ForecastDashboardView(environment: environment))
+    }
+
+    private func openForecast(from url: URL?, in environment: AppEnvironment) {
+        guard let url,
+              ["ventus-52c5b.web.app", "ventus-52c5b.firebaseapp.com"].contains(url.host),
+              url.path == "/forecast/bariloche-dina-huapi" else { return }
+
+        environment.selectedSpotStore.save("64141")
     }
 }
 

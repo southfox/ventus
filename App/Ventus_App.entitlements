@@ -5,6 +5,8 @@
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>appclips:ventus-52c5b.web.app</string>
+		<string>applinks:ventus-52c5b.web.app</string>
+		<string>applinks:ventus-52c5b.firebaseapp.com</string>
 	</array>
 	<key>com.apple.security.application-groups</key>
 	<array>

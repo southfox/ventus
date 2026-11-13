@@ -1,4 +1,19 @@
 {
+	"applinks": {
+		"details": [
+			{
+				"appIDs": [
+					"27XTSJS68A.org.forescoop.iOSnowatch"
+				],
+				"components": [
+					{
+						"/": "/forecast/*",
+						"comment": "Open forecast links in Ventus."
+					}
+				]
+			}
+		]
+	},
   "appclips": {
     "apps": [
       "27XTSJS68A.org.forescoop.iOSnowatch.Clip"
