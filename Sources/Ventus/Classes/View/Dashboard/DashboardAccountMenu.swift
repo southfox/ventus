@@ -23,6 +23,7 @@ struct DashboardAccountMenu: View {
     let onShowGraph: () -> Void
     let onShowOverview: () -> Void
     let onShowSettings: () -> Void
+    let onShowTutorial: () -> Void
     let onShowHelp: () -> Void
     let onShowAbout: () -> Void
     let onShowAccount: () -> Void
@@ -50,6 +51,7 @@ struct DashboardAccountMenu: View {
             Divider()
 
             Button("Settings", systemImage: "gearshape", action: onShowSettings)
+            Button("Tutorial", systemImage: "graduationcap", action: onShowTutorial)
             Button("Help", systemImage: "questionmark.circle", action: onShowHelp)
             Button("About", systemImage: "info.circle", action: onShowAbout)
 
@@ -87,6 +89,7 @@ struct DashboardAccountMenu: View {
         onShowGraph: {},
         onShowOverview: {},
         onShowSettings: {},
+        onShowTutorial: {},
         onShowHelp: {},
         onShowAbout: {},
         onShowAccount: {},

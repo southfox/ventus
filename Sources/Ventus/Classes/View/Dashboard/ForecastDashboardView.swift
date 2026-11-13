@@ -23,6 +23,7 @@ public struct ForecastDashboardView: View {
         case favorites
         case forecastMap
         case weatherBackgroundSettings
+        case tutorial
         case help
         case about
 
@@ -48,6 +49,8 @@ public struct ForecastDashboardView: View {
     @State private var windDirectionDisplayMode: WindDirectionDisplayMode = .arrow
     @State private var gridHourStep: Int
     @State private var activeSheet: DashboardSheet?
+    @AppStorage("ventus.tutorial.automaticallyShows") private var automaticallyShowsTutorial = true
+    @State private var showsInitialTutorial = false
     @State private var content: ForecastViewMode
     @State private var weatherBackgroundStyle: WeatherBackgroundStyle
     @State private var theme: VentusTheme
@@ -175,6 +178,7 @@ public struct ForecastDashboardView: View {
             onShowGraph: { setContent(.graph) },
             onShowOverview: { setContent(.overview) },
             onShowSettings: { activeSheet = .weatherBackgroundSettings },
+            onShowTutorial: { activeSheet = .tutorial },
             onShowHelp: { activeSheet = .help },
             onShowAbout: { activeSheet = .about },
             onShowAccount: { activeSheet = .login },
@@ -197,6 +201,7 @@ public struct ForecastDashboardView: View {
                     Divider()
 
                     tvMenuButton("Settings", symbol: "gearshape") { presentTVMenuSheet(.weatherBackgroundSettings) }
+                    tvMenuButton("Tutorial", symbol: "graduationcap") { presentTVMenuSheet(.tutorial) }
                     tvMenuButton("Help", symbol: "questionmark.circle") { presentTVMenuSheet(.help) }
                     tvMenuButton("About", symbol: "info.circle") { presentTVMenuSheet(.about) }
 
@@ -544,6 +549,16 @@ public struct ForecastDashboardView: View {
                 .presentationSizing(.page)
 #endif
             }
+            .sheet(isPresented: sheetBinding(.tutorial)) {
+                VentusTutorialView(
+                    automaticallyShowsTutorial: $automaticallyShowsTutorial,
+                    onLogin: { activeSheet = .login }
+                )
+                .preferredReadingSize(preferredReadingSize)
+#if os(tvOS)
+                .presentationSizing(.page)
+#endif
+            }
             .sheet(isPresented: sheetBinding(.help)) {
                 NavigationStack {
                     VentusHelpView()
@@ -556,6 +571,23 @@ public struct ForecastDashboardView: View {
             .sheet(isPresented: sheetBinding(.about)) {
                 aboutSheet
                     .preferredReadingSize(preferredReadingSize)
+            }
+            .onAppear {
+                guard automaticallyShowsTutorial, !usesPreviewForecast else { return }
+                showsInitialTutorial = true
+            }
+            .sheet(isPresented: $showsInitialTutorial) {
+                VentusTutorialView(
+                    automaticallyShowsTutorial: $automaticallyShowsTutorial,
+                    onLogin: {
+                        showsInitialTutorial = false
+                        activeSheet = .login
+                    }
+                )
+                .preferredReadingSize(preferredReadingSize)
+#if os(tvOS)
+                .presentationSizing(.page)
+#endif
             }
 #if !os(tvOS)
             .sheet(isPresented: sheetBinding(.forecastMap)) {
