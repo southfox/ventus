@@ -45,12 +45,12 @@ public struct AboutView: View {
 
             Section("Supported devices") {
                 LabeledContent("Minimum Apple OS", value: "Version 26 or later")
-                supportedDevice("macOS", symbol: "laptopcomputer")
+//                supportedDevice("macOS", symbol: "laptopcomputer")
                 supportedDevice("iOS", symbol: "iphone")
                 supportedDevice("iPadOS", symbol: "ipad")
-                supportedDevice("watchOS", symbol: "applewatch")
-                supportedDevice("visionOS", symbol: "visionpro")
-                supportedDevice("tvOS", symbol: "appletv")
+//                supportedDevice("watchOS", symbol: "applewatch")
+//                supportedDevice("visionOS", symbol: "visionpro")
+//                supportedDevice("tvOS", symbol: "appletv")
             }
 
             Section("External libraries") {

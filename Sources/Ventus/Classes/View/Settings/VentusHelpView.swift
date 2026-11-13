@@ -56,7 +56,7 @@ public struct VentusHelpView: View {
                     Label("Ventus across Apple devices".localized, systemImage: "apple.logo")
                         .font(.headline)
 
-                    Text("These interface previews show how the same forecast workflow adapts to each Ventus app.".localized)
+                    Text("These interface previews show how the same forecast workflow adapts to each Ventus app (for the moment only iPhone and iPad).".localized)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
 
@@ -64,10 +64,10 @@ public struct VentusHelpView: View {
                         HStack(alignment: .top, spacing: 14) {
                             HelpPlatformPreview(name: "iPhone".localized, systemImage: "iphone", layout: .phone)
                             HelpPlatformPreview(name: "iPad".localized, systemImage: "ipad", layout: .split)
-                            HelpPlatformPreview(name: "Mac".localized, systemImage: "laptopcomputer", layout: .split)
-                            HelpPlatformPreview(name: "Vision".localized, systemImage: "visionpro", layout: .spatial)
-                            HelpPlatformPreview(name: "Watch".localized, systemImage: "applewatch", layout: .watch)
-                            HelpPlatformPreview(name: "Apple TV".localized, systemImage: "appletv", layout: .television)
+//                            HelpPlatformPreview(name: "Mac".localized, systemImage: "laptopcomputer", layout: .split)
+//                            HelpPlatformPreview(name: "Vision".localized, systemImage: "visionpro", layout: .spatial)
+//                            HelpPlatformPreview(name: "Watch".localized, systemImage: "applewatch", layout: .watch)
+//                            HelpPlatformPreview(name: "Apple TV".localized, systemImage: "appletv", layout: .television)
                         }
                         .padding(.vertical, 2)
                     }
