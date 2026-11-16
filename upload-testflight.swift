@@ -44,6 +44,8 @@ let tvOSExportDir = "\(buildDir)/export/tvos"
 let macOSExportDir = "\(buildDir)/export/macos"
 let exportOptionsPlist = "\(buildDir)/ExportOptions.plist"
 let keychainItemName = ProcessInfo.processInfo.environment["ALTOOL_KEYCHAIN_ITEM"] ?? "Forescoop-AppStoreConnect"
+let macAppStoreProfileName = ProcessInfo.processInfo.environment["MAC_APP_STORE_PROFILE"]
+let macWidgetAppStoreProfileName = ProcessInfo.processInfo.environment["MAC_WIDGET_APP_STORE_PROFILE"]
 
 let bundleVersionPlists = [
     appInfoPlist,
@@ -474,12 +476,10 @@ func archiveAndExport(_ platform: UploadPlatform) -> String {
     checkDSYMs(archivePath: platform.archivePath, appPath: archivedAppPath)
 
     // 3. Export
-    step("Exporting \(platform.name) IPA")
-    // The App Store profiles are deliberately selected for iOS. Automatic
-    // export signing attempts to use Apple's cloud-managed certificates, which
-    // is unavailable for this team even though local distribution profiles
-    // are installed.
-    let manualIOSProfileOptions = platform.name == "iOS" ? """
+    step("Exporting \(platform.name) App Store artifact")
+    // Store exports use local, explicitly selected distribution profiles for
+    // iOS and macOS. Cloud signing is not available to this team account.
+    let manualIOSProfileOptions = """
         <key>signingStyle</key>
         <string>manual</string>
         <key>signingCertificate</key>
@@ -493,10 +493,39 @@ func archiveAndExport(_ platform: UploadPlatform) -> String {
             <key>org.forescoop.iOSnowatch.ForescoopWidgets</key>
             <string>Ventus iOS Widgets App Store</string>
         </dict>
-    """ : """
+    """
+    let exportSigningOptions: String
+    switch platform.name {
+    case "iOS":
+        exportSigningOptions = manualIOSProfileOptions
+    case "macOS":
+        guard let macAppStoreProfileName, !macAppStoreProfileName.isEmpty,
+              let macWidgetAppStoreProfileName, !macWidgetAppStoreProfileName.isEmpty else {
+            fail("""
+            macOS App Store export requires local distribution profiles. Set:
+              MAC_APP_STORE_PROFILE="<Mac App Store profile for org.forescoop.iOSnowatch>"
+              MAC_WIDGET_APP_STORE_PROFILE="<Mac App Store profile for org.forescoop.iOSnowatch.ForescoopMacWidgets>"
+            """)
+        }
+        exportSigningOptions = """
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>signingCertificate</key>
+            <string>Apple Distribution</string>
+            <key>provisioningProfiles</key>
+            <dict>
+                <key>org.forescoop.iOSnowatch</key>
+                <string>\(macAppStoreProfileName)</string>
+                <key>org.forescoop.iOSnowatch.ForescoopMacWidgets</key>
+                <string>\(macWidgetAppStoreProfileName)</string>
+            </dict>
+        """
+    default:
+        exportSigningOptions = """
         <key>signingStyle</key>
         <string>automatic</string>
-    """
+        """
+    }
     let exportOptions = """
     <?xml version="1.0" encoding="UTF-8"?>
     <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -506,7 +535,7 @@ func archiveAndExport(_ platform: UploadPlatform) -> String {
         <string>app-store-connect</string>
         <key>teamID</key>
         <string>\(teamID)</string>
-    \(manualIOSProfileOptions)
+    \(exportSigningOptions)
     </dict>
     </plist>
     """
