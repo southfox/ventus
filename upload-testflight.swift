@@ -3,15 +3,18 @@
 //  upload-testflight.swift
 //  Ventus
 //
-//  Bumps the build number, archives the iOS and Apple TV apps, exports IPAs,
-//  validates them, and uploads them to App Store Connect / TestFlight.
+//  Bumps the build number, archives the iOS, macOS, and Apple TV apps,
+//  exports their App Store artifacts, validates them, and uploads them to
+//  App Store Connect / TestFlight.
 //
 //  Usage:
 //    ./upload-testflight.swift
 //    ./upload-testflight.swift --ios-only
+//    ./upload-testflight.swift --macos-only
 //    ./upload-testflight.swift --version 1.1.0
 //    ./upload-testflight.swift --ipa build/export/VentusIOS.ipa       # upload an existing iOS IPA only
 //    ./upload-testflight.swift --tv-ipa build/export/VentusTVOS.ipa   # upload an existing tvOS IPA only
+//    ./upload-testflight.swift --mac-pkg build/export/Ventus.pkg      # upload an existing macOS package only
 //
 
 import Foundation
@@ -22,6 +25,7 @@ let projectPath = "App/Ventus.xcodeproj"
 let projectFilePath = "App/Ventus.xcodeproj/project.pbxproj"
 let iOSScheme = "VentusIOS"
 let tvOSScheme = "VentusTVOS"
+let macOSScheme = "VentusMacOS"
 let teamID = "27XTSJS68A"
 let appInfoPlist = "App/Ventus_App-Info.plist"
 let clipInfoPlist = "App/VentusClip/Info.plist"
@@ -34,8 +38,10 @@ let tvAppInfoPlist = "App/VentusTVOS/Info.plist"
 let buildDir = "build"
 let iOSArchivePath = "\(buildDir)/VentusIOS.xcarchive"
 let tvOSArchivePath = "\(buildDir)/VentusTVOS.xcarchive"
+let macOSArchivePath = "\(buildDir)/VentusMacOS.xcarchive"
 let iOSExportDir = "\(buildDir)/export/ios"
 let tvOSExportDir = "\(buildDir)/export/tvos"
+let macOSExportDir = "\(buildDir)/export/macos"
 let exportOptionsPlist = "\(buildDir)/ExportOptions.plist"
 let keychainItemName = ProcessInfo.processInfo.environment["ALTOOL_KEYCHAIN_ITEM"] ?? "Forescoop-AppStoreConnect"
 
@@ -206,21 +212,34 @@ func checkDSYMs(archivePath: String, appPath: String) {
 
 var explicitIPAPath: String? = nil
 var explicitTVIPAPath: String? = nil
+var explicitMacPackagePath: String? = nil
 var requestedMarketingVersion: String? = nil
 let arguments = CommandLine.arguments.dropFirst()
 let iOSOnly = arguments.contains("--ios-only")
+let macOSOnly = arguments.contains("--macos-only")
 if let ipaFlagIndex = arguments.firstIndex(of: "--ipa"), arguments.index(after: ipaFlagIndex) < arguments.endIndex {
     explicitIPAPath = arguments[arguments.index(after: ipaFlagIndex)]
 }
 if let ipaFlagIndex = arguments.firstIndex(of: "--tv-ipa"), arguments.index(after: ipaFlagIndex) < arguments.endIndex {
     explicitTVIPAPath = arguments[arguments.index(after: ipaFlagIndex)]
 }
+if let packageFlagIndex = arguments.firstIndex(of: "--mac-pkg"), arguments.index(after: packageFlagIndex) < arguments.endIndex {
+    explicitMacPackagePath = arguments[arguments.index(after: packageFlagIndex)]
+}
 if let versionFlagIndex = arguments.firstIndex(of: "--version"), arguments.index(after: versionFlagIndex) < arguments.endIndex {
     requestedMarketingVersion = arguments[arguments.index(after: versionFlagIndex)]
 }
 
-if iOSOnly, explicitTVIPAPath != nil {
-    fail("--ios-only cannot be combined with --tv-ipa")
+if iOSOnly, macOSOnly {
+    fail("--ios-only and --macos-only cannot be combined")
+}
+
+if iOSOnly, explicitTVIPAPath != nil || explicitMacPackagePath != nil {
+    fail("--ios-only cannot be combined with --tv-ipa or --mac-pkg")
+}
+
+if macOSOnly, explicitIPAPath != nil || explicitTVIPAPath != nil {
+    fail("--macos-only cannot be combined with --ipa or --tv-ipa")
 }
 
 if arguments.contains("--version"), requestedMarketingVersion == nil {
@@ -314,7 +333,8 @@ struct UploadPlatform {
     let archivePath: String
     let exportDir: String
     let appStorePlatform: String
-    let explicitIPAPath: String?
+    let artifactExtension: String
+    let explicitArtifactPath: String?
 }
 
 let allPlatforms = [
@@ -325,7 +345,8 @@ let allPlatforms = [
         archivePath: iOSArchivePath,
         exportDir: iOSExportDir,
         appStorePlatform: "ios",
-        explicitIPAPath: explicitIPAPath
+        artifactExtension: "ipa",
+        explicitArtifactPath: explicitIPAPath
     ),
     UploadPlatform(
         name: "tvOS",
@@ -334,22 +355,35 @@ let allPlatforms = [
         archivePath: tvOSArchivePath,
         exportDir: tvOSExportDir,
         appStorePlatform: "appletvos",
-        explicitIPAPath: explicitTVIPAPath
+        artifactExtension: "ipa",
+        explicitArtifactPath: explicitTVIPAPath
+    ),
+    UploadPlatform(
+        name: "macOS",
+        scheme: macOSScheme,
+        destination: "generic/platform=macOS",
+        archivePath: macOSArchivePath,
+        exportDir: macOSExportDir,
+        appStorePlatform: "osx",
+        artifactExtension: "pkg",
+        explicitArtifactPath: explicitMacPackagePath
     ),
 ]
 
-// With no IPA arguments, ship both platforms. Supplying an IPA uploads only
-// the explicitly requested platform(s), which keeps the old --ipa workflow.
+// With no artifact arguments, ship every platform. Supplying an IPA or macOS
+// package uploads only the explicitly requested platform(s).
 let platforms: [UploadPlatform]
 if iOSOnly {
     platforms = [allPlatforms[0]]
-} else if explicitIPAPath == nil && explicitTVIPAPath == nil {
+} else if macOSOnly {
+    platforms = [allPlatforms[2]]
+} else if explicitIPAPath == nil && explicitTVIPAPath == nil && explicitMacPackagePath == nil {
     platforms = allPlatforms
 } else {
-    platforms = allPlatforms.filter { $0.explicitIPAPath != nil }
+    platforms = allPlatforms.filter { $0.explicitArtifactPath != nil }
 }
 
-let platformsToArchive = platforms.filter { $0.explicitIPAPath == nil }
+let platformsToArchive = platforms.filter { $0.explicitArtifactPath == nil }
 if requestedMarketingVersion != nil, platformsToArchive.isEmpty {
     fail("--version cannot be used with existing IPA uploads; archive a new build so the requested version is embedded.")
 }
@@ -496,29 +530,29 @@ func archiveAndExport(_ platform: UploadPlatform) -> String {
     let exportStatus = run("/usr/bin/xcodebuild", exportArguments)
     guard exportStatus == 0 else { fail("xcodebuild -exportArchive failed (status \(exportStatus))") }
 
-    guard let exportedIPA = (try? fileManager.contentsOfDirectory(atPath: platform.exportDir))?.first(where: { $0.hasSuffix(".ipa") }) else {
-        fail("No .ipa found in \(platform.exportDir) after export")
+    guard let exportedArtifact = (try? fileManager.contentsOfDirectory(atPath: platform.exportDir))?.first(where: { $0.hasSuffix(".\(platform.artifactExtension)") }) else {
+        fail("No .\(platform.artifactExtension) found in \(platform.exportDir) after export")
     }
-    return "\(platform.exportDir)/\(exportedIPA)"
+    return "\(platform.exportDir)/\(exportedArtifact)"
 }
 
 for platform in platforms {
-    let ipaPath: String
-    if let explicitIPAPath = platform.explicitIPAPath {
-        ipaPath = explicitIPAPath
-        guard fileManager.fileExists(atPath: ipaPath) else { fail("No IPA found at \(ipaPath)") }
-        step("Using existing \(platform.name) IPA at \(ipaPath), skipping increment/archive/export.")
+    let artifactPath: String
+    if let explicitArtifactPath = platform.explicitArtifactPath {
+        artifactPath = explicitArtifactPath
+        guard fileManager.fileExists(atPath: artifactPath) else { fail("No artifact found at \(artifactPath)") }
+        step("Using existing \(platform.name) artifact at \(artifactPath), skipping increment/archive/export.")
     } else {
-        ipaPath = archiveAndExport(platform)
+        artifactPath = archiveAndExport(platform)
     }
 
-    print("IPA: \(ipaPath)")
+    print("Artifact: \(artifactPath)")
 
     // 4. Validate
     step("Validating \(platform.name) IPA")
     let validateStatus = run("/usr/bin/xcrun", [
         "altool", "--validate-app",
-        "-f", ipaPath,
+        "-f", artifactPath,
         "-t", platform.appStorePlatform,
     ] + altoolAuthArgs)
     guard validateStatus == 0 else { fail("\(platform.name) validation failed (status \(validateStatus))") }
@@ -527,7 +561,7 @@ for platform in platforms {
     step("Uploading \(platform.name) to App Store Connect / TestFlight")
     let uploadStatus = run("/usr/bin/xcrun", [
         "altool", "--upload-app",
-        "-f", ipaPath,
+        "-f", artifactPath,
         "-t", platform.appStorePlatform,
     ] + altoolAuthArgs)
     guard uploadStatus == 0 else { fail("\(platform.name) upload failed (status \(uploadStatus))") }
