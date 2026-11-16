@@ -9,6 +9,7 @@
 //  Usage:
 //    ./upload-testflight.swift
 //    ./upload-testflight.swift --ios-only
+//    ./upload-testflight.swift --version 1.1.0
 //    ./upload-testflight.swift --ipa build/export/VentusIOS.ipa       # upload an existing iOS IPA only
 //    ./upload-testflight.swift --tv-ipa build/export/VentusTVOS.ipa   # upload an existing tvOS IPA only
 //
@@ -18,6 +19,7 @@ import Foundation
 // MARK: - Configuration
 
 let projectPath = "App/Ventus.xcodeproj"
+let projectFilePath = "App/Ventus.xcodeproj/project.pbxproj"
 let iOSScheme = "VentusIOS"
 let tvOSScheme = "VentusTVOS"
 let teamID = "27XTSJS68A"
@@ -40,6 +42,18 @@ let keychainItemName = ProcessInfo.processInfo.environment["ALTOOL_KEYCHAIN_ITEM
 let bundleVersionPlists = [
     appInfoPlist,
     clipInfoPlist,
+    widgetInfoPlist,
+    watchAppInfoPlist,
+    watchCompanionInfoPlist,
+    watchExtensionInfoPlist,
+    macAppInfoPlist,
+    tvAppInfoPlist,
+]
+
+// The App Clip reads its marketing version from MARKETING_VERSION, so it is
+// updated in the Xcode project rather than directly in its Info.plist.
+let marketingVersionPlists = [
+    appInfoPlist,
     widgetInfoPlist,
     watchAppInfoPlist,
     watchCompanionInfoPlist,
@@ -192,6 +206,7 @@ func checkDSYMs(archivePath: String, appPath: String) {
 
 var explicitIPAPath: String? = nil
 var explicitTVIPAPath: String? = nil
+var requestedMarketingVersion: String? = nil
 let arguments = CommandLine.arguments.dropFirst()
 let iOSOnly = arguments.contains("--ios-only")
 if let ipaFlagIndex = arguments.firstIndex(of: "--ipa"), arguments.index(after: ipaFlagIndex) < arguments.endIndex {
@@ -200,9 +215,21 @@ if let ipaFlagIndex = arguments.firstIndex(of: "--ipa"), arguments.index(after: 
 if let ipaFlagIndex = arguments.firstIndex(of: "--tv-ipa"), arguments.index(after: ipaFlagIndex) < arguments.endIndex {
     explicitTVIPAPath = arguments[arguments.index(after: ipaFlagIndex)]
 }
+if let versionFlagIndex = arguments.firstIndex(of: "--version"), arguments.index(after: versionFlagIndex) < arguments.endIndex {
+    requestedMarketingVersion = arguments[arguments.index(after: versionFlagIndex)]
+}
 
 if iOSOnly, explicitTVIPAPath != nil {
     fail("--ios-only cannot be combined with --tv-ipa")
+}
+
+if arguments.contains("--version"), requestedMarketingVersion == nil {
+    fail("--version requires a value, for example: --version 1.1.0")
+}
+
+if let requestedMarketingVersion,
+   requestedMarketingVersion.range(of: #"^[0-9]+(\.[0-9]+){0,2}$"#, options: .regularExpression) == nil {
+    fail("Version \(requestedMarketingVersion) must contain one to three numeric components, for example 1.1.0.")
 }
 
 // MARK: - Credentials
@@ -323,19 +350,61 @@ if iOSOnly {
 }
 
 let platformsToArchive = platforms.filter { $0.explicitIPAPath == nil }
+if requestedMarketingVersion != nil, platformsToArchive.isEmpty {
+    fail("--version cannot be used with existing IPA uploads; archive a new build so the requested version is embedded.")
+}
 if !platformsToArchive.isEmpty {
-    // 1. Increment build number
-    step("Incrementing build number")
     let plistBuddy = "/usr/libexec/PlistBuddy"
+
+    func setPlistValue(_ key: String, value: String, in plist: String) {
+        let status = run(plistBuddy, ["-c", "Set :\(key) \(value)", plist])
+        guard status == 0 else { fail("Failed to update \(key) in \(plist)") }
+    }
+
+    func replaceProjectBuildSetting(_ name: String, value: String) {
+        let pattern = #"(?m)(\b"# + name + #"\s*=\s*)[^;]+;"#
+        guard let contents = try? String(contentsOfFile: projectFilePath, encoding: .utf8) else {
+            fail("Could not read \(projectFilePath)")
+        }
+        guard let expression = try? NSRegularExpression(pattern: pattern) else {
+            fail("Could not create the \(name) build-setting expression")
+        }
+        let range = NSRange(contents.startIndex..., in: contents)
+        let matchCount = expression.numberOfMatches(in: contents, range: range)
+        guard matchCount > 0 else { fail("No \(name) entries were found in \(projectFilePath)") }
+        let updated = expression.stringByReplacingMatches(
+            in: contents,
+            range: range,
+            withTemplate: "$1\(value);"
+        )
+        do {
+            try updated.write(toFile: projectFilePath, atomically: true, encoding: .utf8)
+        } catch {
+            fail("Could not update \(projectFilePath): \(error)")
+        }
+    }
+
+    // 1. Apply a requested public version consistently before creating a new
+    // build. Without --version, the current marketing version is preserved.
+    if let requestedMarketingVersion {
+        step("Setting marketing version to \(requestedMarketingVersion)")
+        for plist in marketingVersionPlists {
+            setPlistValue("CFBundleShortVersionString", value: requestedMarketingVersion, in: plist)
+        }
+        replaceProjectBuildSetting("MARKETING_VERSION", value: requestedMarketingVersion)
+    }
+
+    // 2. Increment the build number for every bundled app and extension.
+    step("Incrementing build number")
     let currentBuild = capture(plistBuddy, ["-c", "Print :CFBundleVersion", appInfoPlist])
     guard let currentBuildNumber = Int(currentBuild) else {
         fail("Could not read CFBundleVersion from \(appInfoPlist) (got \"\(currentBuild)\")")
     }
     let newBuildNumber = currentBuildNumber + 1
     for plist in bundleVersionPlists {
-        let status = run(plistBuddy, ["-c", "Set :CFBundleVersion \(newBuildNumber)", plist])
-        guard status == 0 else { fail("Failed to update CFBundleVersion in \(plist)") }
+        setPlistValue("CFBundleVersion", value: String(newBuildNumber), in: plist)
     }
+    replaceProjectBuildSetting("CURRENT_PROJECT_VERSION", value: String(newBuildNumber))
     print("Build number: \(currentBuildNumber) -> \(newBuildNumber)")
 }
 
