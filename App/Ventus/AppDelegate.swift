@@ -129,6 +129,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
     private var environment: AppEnvironment?
+    private var hasPresentedDemoSession = false
 
     func scene(
         _ scene: UIScene,
@@ -147,6 +148,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window.makeKeyAndVisible()
         self.window = window
         self.environment = environment
+        presentDemoSessionIfNeeded()
     }
 
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
@@ -155,14 +157,36 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         openForecast(from: userActivity.webpageURL, in: environment)
         window?.rootViewController = UIHostingController(rootView: ForecastDashboardView(environment: environment))
+        presentDemoSessionIfNeeded()
     }
 
     private func openForecast(from url: URL?, in environment: AppEnvironment) {
         guard let url,
-              ["ventus-52c5b.web.app", "ventus-52c5b.firebaseapp.com"].contains(url.host),
-              url.path == "/forecast/bariloche-dina-huapi" else { return }
+              ["ventus-52c5b.web.app", "ventus-52c5b.firebaseapp.com"].contains(url.host) else { return }
+
+        if let demoSession = AppClipDemoSession(invocationURL: url) {
+            demoSession.save()
+            return
+        }
+
+        guard url.path == "/forecast/bariloche-dina-huapi" else { return }
 
         environment.selectedSpotStore.save("64141")
+    }
+
+    private func presentDemoSessionIfNeeded() {
+        guard !hasPresentedDemoSession,
+              let session = AppClipDemoSession.load(),
+              let rootViewController = window?.rootViewController else { return }
+
+        hasPresentedDemoSession = true
+        let alert = UIAlertController(
+            title: "Demo session received",
+            message: "Flow: \(session.flowType)\nToken: \(session.displayToken)\n\nThis is a local test value, not a signed-in account.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        rootViewController.present(alert, animated: true)
     }
 }
 

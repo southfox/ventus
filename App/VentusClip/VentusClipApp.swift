@@ -24,7 +24,7 @@ private struct VentusClipView: View {
     }
 
     private var invocation: VentusClipInvocation? {
-        VentusClipInvocation(url: invocationURL)
+        AppClipDemoSession(invocationURL: invocationURL).map(VentusClipInvocation.init)
     }
 
     var body: some View {
@@ -60,6 +60,9 @@ private struct VentusClipView: View {
         }
         .task(id: spot.id) {
             await viewModel.load(spot: spot)
+        }
+        .task(id: invocation?.bindingKey) {
+            invocation?.session.save()
         }
     }
 }
@@ -223,26 +226,14 @@ private struct VentusClipSpot: Hashable {
     }
 }
 
-private struct VentusClipInvocation: Hashable {
-    let bindingKey: String
-    let flowType: String
+private struct VentusClipInvocation {
+    let session: AppClipDemoSession
 
-    init?(url: URL?) {
-        guard let url,
-              url.path == "/account/autologin/" || url.path == "/account/autologin",
-              let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-              let bindingKey = components.queryItems?.first(where: { $0.name == "binding_key" })?.value,
-              !bindingKey.isEmpty else {
-            return nil
-        }
-
-        self.bindingKey = bindingKey
-        self.flowType = components.queryItems?.first(where: { $0.name == "flow_type" })?.value ?? "unknown"
+    init(_ session: AppClipDemoSession) {
+        self.session = session
     }
 
-    var displayToken: String {
-        let visibleCharacters = 18
-        guard bindingKey.count > visibleCharacters else { return bindingKey }
-        return "\(bindingKey.prefix(visibleCharacters))…"
-    }
+    var bindingKey: String { session.bindingKey }
+    var flowType: String { session.flowType }
+    var displayToken: String { session.displayToken }
 }
