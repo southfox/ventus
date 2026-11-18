@@ -9,6 +9,10 @@
 					{
 						"/": "/forecast/*",
 						"comment": "Open forecast links in Ventus."
+					},
+					{
+						"/": "/account/autologin/*",
+						"comment": "Open account auto-login links in Ventus."
 					}
 				]
 			}

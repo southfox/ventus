@@ -22,7 +22,7 @@ Static Firebase Hosting site for the public Ventus landing page and App Clip dom
    firebase deploy --only hosting --project ventus-weather
    ```
 
-Firebase will publish it at `https://ventus-weather.web.app` (or the actual chosen project ID).
+Firebase publishes this project at `https://ventus-52c5b.web.app`.
 
 ## Enable the App Clip card
 
@@ -32,4 +32,14 @@ After Ventus has an App Store ID, replace `YOUR_APP_STORE_ID` in `public/index.h
 appclips:ventus-weather.web.app
 ```
 
-The `public/.well-known/apple-app-site-association` file already identifies the current Ventus App Clip application identifier.
+The `public/.well-known/apple-app-site-association` file identifies the current Ventus App Clip application identifier and permits both `/forecast/*` and `/account/autologin/*` universal links.
+
+## App Clip auto-login test link
+
+Use this URL shape for an invocation test, replacing the placeholders with the real values:
+
+```
+https://ventus-52c5b.web.app/account/autologin/?binding_key=<token>&flow_type=<flow>
+```
+
+Register the URL prefix `https://ventus-52c5b.web.app/account/autologin/` as an App Clip experience in App Store Connect.
