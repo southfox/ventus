@@ -61,9 +61,6 @@ private struct VentusClipView: View {
         .task(id: spot.id) {
             await viewModel.load(spot: spot)
         }
-        .task(id: invocation?.bindingKey) {
-            invocation?.session.save()
-        }
     }
 }
 

@@ -2,8 +2,8 @@ import Foundation
 
 /// A deliberately non-production session used to verify an App Clip URL handoff.
 ///
-/// Both the App Clip and its containing iOS app use the same App Group so a test
-/// invocation survives the transition from the Clip to the full app.
+/// The containing iOS app persists the invocation in its App Group so it can
+/// reliably confirm the values it received from a universal-link handoff.
 public struct AppClipDemoSession: Equatable, Sendable {
     public static let appGroupIdentifier = "group.org.forescoop.shared"
 
