@@ -42,4 +42,8 @@ Use this URL shape for an invocation test, replacing the placeholders with the r
 https://ventus-52c5b.web.app/account/autologin/?binding_key=<token>&flow_type=<flow>
 ```
 
-Register the URL prefix `https://ventus-52c5b.web.app/account/autologin/` as an App Clip experience in App Store Connect.
+Register the URL prefix `https://ventus-52c5b.web.app/account/autologin` as an App Clip experience in App Store Connect. App Store Connect requires this prefix without a trailing slash.
+
+## Demo login
+
+`/account/login/` is a local-only App Clip test flow. Any non-empty email and password are accepted, but never sent or persisted. Each submission generates a new random `binding_key` and redirects to `/account/autologin/?binding_key=…&flow_type=demo_login`.

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#07131e">
+    <meta name="description" content="Create a demo Ventus App Clip session.">
+    <title>Demo sign in — Ventus</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="legal-page">
+      <nav aria-label="Primary navigation">
+        <a class="brand" href="/" aria-label="Ventus home">
+          <span class="brand-mark" aria-hidden="true">≋</span>
+          <span>Ventus</span>
+        </a>
+      </nav>
+      <p class="eyebrow">Demo App Clip flow</p>
+      <h1>Sign in to test.</h1>
+      <p>This is a local demonstration only: any email and password work, neither is sent or stored, and each sign-in creates a new one-time test token for the App Clip.</p>
+
+      <form class="demo-login" id="demo-login" novalidate>
+        <label>
+          Email
+          <input name="email" type="email" autocomplete="email" required placeholder="you@example.com">
+        </label>
+        <label>
+          Password
+          <input name="password" type="password" autocomplete="current-password" required placeholder="Any password">
+        </label>
+        <p class="form-error" id="form-error" role="alert" hidden>Please enter an email and password to continue.</p>
+        <button class="button primary" type="submit">Continue to Ventus <span aria-hidden="true">→</span></button>
+      </form>
+    </main>
+    <script>
+      const form = document.querySelector('#demo-login');
+      const error = document.querySelector('#form-error');
+
+      function createDemoToken() {
+        const bytes = new Uint8Array(24);
+        crypto.getRandomValues(bytes);
+        return 'demo_' + Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+      }
+
+      form.addEventListener('submit', event => {
+        event.preventDefault();
+        const values = new FormData(form);
+        const email = String(values.get('email') || '').trim();
+        const password = String(values.get('password') || '');
+
+        if (!email || !password) {
+          error.hidden = false;
+          return;
+        }
+
+        const url = new URL('/account/autologin/', window.location.origin);
+        url.searchParams.set('binding_key', createDemoToken());
+        url.searchParams.set('flow_type', 'demo_login');
+        window.location.assign(url);
+      });
+    </script>
+  </body>
+</html>

@@ -23,6 +23,10 @@ private struct VentusClipView: View {
         VentusClipSpot(invocationURL: invocationURL) ?? .bariloche
     }
 
+    private var invocation: VentusClipInvocation? {
+        VentusClipInvocation(url: invocationURL)
+    }
+
     var body: some View {
         NavigationStack {
             Group {
@@ -30,7 +34,7 @@ private struct VentusClipView: View {
                 case .loading:
                     ProgressView("Loading forecast…")
                 case let .loaded(forecast):
-                    ForecastSummaryView(forecast: forecast, spot: spot)
+                    ForecastSummaryView(forecast: forecast, spot: spot, invocation: invocation)
                 case let .failed(message):
                     ContentUnavailableView(
                         "Forecast unavailable",
@@ -63,6 +67,7 @@ private struct VentusClipView: View {
 private struct ForecastSummaryView: View {
     let forecast: SpotForecast
     let spot: VentusClipSpot
+    let invocation: VentusClipInvocation?
 
     private var hour: String? { forecast.currentForecastHour }
     private var data: Forecast? { forecast.forecast }
@@ -70,6 +75,10 @@ private struct ForecastSummaryView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
+                if let invocation {
+                    DemoSessionView(invocation: invocation)
+                }
+
                 HStack(alignment: .center, spacing: 18) {
                     Image(systemName: forecast.weatherSymbolName(hour: hour))
                         .symbolRenderingMode(.multicolor)
@@ -136,6 +145,32 @@ private struct ForecastSummaryView: View {
     }
 }
 
+private struct DemoSessionView: View {
+    let invocation: VentusClipInvocation
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(.green)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Demo session ready")
+                    .font(.headline)
+                Text("Flow: \(invocation.flowType)")
+                    .font(.subheadline)
+                Text(invocation.displayToken)
+                    .font(.caption.monospaced())
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding()
+        .background(.green.opacity(0.12), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Demo session ready for \(invocation.flowType)")
+    }
+}
+
 @MainActor
 private final class VentusClipForecastViewModel: ObservableObject {
     enum State {
@@ -185,5 +220,29 @@ private struct VentusClipSpot: Hashable {
         let path = invocationURL.pathComponents.filter { $0 != "/" }
         guard path.dropFirst().last == Self.bariloche.slug else { return nil }
         self = .bariloche
+    }
+}
+
+private struct VentusClipInvocation: Hashable {
+    let bindingKey: String
+    let flowType: String
+
+    init?(url: URL?) {
+        guard let url,
+              url.path == "/account/autologin/" || url.path == "/account/autologin",
+              let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let bindingKey = components.queryItems?.first(where: { $0.name == "binding_key" })?.value,
+              !bindingKey.isEmpty else {
+            return nil
+        }
+
+        self.bindingKey = bindingKey
+        self.flowType = components.queryItems?.first(where: { $0.name == "flow_type" })?.value ?? "unknown"
+    }
+
+    var displayToken: String {
+        let visibleCharacters = 18
+        guard bindingKey.count > visibleCharacters else { return bindingKey }
+        return "\(bindingKey.prefix(visibleCharacters))…"
     }
 }

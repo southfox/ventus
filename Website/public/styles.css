@@ -60,6 +60,12 @@ footer a, .legal-page a { color: var(--aqua); text-underline-offset: .25em; }
 .legal-page h1 { max-width: none; margin: 4rem 0 1.25rem; font-size: clamp(3rem, 8vw, 5rem); }
 .legal-page h2 { margin: 2.25rem 0 .75rem; font-size: 1.5rem; }
 .legal-page > p { color: var(--muted); font-size: 1.05rem; line-height: 1.7; }
+.demo-login { display: grid; gap: 1.2rem; max-width: 30rem; margin-top: 2.25rem; }
+.demo-login label { display: grid; gap: .45rem; color: var(--ink); font-weight: 700; }
+.demo-login input { width: 100%; border: 1px solid var(--line); border-radius: .75rem; padding: .85rem 1rem; color: var(--ink); font: inherit; background: rgba(8, 23, 34, .72); }
+.demo-login input:focus { outline: 2px solid var(--aqua); outline-offset: 2px; }
+.demo-login .button { justify-self: start; cursor: pointer; font: inherit; }
+.form-error { margin: 0; color: #ff9f9f !important; }
 
 @media (max-width: 35rem) {
   main { width: min(100% - 1.5rem, 67rem); }
