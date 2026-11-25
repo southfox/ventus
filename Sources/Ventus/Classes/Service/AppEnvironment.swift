@@ -1,11 +1,3 @@
-//
-//  AppEnvironment.swift
-//  VentusPackage
-//
-//  Created by Javier Fuchs on 08/20/26.
-//  Copyright © 2026 Mobile Patagonia. All rights reserved.
-//
-
 import Foundation
 import SwiftData
 import SwiftUI
@@ -43,6 +35,13 @@ public final class AppEnvironment: Sendable {
     /// The platform apps inject `VentusFirebase` at launch.
     public init(analytics: AnalyticsLogging = NoOpAnalyticsLogger()) {
         let persistence = VentusPersistenceController()
+        if !persistence.recoveryErrors.isEmpty {
+            analytics.configure()
+        }
+        for error in persistence.recoveryErrors {
+            analytics.log("SwiftData store reset after open failure")
+            analytics.recordError(error)
+        }
         let preferenceStore = VentusPreferenceStore(container: persistence.mapLocationsContainer)
         let selectedSpotStore = SelectedWindguruSpotStore(container: persistence.mapLocationsContainer)
         let forecastAlertStore = ForecastAlertStore(container: persistence.alertsContainer)
