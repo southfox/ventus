@@ -1,0 +1,67 @@
+name: iOS PR
+
+on:
+  pull_request:
+    branches: [dev, master]
+    paths-ignore:
+      - "Website/**"
+      - "**.md"
+  workflow_dispatch:
+
+concurrency:
+  group: ios-pr-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Package tests
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - uses: actions/cache@v4
+        with:
+          path: .build
+          key: spm-test-${{ runner.os }}-${{ hashFiles('Package.resolved') }}
+          restore-keys: spm-test-${{ runner.os }}-
+
+      - name: Run tests
+        run: swift test
+
+  build:
+    name: Build iOS app
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - uses: actions/cache@v4
+        with:
+          path: SourcePackages
+          key: spm-app-${{ runner.os }}-${{ hashFiles('App/Ventus.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+          restore-keys: spm-app-${{ runner.os }}-
+
+      - name: Build for simulator
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project App/Ventus.xcodeproj \
+            -scheme VentusIOS \
+            -configuration Debug \
+            -destination "generic/platform=iOS Simulator" \
+            -clonedSourcePackagesDirPath SourcePackages \
+            -skipPackagePluginValidation \
+            -skipMacroValidation \
+            CODE_SIGNING_ALLOWED=NO
