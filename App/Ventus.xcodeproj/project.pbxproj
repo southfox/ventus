@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0894FBC9122E19A4D3DFDA01 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000100 /* Localizable.xcstrings */; };
+		701CB5F0B221FC177A36A322 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000100 /* Localizable.xcstrings */; };
+		7343110DACB1666706E00938 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000100 /* Localizable.xcstrings */; };
 		980E864B3040D6CB00F05C31 /* VentusFirebase in Frameworks */ = {isa = PBXBuildFile; productRef = F90000000000000000000003 /* VentusFirebase */; };
 		980E864C3040D6CB00F05C31 /* VentusFirebase in Frameworks */ = {isa = PBXBuildFile; productRef = F90000000000000000000005 /* VentusFirebase */; };
 		980E864D3040D6CB00F05C31 /* VentusFirebase in Frameworks */ = {isa = PBXBuildFile; productRef = F90000000000000000000004 /* VentusFirebase */; };
@@ -39,6 +42,7 @@
 		C0DE00000000000000000104 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000100 /* Localizable.xcstrings */; };
 		C0DE00000000000000000105 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000100 /* Localizable.xcstrings */; };
 		C0DE00000000000000000106 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000100 /* Localizable.xcstrings */; };
+		C26F5375EA870397CE51E91F /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000100 /* Localizable.xcstrings */; };
 		D00100000000000000000001 /* VentusWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00100000000000000000002 /* VentusWidgetBundle.swift */; };
 		D00100000000000000000003 /* VentusWidgets in Frameworks */ = {isa = PBXBuildFile; productRef = D00100000000000000000004 /* VentusWidgets */; };
 		D00100000000000000000005 /* VentusWatchWidgets.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = D00100000000000000000006 /* VentusWatchWidgets.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -527,6 +531,7 @@
 			buildPhases = (
 				D0010000000000000000000F /* Sources */,
 				D00100000000000000000009 /* Frameworks */,
+				18DFD2C9D6313BBF73A0F9C1 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -546,6 +551,7 @@
 			buildPhases = (
 				E10100000000000000000007 /* Sources */,
 				E10100000000000000000006 /* Frameworks */,
+				07DBDAE42279D56A1F45A765 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -565,6 +571,7 @@
 			buildPhases = (
 				F10100000000000000000007 /* Sources */,
 				F10100000000000000000006 /* Frameworks */,
+				D0EF21D3DF90E9CD18033BA1 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -658,6 +665,22 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		07DBDAE42279D56A1F45A765 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7343110DACB1666706E00938 /* Localizable.xcstrings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		18DFD2C9D6313BBF73A0F9C1 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				701CB5F0B221FC177A36A322 /* Localizable.xcstrings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		98688A0222D5936400A09AD0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -695,6 +718,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AC1C00000000000000000002 /* Images.xcassets in Resources */,
+				0894FBC9122E19A4D3DFDA01 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -705,6 +729,14 @@
 				B00100000000000000000009 /* LaunchScreen.xib in Resources */,
 				B0010000000000000000000A /* Images.xcassets in Resources */,
 				C0DE00000000000000000105 /* Localizable.xcstrings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D0EF21D3DF90E9CD18033BA1 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C26F5375EA870397CE51E91F /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

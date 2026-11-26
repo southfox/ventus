@@ -121,7 +121,7 @@ public struct ForecastWidgetEntry: TimelineEntry, Sendable {
         cloudCover: "35%",
         pressure: "1015 hPa",
         symbolName: "cloud.sun.fill",
-        condition: "Partly cloudy",
+        condition: "Partly cloudy".localized,
         high: "14°",
         highCelsius: 14,
         low: "6°",
