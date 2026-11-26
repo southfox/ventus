@@ -530,18 +530,18 @@ public struct SettingsView: View {
     private var systemSection: some View {
         Section {
             useDeviceTextSizeToggle
-#if !os(tvOS)
+#if !os(tvOS) && !os(watchOS)
                 .listRowSeparator(.visible)
 #endif
             if !usesDeviceTextSize {
                 Text("Preferred reading size".localized)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
-#if !os(tvOS)
+#if !os(tvOS) && !os(watchOS)
                     .listRowSeparator(.hidden)
 #endif
                 readingSizeButtons
-#if !os(tvOS)
+#if !os(tvOS) && !os(watchOS)
                     .listRowSeparator(.hidden)
 #endif
                 readingSizeExample

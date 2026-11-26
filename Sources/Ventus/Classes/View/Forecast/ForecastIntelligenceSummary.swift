@@ -9,7 +9,7 @@
 #if !os(watchOS)
 import SwiftUI
 
-#if canImport(FoundationModels) && !os(tvOS)
+#if canImport(FoundationModels) && !os(tvOS) && !os(watchOS)
 import FoundationModels
 #endif
 
@@ -92,7 +92,7 @@ public struct ForecastIntelligenceSummary: View {
     @MainActor
     private func generateSummary() async {
         summary = snapshot.structuredOverview
-#if canImport(FoundationModels) && !os(tvOS)
+#if canImport(FoundationModels) && !os(tvOS) && !os(watchOS)
         guard SystemLanguageModel.default.isAvailable else { return }
         isGenerating = true
         defer { isGenerating = false }

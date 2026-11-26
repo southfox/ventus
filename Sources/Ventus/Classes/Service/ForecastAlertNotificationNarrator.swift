@@ -5,7 +5,7 @@
 
 import Foundation
 
-#if canImport(FoundationModels) && !os(tvOS)
+#if canImport(FoundationModels) && !os(tvOS) && !os(watchOS)
 import FoundationModels
 #endif
 
@@ -73,7 +73,7 @@ enum ForecastAlertNotificationNarrator {
     }
 
     static func body(for facts: Facts) async -> String {
-#if canImport(FoundationModels) && !os(tvOS)
+#if canImport(FoundationModels) && !os(tvOS) && !os(watchOS)
         guard SystemLanguageModel.default.isAvailable else { return facts.fallback }
         do {
             let language = Locale(identifier: "en").localizedString(forLanguageCode: facts.languageCode) ?? "English"

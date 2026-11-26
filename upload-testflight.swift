@@ -506,6 +506,10 @@ func archiveAndExport(_ platform: UploadPlatform) -> String {
             <string>Ventus Clip App Store</string>
             <key>org.forescoop.iOSnowatch.ForescoopWidgets</key>
             <string>Ventus iOS Widgets App Store</string>
+            <key>org.forescoop.iOSnowatch.ForescoopWatchOnly</key>
+            <string>Ventus Watch App Store</string>
+            <key>org.forescoop.iOSnowatch.ForescoopWatchOnly.ForescoopWidgets</key>
+            <string>Ventus Watch Widgets App Store</string>
         </dict>
     """
     let exportSigningOptions: String
