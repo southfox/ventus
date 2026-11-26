@@ -17,6 +17,7 @@
 		98688A1422D5938500A09AD0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		987A6DCF22D595D400662010 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 987A6DCE22D595D400662010 /* Assets.xcassets */; };
 		98DC785522D5963C00F72DBA /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
+		9C66739BBC3BFC5E50182D6E /* VentusWatchOnly.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000011 /* VentusWatchOnly.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A00100000000000000000007 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		A00100000000000000000009 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		A0010000000000000000000A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
@@ -84,9 +85,27 @@
 			remoteGlobalIDString = AC1C0000000000000000000F;
 			remoteInfo = VentusClip;
 		};
+		BE89264D070A2BB7AC4F7FAA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 607FACC81AFB9204008FA782 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA0100000000000000000005;
+			remoteInfo = VentusWatchOnly;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		55055349B6E2EC309D6B9417 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				9C66739BBC3BFC5E50182D6E /* VentusWatchOnly.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AC1C00000000000000000005 /* Embed App Clips */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -420,12 +439,14 @@
 				A00100000000000000000012 /* Resources */,
 				E10100000000000000000008 /* Embed App Extensions */,
 				AC1C00000000000000000005 /* Embed App Clips */,
+				55055349B6E2EC309D6B9417 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				E10100000000000000000009 /* PBXTargetDependency */,
 				AC1C00000000000000000009 /* PBXTargetDependency */,
+				E984300B468D65DE65EC5EB6 /* PBXTargetDependency */,
 			);
 			name = VentusIOS;
 			packageProductDependencies = (
@@ -791,6 +812,12 @@
 			target = E10100000000000000000005 /* VentusIOSWidgets */;
 			targetProxy = 98231BAA3025E34900D4E0F2 /* PBXContainerItemProxy */;
 		};
+		E984300B468D65DE65EC5EB6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = VentusWatchOnly;
+			target = AA0100000000000000000005 /* VentusWatchOnly */;
+			targetProxy = BE89264D070A2BB7AC4F7FAA /* PBXContainerItemProxy */;
+		};
 		F10100000000000000000009 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = F10100000000000000000005 /* VentusMacWidgets */;
@@ -1128,6 +1155,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.forescoop.iOSnowatch.ForescoopWatchOnly;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "watchos watchsimulator";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
@@ -1140,13 +1168,17 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = VentusWatchOnly.entitlements;
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 27XTSJS68A;
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=watchos*]" = 27XTSJS68A;
 				INFOPLIST_FILE = "VentusWatchOnly-Info.plist";
 				PRODUCT_BUNDLE_IDENTIFIER = org.forescoop.iOSnowatch.ForescoopWatchOnly;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=watchos*]" = "Ventus Watch App Store";
 				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "watchos watchsimulator";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
@@ -1278,13 +1310,15 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = VentusWidgets/VentusWidgets.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 27XTSJS68A;
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=watchos*]" = 27XTSJS68A;
 				INFOPLIST_FILE = VentusWidgets/Info.plist;
 				PRODUCT_BUNDLE_IDENTIFIER = org.forescoop.iOSnowatch.ForescoopWatchOnly.ForescoopWidgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=watchos*]" = "Ventus Watch Widgets App Store";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "watchos watchsimulator";
