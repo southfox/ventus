@@ -1,0 +1,35 @@
+name: iOS TestFlight
+
+on:
+  push:
+    branches: [dev]
+    paths-ignore:
+      - "Website/**"
+      - "**.md"
+      - ".github/pull_request_template.md"
+  workflow_dispatch:
+
+concurrency:
+  group: ios-testflight
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Tests
+    uses: ./.github/workflows/swift-tests.yml
+    permissions:
+      contents: read
+
+  upload:
+    name: TestFlight
+    needs: test
+    uses: ./.github/workflows/testflight-upload.yml
+    with:
+      ref: dev
+      commit-build-number: true
+    secrets: inherit
+    permissions:
+      contents: write

@@ -1,0 +1,131 @@
+name: TestFlight upload
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        type: string
+        required: true
+      build-number-suffix:
+        type: string
+        default: ""
+      commit-build-number:
+        type: boolean
+        default: false
+    outputs:
+      build-number:
+        value: ${{ jobs.upload.outputs.build-number }}
+      version:
+        value: ${{ jobs.upload.outputs.version }}
+
+jobs:
+  upload:
+    name: Archive and upload
+    runs-on: macos-26
+    timeout-minutes: 90
+    outputs:
+      build-number: ${{ steps.result.outputs.build-number }}
+      version: ${{ steps.result.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/Library/Developer/Xcode/DerivedData/**/SourcePackages
+          key: spm-archive-${{ runner.os }}-${{ hashFiles('App/Ventus.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+          restore-keys: spm-archive-${{ runner.os }}-
+
+      - name: Install signing certificates and profiles
+        env:
+          SIGNING_CERTIFICATES_P12_BASE64: ${{ secrets.SIGNING_CERTIFICATES_P12_BASE64 }}
+          SIGNING_CERTIFICATES_PASSWORD: ${{ secrets.SIGNING_CERTIFICATES_PASSWORD }}
+          IOS_APP_PROFILE_BASE64: ${{ secrets.IOS_APP_PROFILE_BASE64 }}
+          IOS_CLIP_PROFILE_BASE64: ${{ secrets.IOS_CLIP_PROFILE_BASE64 }}
+          IOS_WIDGETS_PROFILE_BASE64: ${{ secrets.IOS_WIDGETS_PROFILE_BASE64 }}
+        run: |
+          set -euo pipefail
+          KEYCHAIN="$RUNNER_TEMP/signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(uuidgen)"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          echo "$SIGNING_CERTIFICATES_P12_BASE64" | base64 --decode > "$RUNNER_TEMP/certificates.p12"
+          security import "$RUNNER_TEMP/certificates.p12" -P "$SIGNING_CERTIFICATES_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN" > /dev/null
+          security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | tr -d '"')
+          rm "$RUNNER_TEMP/certificates.p12"
+
+          for DIR in "$HOME/Library/MobileDevice/Provisioning Profiles" "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"; do
+            mkdir -p "$DIR"
+            for PROFILE in "$IOS_APP_PROFILE_BASE64" "$IOS_CLIP_PROFILE_BASE64" "$IOS_WIDGETS_PROFILE_BASE64"; do
+              echo "$PROFILE" | base64 --decode > "$RUNNER_TEMP/profile.mobileprovision"
+              UUID="$(security cms -D -i "$RUNNER_TEMP/profile.mobileprovision" | plutil -extract UUID raw -)"
+              mv "$RUNNER_TEMP/profile.mobileprovision" "$DIR/$UUID.mobileprovision"
+            done
+          done
+
+      - name: Install App Store Connect API key
+        env:
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_KEY_P8_BASE64: ${{ secrets.ASC_API_KEY_P8_BASE64 }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "$ASC_API_KEY_P8_BASE64" | base64 --decode > ~/.appstoreconnect/private_keys/AuthKey_${ASC_API_KEY_ID}.p8
+
+      - name: Archive and upload to TestFlight
+        env:
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_ISSUER_ID: ${{ secrets.ASC_API_ISSUER_ID }}
+          BUILD_NUMBER_SUFFIX: ${{ inputs.build-number-suffix }}
+        run: |
+          set -euo pipefail
+          if [[ -n "$BUILD_NUMBER_SUFFIX" ]]; then
+            CURRENT="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' App/Ventus_App-Info.plist)"
+            ./upload-testflight.swift --ios-only --build-number "${CURRENT%%.*}.$BUILD_NUMBER_SUFFIX"
+          else
+            ./upload-testflight.swift --ios-only
+          fi
+
+      - name: Read uploaded version
+        id: result
+        run: |
+          echo "build-number=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' App/Ventus_App-Info.plist)" >> "$GITHUB_OUTPUT"
+          echo "version=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' App/Ventus_App-Info.plist)" >> "$GITHUB_OUTPUT"
+
+      - name: Commit build number
+        if: inputs.commit-build-number
+        env:
+          BUILD: ${{ steps.result.outputs.build-number }}
+          BRANCH: ${{ inputs.ref }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -u App
+          git commit -m "Bump build number to $BUILD [skip ci]"
+          git pull --rebase origin "$BRANCH"
+          git push origin "HEAD:$BRANCH"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: VentusIOS-ipa-${{ github.run_id }}
+          path: build/export/ios/*.ipa
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Remove signing assets
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/signing.keychain-db" || true
+          rm -rf ~/.appstoreconnect/private_keys
+          rm -f "$HOME/Library/MobileDevice/Provisioning Profiles"/*.mobileprovision
+          rm -f "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"/*.mobileprovision
