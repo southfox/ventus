@@ -12,6 +12,9 @@ import SwiftUI
 /// remains available separately in Help.
 public struct VentusTutorialView: View {
     @Environment(\.dismiss) private var dismiss
+#if os(tvOS)
+    @Namespace private var tutorialFocus
+#endif
 
     @Binding private var automaticallyShowsTutorial: Bool
     private let onLogin: () -> Void
@@ -37,6 +40,11 @@ public struct VentusTutorialView: View {
                         Text("Windguru-powered forecasts, organized for a quick decision before you head out.".localized)
                             .foregroundStyle(.secondary)
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .tutorialFocusable()
+#if os(tvOS)
+                    .prefersDefaultFocus(true, in: tutorialFocus)
+#endif
 
                     TutorialSection(title: "Start here".localized, symbol: "1.circle.fill") {
                         TutorialRow(
@@ -56,7 +64,7 @@ public struct VentusTutorialView: View {
                         )
                     }
 
-                    TutorialSection(title: "Windguru account".localized, symbol: "person.crop.circle") {
+                    TutorialSection(title: "Windguru account".localized, symbol: "person.crop.circle", isFocusable: false) {
                         Text("Signing in is optional. Use your existing Windguru username and password to access account-based features, including your Windguru favorites.".localized)
                             .foregroundStyle(.secondary)
 
@@ -101,6 +109,10 @@ public struct VentusTutorialView: View {
                 .frame(maxWidth: 720, alignment: .leading)
                 .padding()
             }
+#if os(tvOS)
+            .focusScope(tutorialFocus)
+            .onExitCommand { dismiss() }
+#endif
             .navigationTitle("Tutorial".localized)
 #if os(macOS)
             .toolbar {
@@ -117,6 +129,7 @@ public struct VentusTutorialView: View {
 private struct TutorialSection<Content: View>: View {
     let title: String
     let symbol: String
+    var isFocusable = true
     @ViewBuilder let content: Content
 
     var body: some View {
@@ -128,8 +141,39 @@ private struct TutorialSection<Content: View>: View {
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .tutorialFocusable(isFocusable)
     }
 }
+
+private extension View {
+    @ViewBuilder
+    func tutorialFocusable(_ isEnabled: Bool = true) -> some View {
+#if os(tvOS)
+        if isEnabled {
+            modifier(TutorialFocusableCard())
+        } else {
+            self
+        }
+#else
+        self
+#endif
+    }
+}
+
+#if os(tvOS)
+private struct TutorialFocusableCard: ViewModifier {
+    @FocusState private var isFocused: Bool
+
+    func body(content: Content) -> some View {
+        content
+            .focusable()
+            .focused($isFocused)
+            .scaleEffect(isFocused ? 1.03 : 1)
+            .shadow(color: .black.opacity(isFocused ? 0.35 : 0), radius: isFocused ? 20 : 0, y: isFocused ? 12 : 0)
+            .animation(.easeOut(duration: 0.15), value: isFocused)
+    }
+}
+#endif
 
 private struct TutorialRow: View {
     let symbol: String

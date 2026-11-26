@@ -95,12 +95,12 @@ struct WatchForecastDaysView: View {
 
     private func conditionText(for forecast: SpotForecast, hour: String) -> String {
         let symbols = forecast.weatherSymbolNames(hour: hour)
-        if symbols.contains(where: { $0.contains("snow") }) { return "Snow" }
-        if symbols.contains(where: { $0.contains("rain") || $0.contains("drizzle") }) { return "Rain" }
-        if symbols.contains("cloud.fill") { return "Overcast" }
-        if symbols.contains(where: { $0.hasPrefix("cloud.sun") || $0.hasPrefix("cloud.moon") }) { return "Partly cloudy" }
-        if symbols.contains("cloud") { return "Cloudy" }
-        return "Clear"
+        if symbols.contains(where: { $0.contains("snow") }) { return "Snow".localized }
+        if symbols.contains(where: { $0.contains("rain") || $0.contains("drizzle") }) { return "Rain".localized }
+        if symbols.contains("cloud.fill") { return "Overcast".localized }
+        if symbols.contains(where: { $0.hasPrefix("cloud.sun") || $0.hasPrefix("cloud.moon") }) { return "Partly cloudy".localized }
+        if symbols.contains("cloud") { return "Cloudy".localized }
+        return "Clear".localized
     }
 
     private func temperature(_ value: Double) -> String {
