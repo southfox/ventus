@@ -1,4 +1,4 @@
-name: iOS PR
+name: PR
 
 on:
   pull_request:
@@ -24,10 +24,29 @@ jobs:
       pull-requests: write
 
   build:
-    name: Build iOS app
+    name: Build ${{ matrix.platform }}
     needs: test
     runs-on: macos-26
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: iOS
+            scheme: VentusIOS
+            destination: generic/platform=iOS Simulator
+          - platform: macOS
+            scheme: VentusMacOS
+            destination: generic/platform=macOS
+          - platform: tvOS
+            scheme: VentusTVOS
+            destination: generic/platform=tvOS Simulator
+          - platform: visionOS
+            scheme: VentusVisionOS
+            destination: generic/platform=visionOS Simulator
+          - platform: watchOS
+            scheme: VentusWatchOnly
+            destination: generic/platform=watchOS Simulator
     steps:
       - uses: actions/checkout@v4
 
@@ -41,14 +60,17 @@ jobs:
           key: spm-app-${{ runner.os }}-${{ hashFiles('App/Ventus.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
           restore-keys: spm-app-${{ runner.os }}-
 
-      - name: Build for simulator
+      - name: Build ${{ matrix.scheme }}
+        env:
+          SCHEME: ${{ matrix.scheme }}
+          DESTINATION: ${{ matrix.destination }}
         run: |
           set -o pipefail
           xcodebuild build \
             -project App/Ventus.xcodeproj \
-            -scheme VentusIOS \
+            -scheme "$SCHEME" \
             -configuration Release \
-            -destination "generic/platform=iOS Simulator" \
+            -destination "$DESTINATION" \
             -clonedSourcePackagesDirPath SourcePackages \
             -skipPackagePluginValidation \
             -skipMacroValidation \
