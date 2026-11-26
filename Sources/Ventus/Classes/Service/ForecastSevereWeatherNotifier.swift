@@ -10,18 +10,24 @@ import Foundation
 import UserNotifications
 #endif
 
+protocol ForecastNotificationScheduling: Sendable {
+    func schedule(identifier: String, categoryIdentifier: String, title: String, body: String)
+}
+
 @MainActor
 final class ForecastSevereWeatherNotifier {
-#if canImport(UserNotifications) && !os(tvOS)
-    private nonisolated static let deliveredAlertsKey = "forecastSevereWeatherNotifier.deliveredAlerts"
-#endif
-
     private let notificationsStore: ForecastSevereWeatherNotificationsStoring
     private let alertStore: ForecastAlertStoring
+    private let scheduler: ForecastNotificationScheduling
 
-    nonisolated init(notificationsStore: ForecastSevereWeatherNotificationsStoring, alertStore: ForecastAlertStoring) {
+    nonisolated init(
+        notificationsStore: ForecastSevereWeatherNotificationsStoring,
+        alertStore: ForecastAlertStoring,
+        scheduler: ForecastNotificationScheduling = UserNotificationScheduler()
+    ) {
         self.notificationsStore = notificationsStore
         self.alertStore = alertStore
+        self.scheduler = scheduler
     }
 
     func evaluate(_ spotForecast: SpotForecast) -> ForecastSevereWeatherAlert? {
@@ -64,7 +70,7 @@ final class ForecastSevereWeatherNotifier {
         guard let alert else { return nil }
 #if canImport(UserNotifications) && !os(tvOS)
         let locationIdentifier = spotForecast.identifier ?? location
-        Self.scheduleNotification(
+        scheduler.schedule(
             identifier: "forecast-severe-weather.\(locationIdentifier).\(alert.kind).\(alert.hour)",
             categoryIdentifier: "forecast-severe-weather",
             title: alert.title,
@@ -90,9 +96,9 @@ final class ForecastSevereWeatherNotifier {
                 date: match.date,
                 location: location
             )
-            Task {
+            Task { [scheduler] in
                 let body = await ForecastAlertNotificationNarrator.body(for: facts)
-                Self.scheduleNotification(
+                scheduler.schedule(
                     identifier: "forecast-custom-alert.\(alert.id).\(match.hour)",
                     categoryIdentifier: "forecast-custom-alert",
                     title: facts.title,
@@ -108,9 +114,16 @@ final class ForecastSevereWeatherNotifier {
             (spotForecast.forecastDate(hour: $0) ?? .distantFuture) <= Date()
         }) ?? spotForecast.availableForecastHours.first
     }
+}
 
+struct UserNotificationScheduler: ForecastNotificationScheduling {
 #if canImport(UserNotifications) && !os(tvOS)
-    private nonisolated static func scheduleNotification(identifier: String, categoryIdentifier: String, title: String, body: String) {
+    private static let deliveredAlertsKey = "forecastSevereWeatherNotifier.deliveredAlerts"
+#endif
+
+    func schedule(identifier: String, categoryIdentifier: String, title: String, body: String) {
+#if canImport(UserNotifications) && !os(tvOS)
+        let deliveredAlertsKey = Self.deliveredAlertsKey
         Task {
             var delivered = Set(UserDefaults.standard.stringArray(forKey: deliveredAlertsKey) ?? [])
             guard delivered.insert(identifier).inserted else { return }
@@ -126,8 +139,8 @@ final class ForecastSevereWeatherNotifier {
             try? await UNUserNotificationCenter.current().add(request)
             UserDefaults.standard.set(Array(delivered.suffix(100)), forKey: deliveredAlertsKey)
         }
-    }
 #endif
+    }
 }
 
 struct ForecastSevereWeatherAlert: Equatable {

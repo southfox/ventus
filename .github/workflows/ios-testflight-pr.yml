@@ -1,0 +1,73 @@
+name: iOS TestFlight PR build
+
+on:
+  pull_request:
+    types: [labeled]
+
+concurrency:
+  group: ios-testflight-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Tests
+    if: github.event.label.name == 'testflight' && github.event.pull_request.head.repo.full_name == github.repository
+    uses: ./.github/workflows/swift-tests.yml
+    permissions:
+      contents: read
+      pull-requests: write
+
+  upload:
+    name: TestFlight
+    needs: test
+    uses: ./.github/workflows/testflight-upload.yml
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}
+      build-number-suffix: ${{ github.event.pull_request.number }}.${{ github.run_number }}
+    secrets: inherit
+    permissions:
+      contents: read
+
+  report:
+    name: Report
+    needs: [test, upload]
+    if: always() && github.event.label.name == 'testflight' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Remove testflight label
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr edit "${{ github.event.pull_request.number }}" --repo "${{ github.repository }}" --remove-label testflight
+
+      - name: Build comment
+        env:
+          TEST_RESULT: ${{ needs.test.result }}
+          UPLOAD_RESULT: ${{ needs.upload.result }}
+          VERSION: ${{ needs.upload.outputs.version }}
+          BUILD: ${{ needs.upload.outputs.build-number }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          {
+            if [[ "$UPLOAD_RESULT" == "success" ]]; then
+              echo "### ✈️ TestFlight build uploaded: $VERSION ($BUILD)"
+              echo
+              echo "Built from \`${SHA:0:7}\`. It reaches internal testers once Apple finishes processing, usually 5–30 minutes."
+            elif [[ "$TEST_RESULT" != "success" ]]; then
+              echo "### ❌ TestFlight build skipped: tests failed"
+            else
+              echo "### ❌ TestFlight upload failed"
+            fi
+            echo
+            echo "[Workflow run]($RUN_URL) · Add the \`testflight\` label again to upload a new build."
+          } > comment.md
+
+      - uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: testflight
+          path: comment.md

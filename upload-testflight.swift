@@ -216,6 +216,7 @@ var explicitIPAPath: String? = nil
 var explicitTVIPAPath: String? = nil
 var explicitMacPackagePath: String? = nil
 var requestedMarketingVersion: String? = nil
+var requestedBuildNumber: String? = nil
 let arguments = CommandLine.arguments.dropFirst()
 let iOSOnly = arguments.contains("--ios-only")
 let macOSOnly = arguments.contains("--macos-only")
@@ -230,6 +231,19 @@ if let packageFlagIndex = arguments.firstIndex(of: "--mac-pkg"), arguments.index
 }
 if let versionFlagIndex = arguments.firstIndex(of: "--version"), arguments.index(after: versionFlagIndex) < arguments.endIndex {
     requestedMarketingVersion = arguments[arguments.index(after: versionFlagIndex)]
+}
+
+if let buildFlagIndex = arguments.firstIndex(of: "--build-number"), arguments.index(after: buildFlagIndex) < arguments.endIndex {
+    requestedBuildNumber = arguments[arguments.index(after: buildFlagIndex)]
+}
+
+if arguments.contains("--build-number"), requestedBuildNumber == nil {
+    fail("--build-number requires a value, for example: --build-number 57.38.1")
+}
+
+if let requestedBuildNumber,
+   requestedBuildNumber.range(of: #"^[0-9]+(\.[0-9]+){0,2}$"#, options: .regularExpression) == nil {
+    fail("Build number \(requestedBuildNumber) must contain one to three numeric components, for example 58 or 57.38.1.")
 }
 
 if iOSOnly, macOSOnly {
@@ -436,11 +450,11 @@ if !platformsToArchive.isEmpty {
     guard let currentBuildNumber = Int(currentBuild) else {
         fail("Could not read CFBundleVersion from \(appInfoPlist) (got \"\(currentBuild)\")")
     }
-    let newBuildNumber = currentBuildNumber + 1
+    let newBuildNumber = requestedBuildNumber ?? String(currentBuildNumber + 1)
     for plist in bundleVersionPlists {
-        setPlistValue("CFBundleVersion", value: String(newBuildNumber), in: plist)
+        setPlistValue("CFBundleVersion", value: newBuildNumber, in: plist)
     }
-    replaceProjectBuildSetting("CURRENT_PROJECT_VERSION", value: String(newBuildNumber))
+    replaceProjectBuildSetting("CURRENT_PROJECT_VERSION", value: newBuildNumber)
     print("Build number: \(currentBuildNumber) -> \(newBuildNumber)")
 }
 

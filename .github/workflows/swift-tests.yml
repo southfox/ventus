@@ -1,0 +1,58 @@
+name: Swift tests
+
+on:
+  workflow_call:
+
+jobs:
+  test:
+    name: Package tests
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - uses: actions/cache@v4
+        with:
+          path: .build
+          key: spm-test-${{ runner.os }}-${{ hashFiles('Package.resolved') }}
+          restore-keys: spm-test-${{ runner.os }}-
+
+      - name: Run tests
+        id: tests
+        run: |
+          mkdir -p test-results
+          set +e
+          set -o pipefail
+          swift test --configuration debug --parallel --xunit-output test-results/tests.xml 2>&1 | tee test-results/output.log
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Build test report
+        if: always()
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python3 .github/scripts/test-report.py test-results "${{ steps.tests.outputs.exit_code }}" > test-report.md
+          cat test-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Comment test report on PR
+        if: always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: swift-tests
+          path: test-report.md
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: test-results/
+          retention-days: 14
+
+      - name: Fail if tests failed
+        if: steps.tests.outputs.exit_code != '0'
+        run: exit 1

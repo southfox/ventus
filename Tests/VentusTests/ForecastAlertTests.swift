@@ -14,6 +14,17 @@ final class ForecastAlertTests: XCTestCase {
         func save(_ isEnabled: Bool) { self.isEnabled = isEnabled }
     }
 
+    private final class NotificationSchedulerSpy: ForecastNotificationScheduling, @unchecked Sendable {
+        private let lock = NSLock()
+        private var scheduled = [String]()
+
+        var identifiers: [String] { lock.withLock { scheduled } }
+
+        func schedule(identifier: String, categoryIdentifier: String, title: String, body: String) {
+            lock.withLock { scheduled.append(identifier) }
+        }
+    }
+
     private final class AlertsStore: ForecastAlertStoring, @unchecked Sendable {
         var alerts = [ForecastAlert]()
 
@@ -60,16 +71,21 @@ final class ForecastAlertTests: XCTestCase {
     }
 
     func testSevereNotifierDetectsExtremeColdAndHeat() throws {
-        let notifier = makeNotifier()
+        let scheduler = NotificationSchedulerSpy()
+        let notifier = makeNotifier(scheduler: scheduler)
 
         XCTAssertEqual(notifier.evaluate(try makeForecast(temperature: -12))?.kind, "extreme-cold")
         XCTAssertEqual(notifier.evaluate(try makeForecast(temperature: 36))?.kind, "extreme-heat")
+        XCTAssertEqual(scheduler.identifiers.count, 2)
+        XCTAssertTrue(scheduler.identifiers.allSatisfy { $0.hasPrefix("forecast-severe-weather.") })
     }
 
     func testSevereNotifierDoesNothingWhenNotificationsAreDisabled() throws {
-        let notifier = makeNotifier(notificationsEnabled: false)
+        let scheduler = NotificationSchedulerSpy()
+        let notifier = makeNotifier(notificationsEnabled: false, scheduler: scheduler)
 
         XCTAssertNil(notifier.evaluate(try makeForecast(temperature: 38)))
+        XCTAssertTrue(scheduler.identifiers.isEmpty)
     }
 
     func testCustomAlertEvaluatorFindsTheFirstMatchingFutureHour() throws {
@@ -157,10 +173,14 @@ final class ForecastAlertTests: XCTestCase {
         XCTAssertFalse(ForecastAlertComparator.lessThanOrEqual.isSatisfied(-9.9, -10))
     }
 
-    private func makeNotifier(notificationsEnabled: Bool = true) -> ForecastSevereWeatherNotifier {
+    private func makeNotifier(
+        notificationsEnabled: Bool = true,
+        scheduler: NotificationSchedulerSpy = NotificationSchedulerSpy()
+    ) -> ForecastSevereWeatherNotifier {
         ForecastSevereWeatherNotifier(
             notificationsStore: NotificationsStore(isEnabled: notificationsEnabled),
-            alertStore: AlertsStore()
+            alertStore: AlertsStore(),
+            scheduler: scheduler
         )
     }
 

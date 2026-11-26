@@ -8921,6 +8921,9 @@
     "Stop" : {
 
     },
+    "Stop loading forecast" : {
+
+    },
     "strong wind expected, up to %@ (Beaufort %@) around %@" : {
       "localizations" : {
         "de" : {
